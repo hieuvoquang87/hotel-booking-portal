@@ -6,7 +6,7 @@
 
 **Architecture:** Scaffold via `create-next-app` into a throwaway dir, then merge into this non-empty docs repo (Approach A) so existing `docs/` and `.gitignore` survive. No application logic — only configuration and empty structure. CI is deferred; the coverage gate stays non-blocking until code exists (M1/M7).
 
-**Tech Stack:** Next.js 15 (App Router, React 19), TypeScript `strict`, Tailwind v4, npm, `@tanstack/react-query` (dep only), Jest + React Testing Library + jsdom (via `next/jest`), MSW v2, Playwright, Prettier + ESLint.
+**Tech Stack:** Next.js 16.x (App Router, React 19), TypeScript `strict`, Tailwind v4, npm, `@tanstack/react-query` (dep only), Jest + React Testing Library + `jest-fixed-jsdom` (via `next/jest`), MSW v2, Playwright, Prettier + ESLint.
 
 **Source spec:** `docs/superpowers/specs/2026-06-08-m0-project-setup-design.md`
 
@@ -17,7 +17,7 @@
 - Run all commands from the repo root: `/Users/hieu/dev/hotel-booking-portal`.
 - The repo already has a GitHub remote (`origin`) and a comprehensive `.gitignore` covering `node_modules/`, `coverage`, `.next`, `out`, `*.tsbuildinfo`, `.env*`.
 - **Do not** copy the scaffold's `node_modules`, `.git`, `.gitignore`, or `README.md` into the repo (handled explicitly).
-- **No CI** in this milestone. Commit on the current branch (`docs/initial-docs`).
+- **No CI** in this milestone. Commit on the current branch (`feat/m0-project-setup`).
 
 ---
 
@@ -33,7 +33,7 @@
 | `app/layout.tsx`, `app/page.tsx`                                                   | scaffolded blank app               | 1             |
 | `components/ hooks/ lib/ stores/ types/` (`.gitkeep`)                              | empty skeleton dirs                | 3             |
 | `services/mock/hotels.json`                                                        | relocated seed (server-only)       | 3             |
-| `jest.config.js`, `jest.setup.ts`, `jest.polyfills.js`                             | Jest via next/jest + MSW polyfills | 4             |
+| `jest.config.js`, `jest.setup.ts`                                                   | Jest via next/jest + MSW transform | 4             |
 | `mocks/handlers.ts`, `mocks/server.ts`, `mocks/browser.ts`, `mocks/server.test.ts` | MSW v2 bootstrap + bootstrap test  | 4             |
 | `playwright.config.ts`, `e2e/smoke.spec.ts`                                        | E2E config + smoke test            | 5             |
 | `README.md`                                                                        | install / run / test skeleton      | 6             |
@@ -148,7 +148,7 @@ A successful `build` confirms the scaffold is sound. The "app actually serves a 
 ```bash
 rm -rf /tmp/hbp-scaffold
 git add -A
-git commit -m "build: scaffold Next.js 15 + TS strict + Tailwind v4 (M0)"
+git commit -m "build: scaffold Next.js + TS strict + Tailwind v4 (M0)"
 ```
 
 ---
@@ -187,16 +187,24 @@ export default config;
 
 - [ ] **Step 3: Disable ESLint formatting rules via `eslint-config-prettier`**
 
-Edit `eslint.config.mjs`. Add the import at the top and append `eslintConfigPrettier` as the **last** item of the exported array. Example (match the scaffold's existing structure — it uses `FlatCompat`):
+Edit `eslint.config.mjs`. Add the import at the top and append `eslintConfigPrettier` as the **last** item of the exported array.
+
+> **Note:** Next 16's scaffold generates a native flat-config `eslint.config.mjs`
+> (no `FlatCompat` adapter). The array extends from `@eslint/eslintrc`'s flat-compat
+> only if the scaffold version requires it; Next 16 does not. Also add a
+> `{ files: ['**/*.config.js'], rules: { '@typescript-eslint/no-require-imports': 'off' } }`
+> override so `jest.config.js` (which must be CJS) doesn't trigger the TS-ESLint rule.
+> Add `coverage/**`, `playwright-report/**`, `test-results/**` to `globalIgnores`.
 
 ```js
 import eslintConfigPrettier from 'eslint-config-prettier';
 
-// ...existing imports and compat setup...
+// ...existing imports...
 
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
-  eslintConfigPrettier,
+  // ...existing next/core-web-vitals + typescript rules...
+  { files: ['**/*.config.js'], rules: { '@typescript-eslint/no-require-imports': 'off' } },
+  eslintConfigPrettier,  // must be last
 ];
 
 export default eslintConfig;
@@ -272,12 +280,16 @@ git commit -m "build: add folder skeleton; move seed to services/mock/hotels.jso
 
 ## Task 4: Jest + RTL + jsdom + MSW v2 bootstrap
 
+> **Implementation note:** Steps 1–4 below describe the originally-planned approach.
+> The actual implementation diverged — see the "**Actual implementation**" block
+> after Step 4 for what was committed and why. Steps 5–9 were executed as written.
+
 **Files:**
 
-- Create: `jest.config.js`, `jest.setup.ts`, `jest.polyfills.js`, `mocks/handlers.ts`, `mocks/server.ts`, `mocks/browser.ts`, `mocks/server.test.ts`
+- Create: `jest.config.js`, `jest.setup.ts`, `mocks/handlers.ts`, `mocks/server.ts`, `mocks/browser.ts`, `mocks/server.test.ts`
 - Modify: `package.json`
 
-- [ ] **Step 1: Install test dependencies**
+- [ ] **Step 1: Install test dependencies** _(planned — see actual below)_
 
 ```bash
 npm install -D jest jest-environment-jsdom \
@@ -288,7 +300,7 @@ npm install -D msw@latest
 
 (`next/jest` ships with `next`; no separate install. `undici` provides `fetch`/`Response` polyfills MSW v2 needs under jsdom.)
 
-- [ ] **Step 2: Create `jest.polyfills.js`** (loaded before the test framework)
+- [ ] **Step 2: Create `jest.polyfills.js`** _(planned — not created; see actual below)_
 
 ```js
 // jest.polyfills.js — MSW v2 needs Web Streams + fetch primitives in jsdom.
@@ -315,7 +327,7 @@ Object.defineProperties(globalThis, {
 import '@testing-library/jest-dom';
 ```
 
-- [ ] **Step 4: Create `jest.config.js`** (via `next/jest`; CommonJS so no `ts-node` needed)
+- [ ] **Step 4: Create `jest.config.js`** _(planned config — see actual below)_
 
 ```js
 const nextJest = require('next/jest');
@@ -342,6 +354,74 @@ const config = {
 };
 
 module.exports = createJestConfig(config);
+```
+
+### Actual implementation (Steps 1–4 superseded)
+
+**Why it changed:** Under Next 16.2.7 + MSW 2.14.6 + Jest 30:
+
+1. MSW 2.x ships ESM-only. The `jest-environment-jsdom` stock environment strips Node's
+   `fetch`/`Request`/`Response`/`ReadableStream` globals, which MSW needs at module load
+   time. The `undici`-based `jest.polyfills.js` approach failed because `undici@7` itself
+   references `MessagePort` at load time (before the polyfill ran), causing a
+   "MessagePort is not defined" crash — a layered bootstrapping problem with no clean fix.
+2. Even with MessagePort patched, MSW's `.mjs` build still threw
+   "Cannot use import statement outside a module" because next/jest's `transformIgnorePatterns`
+   cannot be widened by adding a replacement pattern (the override only appends; the
+   original pattern still takes precedence for `geist`/`next/dist/*`).
+
+**Actual install:**
+
+```bash
+npm install -D jest jest-fixed-jsdom \
+  @testing-library/react @testing-library/jest-dom @testing-library/user-event \
+  @types/jest
+npm install -D msw@latest
+# undici NOT installed
+```
+
+**`jest.polyfills.js` NOT created.** `jest-fixed-jsdom` restores all globals MSW needs, making it redundant.
+
+**Actual `jest.config.js`:**
+
+```js
+const nextJest = require('next/jest');
+const createJestConfig = nextJest({ dir: './' });
+
+/** @type {import('jest').Config} */
+const baseConfig = {
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  testEnvironment: 'jest-fixed-jsdom',
+  testEnvironmentOptions: { customExportConditions: [''] },
+  testMatch: ['**/?(*.)+(test).[jt]s?(x)'],
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/e2e/'],
+  collectCoverageFrom: [
+    'lib/**/*.{ts,tsx}',
+    'services/**/*.{ts,tsx}',
+    'hooks/**/*.{ts,tsx}',
+    'components/**/*.{ts,tsx}',
+    'app/**/*.{ts,tsx}',
+  ],
+};
+
+// MSW v2 ships only ESM — must be transformed by next/jest's SWC.
+// Inject into next/jest's existing lookahead (don't replace) to preserve
+// geist + next/dist/* transforms needed by M3–M5 component tests.
+const transformEsmDeps = [
+  'msw', '@mswjs', '@bundled-es-modules', '@open-draft',
+  'until-async', 'strict-event-emitter', 'outvariant',
+  'headers-polyfill', 'set-cookie-parser', 'rettime',
+].join('|');
+
+module.exports = async () => {
+  const config = await createJestConfig(baseConfig)();
+  config.transformIgnorePatterns = config.transformIgnorePatterns.map((pattern) =>
+    pattern.includes('(?!(geist|')
+      ? pattern.replace('(?!(geist|', `(?!(${transformEsmDeps}|geist|`)
+      : pattern,
+  );
+  return config;
+};
 ```
 
 - [ ] **Step 5: Create the MSW bootstrap files**
@@ -399,7 +479,7 @@ Run:
 npx jest mocks/server.test.ts
 ```
 
-Expected: PASS. If it fails importing `Response`/`fetch`, confirm `jest.polyfills.js` is listed under `setupFiles` and `undici` is installed — that chain is the common MSW-v2-under-jsdom failure.
+Expected: PASS. If it fails with "Cannot use import statement outside a module", the MSW ESM deps are not being transformed — confirm the `transformIgnorePatterns` injection in `jest.config.js` is in place (see actual implementation above). If globals like `Response`/`fetch` are missing, confirm `jest-fixed-jsdom` is the `testEnvironment`.
 
 - [ ] **Step 8: Add `test` scripts and verify**
 
@@ -698,7 +778,7 @@ git status --short   # Expected: empty (everything committed)
 Only if the user asks to push:
 
 ```bash
-git push -u origin docs/initial-docs
+git push -u origin feat/m0-project-setup
 ```
 
 ---
