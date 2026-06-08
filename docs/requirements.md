@@ -23,6 +23,7 @@ The interface must deliver three core capabilities:
 **Description:** A primary view where users can browse properties.
 
 **Expectations:**
+
 - Provide intuitive UI controls (e.g., dropdowns, sliders, or inputs) that allow users to filter the hotel list dynamically by:
   - City
   - Star rating
@@ -34,6 +35,7 @@ The interface must deliver three core capabilities:
 **Description:** A mechanism (e.g., a dedicated route, view toggle, or a modal overlay) to dive deep into a single hotel's information when selected from the dashboard.
 
 **Expectations:**
+
 - Render comprehensive data about the property, including:
   - Name
   - Address
@@ -46,6 +48,7 @@ The interface must deliver three core capabilities:
 **Description:** An interactive component within the Hotel Detail view that lets users see open rooms.
 
 **Expectations:**
+
 - Provide an interface for users to select/input a check-in and check-out date
 - Based on the selected dates, dynamically display which room types are available
 - Show their price per night according to the dataset's `available_dates`
@@ -71,11 +74,13 @@ We heavily welcome and encourage the use of AI tools (e.g., GitHub Copilot, Chat
 ### Documentation (README.md)
 
 Include instructions on how to:
+
 - Install dependencies
 - Run your application locally
 - Test your application
 
 Briefly explain:
+
 - Your state management approach
 - Component breakdown
 
@@ -86,6 +91,7 @@ Add a separate documentation file that explains any tradeoffs or architectural a
 ### Code Quality
 
 We value readable, scalable code. Prioritize:
+
 - Clear separation of UI elements from data handling logic
 - Component reusability
 - Rich, useful unit/component tests where appropriate
@@ -97,6 +103,7 @@ We value readable, scalable code. Prioritize:
 To save you time from writing data scripts, use the following master dataset to power your application interface. Save it locally as a JSON file to seed your frontend state.
 
 **Dataset Details:**
+
 - **Total hotels:** 40 distinct properties
 - **Geographic distribution:** 10 global travel hubs (4 hotels per city)
 - **Availability coverage:** Exactly 15% of the inventory is marked with no room availability to test date-boundary layout states

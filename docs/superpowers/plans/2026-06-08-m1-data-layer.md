@@ -16,22 +16,22 @@
 
 ## File Map
 
-| File | Responsibility |
-| --- | --- |
-| `package.json`, `tsconfig.json`, `jest.config.js` | Minimal toolchain (Task 0 — superseded by M0 later) |
-| `services/mock/hotels.json` | Raw seed (moved from `docs/mock-data.json` by M0) |
-| `types/domain.ts` | Domain types + `InvalidDateRangeError`, `HotelNotFoundError` |
-| `lib/slug.ts` | `slugify`, `buildSlugLookup` |
-| `lib/availability.ts` | `nightsInRange`, `isRoomAvailable` |
-| `lib/filters.ts` | `filterByStars`, `filterByPrice` |
-| `lib/sort.ts` | `sortHotels`, `SortKey` |
-| `lib/paginate.ts` | `paginate`, `PAGE_SIZE` |
-| `tests/fixtures.ts` | `makeHotel`, `makeRoom` test factories |
-| `services/mappers.ts` | `RawHotel`/`RawRoom`, `mapHotel`, `mapRoom`, `mapLocation` |
-| `services/seed.ts` | `getRawHotels` — the only importer of `hotels.json` |
-| `services/hotelService.ts` | `getLocations`, `getHotelsByLocation`, `getHotelById` |
-| `services/availabilityService.ts` | `checkAvailability` |
-| `services/boundary.test.ts` | Guard: nothing outside `services/` imports the seed |
+| File                                              | Responsibility                                               |
+| ------------------------------------------------- | ------------------------------------------------------------ |
+| `package.json`, `tsconfig.json`, `jest.config.js` | Minimal toolchain (Task 0 — superseded by M0 later)          |
+| `services/mock/hotels.json`                       | Raw seed (moved from `docs/mock-data.json` by M0)            |
+| `types/domain.ts`                                 | Domain types + `InvalidDateRangeError`, `HotelNotFoundError` |
+| `lib/slug.ts`                                     | `slugify`, `buildSlugLookup`                                 |
+| `lib/availability.ts`                             | `nightsInRange`, `isRoomAvailable`                           |
+| `lib/filters.ts`                                  | `filterByStars`, `filterByPrice`                             |
+| `lib/sort.ts`                                     | `sortHotels`, `SortKey`                                      |
+| `lib/paginate.ts`                                 | `paginate`, `PAGE_SIZE`                                      |
+| `tests/fixtures.ts`                               | `makeHotel`, `makeRoom` test factories                       |
+| `services/mappers.ts`                             | `RawHotel`/`RawRoom`, `mapHotel`, `mapRoom`, `mapLocation`   |
+| `services/seed.ts`                                | `getRawHotels` — the only importer of `hotels.json`          |
+| `services/hotelService.ts`                        | `getLocations`, `getHotelsByLocation`, `getHotelById`        |
+| `services/availabilityService.ts`                 | `checkAvailability`                                          |
+| `services/boundary.test.ts`                       | Guard: nothing outside `services/` imports the seed          |
 
 ---
 
@@ -40,6 +40,7 @@
 > If `package.json` with Jest already exists from M0, only do the seed copy (Step 4) and skip the rest.
 
 **Files:**
+
 - Create: `package.json`, `tsconfig.json`, `jest.config.js`
 - Move: `docs/mock-data.json` → `services/mock/hotels.json` (M0 owns this)
 
@@ -119,6 +120,7 @@ git commit -m "chore: minimal TS+Jest toolchain and seed for M1"
 ## Task 1: Domain types & typed errors
 
 **Files:**
+
 - Create: `types/domain.ts`
 - Test: `types/domain.test.ts`
 
@@ -126,7 +128,7 @@ git commit -m "chore: minimal TS+Jest toolchain and seed for M1"
 
 ```ts
 // types/domain.test.ts
-import { InvalidDateRangeError, HotelNotFoundError } from './domain';
+import { HotelNotFoundError, InvalidDateRangeError } from './domain';
 
 describe('domain errors', () => {
   it('InvalidDateRangeError is an Error with a stable name', () => {
@@ -229,6 +231,7 @@ git commit -m "feat(types): domain types and typed errors for M1"
 ## Task 2: `lib/slug.ts` — slugify + lookup
 
 **Files:**
+
 - Create: `lib/slug.ts`
 - Test: `lib/slug.test.ts`
 
@@ -236,7 +239,7 @@ git commit -m "feat(types): domain types and typed errors for M1"
 
 ```ts
 // lib/slug.test.ts
-import { slugify, buildSlugLookup } from './slug';
+import { buildSlugLookup, slugify } from './slug';
 
 describe('slugify', () => {
   it.each([
@@ -304,6 +307,7 @@ git commit -m "feat(lib): bidirectional slug helpers"
 ## Task 3: `lib/availability.ts` — nights + room availability
 
 **Files:**
+
 - Create: `lib/availability.ts`
 - Test: `lib/availability.test.ts`
 
@@ -311,12 +315,19 @@ git commit -m "feat(lib): bidirectional slug helpers"
 
 ```ts
 // lib/availability.test.ts
-import { nightsInRange, isRoomAvailable } from './availability';
 import type { Room } from '../types/domain';
+import { isRoomAvailable, nightsInRange } from './availability';
 
 const room = (availableDates: string[]): Room => ({
-  roomId: 'r', type: 'Std', bedType: 'Queen', bedCount: 1, maxOccupancy: 2,
-  squareFootage: 300, pricePerNight: 200, amenities: [], availableDates,
+  roomId: 'r',
+  type: 'Std',
+  bedType: 'Queen',
+  bedCount: 1,
+  maxOccupancy: 2,
+  squareFootage: 300,
+  pricePerNight: 200,
+  amenities: [],
+  availableDates,
 });
 
 describe('nightsInRange', () => {
@@ -389,6 +400,7 @@ git commit -m "feat(lib): night-range and room availability logic"
 ## Task 4: Test fixtures + `lib/filters.ts`
 
 **Files:**
+
 - Create: `tests/fixtures.ts`
 - Create: `lib/filters.ts`
 - Test: `lib/filters.test.ts`
@@ -438,11 +450,15 @@ export function makeHotel(overrides: Partial<Hotel> = {}): Hotel {
 
 ```ts
 // lib/filters.test.ts
-import { filterByStars, filterByPrice } from './filters';
 import { makeHotel, makeRoom } from '../tests/fixtures';
+import { filterByPrice, filterByStars } from './filters';
 
 describe('filterByStars (minimum)', () => {
-  const hotels = [makeHotel({ starRating: 3 }), makeHotel({ starRating: 4 }), makeHotel({ starRating: 5 })];
+  const hotels = [
+    makeHotel({ starRating: 3 }),
+    makeHotel({ starRating: 4 }),
+    makeHotel({ starRating: 5 }),
+  ];
   it('keeps stars >= min', () => {
     expect(filterByStars(hotels, 4).map((h) => h.starRating)).toEqual([4, 5]);
   });
@@ -453,11 +469,15 @@ describe('filterByStars (minimum)', () => {
 
 describe('filterByPrice (any room in range)', () => {
   it('keeps a hotel whose cheapest room is in range', () => {
-    const h = makeHotel({ rooms: [makeRoom({ pricePerNight: 500 }), makeRoom({ pricePerNight: 150 })] });
+    const h = makeHotel({
+      rooms: [makeRoom({ pricePerNight: 500 }), makeRoom({ pricePerNight: 150 })],
+    });
     expect(filterByPrice([h], 100, 200)).toHaveLength(1);
   });
   it('keeps a hotel that matches only via a non-cheapest room', () => {
-    const h = makeHotel({ rooms: [makeRoom({ pricePerNight: 150 }), makeRoom({ pricePerNight: 800 })] });
+    const h = makeHotel({
+      rooms: [makeRoom({ pricePerNight: 150 }), makeRoom({ pricePerNight: 800 })],
+    });
     expect(filterByPrice([h], 700, 900)).toHaveLength(1); // priceFrom is 150, but room 800 matches
   });
   it('drops a hotel with no room in range', () => {
@@ -506,6 +526,7 @@ git commit -m "feat(lib): star (min) and price (any-room) filters + fixtures"
 ## Task 5: `lib/sort.ts`
 
 **Files:**
+
 - Create: `lib/sort.ts`
 - Test: `lib/sort.test.ts`
 
@@ -513,11 +534,16 @@ git commit -m "feat(lib): star (min) and price (any-room) filters + fixtures"
 
 ```ts
 // lib/sort.test.ts
-import { sortHotels } from './sort';
 import { makeHotel, makeRoom } from '../tests/fixtures';
+import { sortHotels } from './sort';
 
 const hotel = (id: string, price: number, rating: number, stars: number) =>
-  makeHotel({ id, rooms: [makeRoom({ pricePerNight: price })], overallRating: rating, starRating: stars });
+  makeHotel({
+    id,
+    rooms: [makeRoom({ pricePerNight: price })],
+    overallRating: rating,
+    starRating: stars,
+  });
 
 describe('sortHotels', () => {
   const hotels = [hotel('a', 300, 4.0, 3), hotel('b', 100, 4.8, 5), hotel('c', 200, 4.5, 4)];
@@ -589,6 +615,7 @@ git commit -m "feat(lib): stable hotel sorting by price/rating/stars"
 ## Task 6: `lib/paginate.ts`
 
 **Files:**
+
 - Create: `lib/paginate.ts`
 - Test: `lib/paginate.test.ts`
 
@@ -596,7 +623,7 @@ git commit -m "feat(lib): stable hotel sorting by price/rating/stars"
 
 ```ts
 // lib/paginate.test.ts
-import { paginate, PAGE_SIZE } from './paginate';
+import { PAGE_SIZE, paginate } from './paginate';
 
 const nums = Array.from({ length: 25 }, (_, i) => i + 1); // 1..25
 
@@ -667,6 +694,7 @@ git commit -m "feat(lib): page clamping helper"
 ## Task 7: `services/mappers.ts` + `services/seed.ts`
 
 **Files:**
+
 - Create: `services/mappers.ts`
 - Create: `services/seed.ts`
 - Test: `services/mappers.test.ts`
@@ -675,7 +703,7 @@ git commit -m "feat(lib): page clamping helper"
 
 ```ts
 // services/mappers.test.ts
-import { mapHotel, mapRoom, mapLocation, type RawHotel } from './mappers';
+import { mapHotel, mapLocation, mapRoom, type RawHotel } from './mappers';
 
 const rawHotel: RawHotel = {
   id: 'hotel-01',
@@ -684,17 +712,37 @@ const rawHotel: RawHotel = {
   star_rating: 5,
   overall_rating: 4.8,
   review_count: 1240,
-  address: { street: '789 Skyline Blvd', city: 'Chicago', state: 'IL', zip_code: '60611', country: 'USA' },
+  address: {
+    street: '789 Skyline Blvd',
+    city: 'Chicago',
+    state: 'IL',
+    zip_code: '60611',
+    country: 'USA',
+  },
   amenities: ['pool', 'spa'],
   policies: { check_in_time: '15:00', check_out_time: '11:00', cancellation: 'Free up to 24h' },
   rooms: [
     {
-      room_id: 'room-01a', type: 'Deluxe King', bed_type: 'King', bed_count: 1, max_occupancy: 2,
-      square_footage: 450, price_per_night: 299, room_amenities: ['city_view'], available_dates: ['2026-07-10'],
+      room_id: 'room-01a',
+      type: 'Deluxe King',
+      bed_type: 'King',
+      bed_count: 1,
+      max_occupancy: 2,
+      square_footage: 450,
+      price_per_night: 299,
+      room_amenities: ['city_view'],
+      available_dates: ['2026-07-10'],
     },
     {
-      room_id: 'room-01b', type: 'Standard Queen', bed_type: 'Queen', bed_count: 1, max_occupancy: 2,
-      square_footage: 300, price_per_night: 199, room_amenities: [], available_dates: ['2026-07-10'],
+      room_id: 'room-01b',
+      type: 'Standard Queen',
+      bed_type: 'Queen',
+      bed_count: 1,
+      max_occupancy: 2,
+      square_footage: 300,
+      price_per_night: 199,
+      room_amenities: [],
+      available_dates: ['2026-07-10'],
     },
   ],
 };
@@ -702,8 +750,15 @@ const rawHotel: RawHotel = {
 describe('mapRoom', () => {
   it('renames snake_case to camelCase domain fields', () => {
     expect(mapRoom(rawHotel.rooms[0])).toEqual({
-      roomId: 'room-01a', type: 'Deluxe King', bedType: 'King', bedCount: 1, maxOccupancy: 2,
-      squareFootage: 450, pricePerNight: 299, amenities: ['city_view'], availableDates: ['2026-07-10'],
+      roomId: 'room-01a',
+      type: 'Deluxe King',
+      bedType: 'King',
+      bedCount: 1,
+      maxOccupancy: 2,
+      squareFootage: 450,
+      pricePerNight: 299,
+      amenities: ['city_view'],
+      availableDates: ['2026-07-10'],
     });
   });
 });
@@ -714,7 +769,13 @@ describe('mapHotel', () => {
     expect(hotel.id).toBe('hotel-01');
     expect(hotel.starRating).toBe(5);
     expect(hotel.reviewCount).toBe(1240);
-    expect(hotel.address).toEqual({ street: '789 Skyline Blvd', city: 'Chicago', state: 'IL', zipCode: '60611', country: 'USA' });
+    expect(hotel.address).toEqual({
+      street: '789 Skyline Blvd',
+      city: 'Chicago',
+      state: 'IL',
+      zipCode: '60611',
+      country: 'USA',
+    });
     expect(hotel.policies.checkInTime).toBe('15:00');
   });
   it('derives priceFrom from the cheapest room', () => {
@@ -729,7 +790,11 @@ describe('mapHotel', () => {
 describe('mapLocation', () => {
   it('derives slugged location from a domain hotel', () => {
     expect(mapLocation(mapHotel(rawHotel))).toEqual({
-      city: 'Chicago', country: 'USA', state: 'IL', citySlug: 'chicago', countrySlug: 'usa',
+      city: 'Chicago',
+      country: 'USA',
+      state: 'IL',
+      citySlug: 'chicago',
+      countrySlug: 'usa',
     });
   });
 });
@@ -745,7 +810,7 @@ Expected: FAIL — cannot find module `./mappers`.
 ```ts
 // services/mappers.ts
 import { slugify } from '../lib/slug';
-import type { Hotel, Room, Location } from '../types/domain';
+import type { Hotel, Location, Room } from '../types/domain';
 
 const PLACEHOLDER_PHOTO = '/images/hotel-placeholder.svg';
 
@@ -831,8 +896,8 @@ export function mapLocation(hotel: Hotel): Location {
 
 ```ts
 // services/seed.ts
-import rawHotels from './mock/hotels.json';
 import type { RawHotel } from './mappers';
+import rawHotels from './mock/hotels.json';
 
 // The ONLY module that imports the raw seed. Phase-2 swaps this for an HTTP client.
 export function getRawHotels(): RawHotel[] {
@@ -857,6 +922,7 @@ git commit -m "feat(services): seed accessor and raw->domain mappers"
 ## Task 8: `services/hotelService.ts`
 
 **Files:**
+
 - Create: `services/hotelService.ts`
 - Test: `services/hotelService.test.ts`
 
@@ -864,7 +930,7 @@ git commit -m "feat(services): seed accessor and raw->domain mappers"
 
 ```ts
 // services/hotelService.test.ts
-import { getLocations, getHotelsByLocation, getHotelById } from './hotelService';
+import { getHotelById, getHotelsByLocation, getLocations } from './hotelService';
 
 describe('getLocations', () => {
   it('returns the 10 distinct seed locations, deterministically ordered', () => {
@@ -872,7 +938,13 @@ describe('getLocations', () => {
     const b = getLocations();
     expect(a).toHaveLength(10);
     expect(a).toEqual(b); // deterministic order
-    expect(a).toContainEqual({ city: 'New York', country: 'USA', state: 'NY', citySlug: 'new-york', countrySlug: 'usa' });
+    expect(a).toContainEqual({
+      city: 'New York',
+      country: 'USA',
+      state: 'NY',
+      citySlug: 'new-york',
+      countrySlug: 'usa',
+    });
   });
 });
 
@@ -915,10 +987,10 @@ Expected: FAIL — cannot find module `./hotelService`.
 
 ```ts
 // services/hotelService.ts
-import { getRawHotels } from './seed';
-import { mapHotel, mapLocation } from './mappers';
 import { buildSlugLookup } from '../lib/slug';
 import type { Hotel, Location } from '../types/domain';
+import { mapHotel, mapLocation } from './mappers';
+import { getRawHotels } from './seed';
 
 // Map the whole seed to domain types once, at module load.
 const hotels: Hotel[] = getRawHotels().map(mapHotel);
@@ -977,6 +1049,7 @@ git commit -m "feat(services): hotelService getLocations/getHotelsByLocation/get
 ## Task 9: `services/availabilityService.ts`
 
 **Files:**
+
 - Create: `services/availabilityService.ts`
 - Test: `services/availabilityService.test.ts`
 
@@ -984,8 +1057,8 @@ git commit -m "feat(services): hotelService getLocations/getHotelsByLocation/get
 
 ```ts
 // services/availabilityService.test.ts
+import { HotelNotFoundError, InvalidDateRangeError } from '../types/domain';
 import { checkAvailability } from './availabilityService';
-import { InvalidDateRangeError, HotelNotFoundError } from '../types/domain';
 
 describe('checkAvailability', () => {
   it('returns only rooms available for every night in range', async () => {
@@ -996,23 +1069,27 @@ describe('checkAvailability', () => {
   });
 
   it('returns [] for a hotel with no availability (hotel-04)', async () => {
-    expect(await checkAvailability('hotel-04', '2026-07-10', '2026-07-11', { delayMs: 0 })).toEqual([]);
+    expect(await checkAvailability('hotel-04', '2026-07-10', '2026-07-11', { delayMs: 0 })).toEqual(
+      [],
+    );
   });
 
   it('returns [] for dates outside the dataset window', async () => {
-    expect(await checkAvailability('hotel-01', '2026-08-01', '2026-08-02', { delayMs: 0 })).toEqual([]);
+    expect(await checkAvailability('hotel-01', '2026-08-01', '2026-08-02', { delayMs: 0 })).toEqual(
+      [],
+    );
   });
 
   it('throws InvalidDateRangeError when checkout <= checkin', async () => {
-    await expect(checkAvailability('hotel-01', '2026-07-12', '2026-07-12', { delayMs: 0 })).rejects.toBeInstanceOf(
-      InvalidDateRangeError,
-    );
+    await expect(
+      checkAvailability('hotel-01', '2026-07-12', '2026-07-12', { delayMs: 0 }),
+    ).rejects.toBeInstanceOf(InvalidDateRangeError);
   });
 
   it('throws HotelNotFoundError for an unknown id', async () => {
-    await expect(checkAvailability('hotel-999', '2026-07-10', '2026-07-11', { delayMs: 0 })).rejects.toBeInstanceOf(
-      HotelNotFoundError,
-    );
+    await expect(
+      checkAvailability('hotel-999', '2026-07-10', '2026-07-11', { delayMs: 0 }),
+    ).rejects.toBeInstanceOf(HotelNotFoundError);
   });
 });
 ```
@@ -1026,9 +1103,9 @@ Expected: FAIL — cannot find module `./availabilityService`.
 
 ```ts
 // services/availabilityService.ts
+import { isRoomAvailable, nightsInRange } from '../lib/availability';
+import { HotelNotFoundError, InvalidDateRangeError, type AvailableRoom } from '../types/domain';
 import { getHotelById } from './hotelService';
-import { nightsInRange, isRoomAvailable } from '../lib/availability';
-import { InvalidDateRangeError, HotelNotFoundError, type AvailableRoom } from '../types/domain';
 
 const DEFAULT_LATENCY_MS = Number(process.env.AVAILABILITY_LATENCY_MS ?? 1000);
 
@@ -1084,6 +1161,7 @@ git commit -m "feat(services): availabilityService with simulated latency"
 ## Task 10: Boundary guard — only `services/` imports the seed
 
 **Files:**
+
 - Create: `services/boundary.test.ts`
 
 > Placed inside `services/` so the walk (which skips `services/`) does not flag this test's own reference to `hotels.json`.
@@ -1099,7 +1177,10 @@ function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const full = join(dir, name);
     if (statSync(full).isDirectory()) {
-      if (['node_modules', 'services', 'coverage', 'dist', '.next', '.git'].includes(name) || name.startsWith('.')) {
+      if (
+        ['node_modules', 'services', 'coverage', 'dist', '.next', '.git'].includes(name) ||
+        name.startsWith('.')
+      ) {
         return [];
       }
       return walk(full);
@@ -1132,6 +1213,7 @@ git commit -m "test(services): guard that only services/ imports the seed"
 ## Task 11: Full suite, coverage gate, and progress doc update
 
 **Files:**
+
 - Modify: `docs/progress.md` (M1 price-filter wording + check off M1 items)
 
 - [ ] **Step 1: Run the whole suite with coverage**
@@ -1166,6 +1248,7 @@ git commit -m "docs: mark M1 complete; correct price-filter semantics"
 ## Self-Review (completed by plan author)
 
 **1. Spec coverage** — every spec section maps to a task:
+
 - §3 module structure → Tasks 7, 8, 9. §4 domain types → Task 1. §5.1 hotelService → Task 8. §5.2 availabilityService → Task 9. §6.1–6.5 lib → Tasks 2–6. §7 errors → Task 1 (defined) + Task 9 (thrown). §8 testing → every task is test-first; §8 boundary invariant → Task 10; ≥85% gate → Task 0 config + Task 11 run. §9 progress.md wording fix → Task 11.
 
 **2. Placeholder scan** — no TBD/TODO; every code step shows complete code; every test step shows full assertions.

@@ -23,43 +23,47 @@
 
 ## File Structure
 
-| File / dir | Responsibility | Task |
-| --- | --- | --- |
-| `package.json`, `package-lock.json` | deps + scripts | 1, 2, 4, 5, 6 |
-| `tsconfig.json`, `next.config.ts`, `next-env.d.ts` | TS + Next config (scaffolded) | 1 |
-| `postcss.config.mjs`, `app/globals.css` | Tailwind v4 (scaffolded) | 1 |
-| `eslint.config.mjs` | ESLint flat config (+ prettier) | 1, 2 |
-| `prettier.config.mjs` | formatting + import order | 2 |
-| `app/layout.tsx`, `app/page.tsx` | scaffolded blank app | 1 |
-| `components/ hooks/ lib/ stores/ types/` (`.gitkeep`) | empty skeleton dirs | 3 |
-| `services/mock/hotels.json` | relocated seed (server-only) | 3 |
-| `jest.config.js`, `jest.setup.ts`, `jest.polyfills.js` | Jest via next/jest + MSW polyfills | 4 |
-| `mocks/handlers.ts`, `mocks/server.ts`, `mocks/browser.ts`, `mocks/server.test.ts` | MSW v2 bootstrap + bootstrap test | 4 |
-| `playwright.config.ts`, `e2e/smoke.spec.ts` | E2E config + smoke test | 5 |
-| `README.md` | install / run / test skeleton | 6 |
-| `docs/progress.md`, `docs/superpowers/specs/2026-06-08-m1-data-layer-design.md` | doc deltas | 7 |
+| File / dir                                                                         | Responsibility                     | Task          |
+| ---------------------------------------------------------------------------------- | ---------------------------------- | ------------- |
+| `package.json`, `package-lock.json`                                                | deps + scripts                     | 1, 2, 4, 5, 6 |
+| `tsconfig.json`, `next.config.ts`, `next-env.d.ts`                                 | TS + Next config (scaffolded)      | 1             |
+| `postcss.config.mjs`, `app/globals.css`                                            | Tailwind v4 (scaffolded)           | 1             |
+| `eslint.config.mjs`                                                                | ESLint flat config (+ prettier)    | 1, 2          |
+| `prettier.config.mjs`                                                              | formatting + import order          | 2             |
+| `app/layout.tsx`, `app/page.tsx`                                                   | scaffolded blank app               | 1             |
+| `components/ hooks/ lib/ stores/ types/` (`.gitkeep`)                              | empty skeleton dirs                | 3             |
+| `services/mock/hotels.json`                                                        | relocated seed (server-only)       | 3             |
+| `jest.config.js`, `jest.setup.ts`, `jest.polyfills.js`                             | Jest via next/jest + MSW polyfills | 4             |
+| `mocks/handlers.ts`, `mocks/server.ts`, `mocks/browser.ts`, `mocks/server.test.ts` | MSW v2 bootstrap + bootstrap test  | 4             |
+| `playwright.config.ts`, `e2e/smoke.spec.ts`                                        | E2E config + smoke test            | 5             |
+| `README.md`                                                                        | install / run / test skeleton      | 6             |
+| `docs/progress.md`, `docs/superpowers/specs/2026-06-08-m1-data-layer-design.md`    | doc deltas                         | 7             |
 
 ---
 
 ## Task 1: Scaffold Next.js app (Approach A — temp + merge)
 
 **Files:**
+
 - Create (via scaffold): `package.json`, `package-lock.json`, `tsconfig.json`, `next.config.ts`, `next-env.d.ts`, `postcss.config.mjs`, `eslint.config.mjs`, `app/layout.tsx`, `app/page.tsx`, `app/globals.css`, `public/*`
 - Modify: `.gitignore` (append only)
 
 - [ ] **Step 1: Scaffold into a throwaway directory** (non-interactive)
 
 Run:
+
 ```bash
 npx create-next-app@latest /tmp/hbp-scaffold --yes \
   --ts --tailwind --eslint --app --no-src-dir \
   --import-alias "@/*" --use-npm
 ```
+
 Expected: completes and prints "Success! Created hbp-scaffold". If the CLI rejects a flag (version drift), run `npx create-next-app@latest --help`, map to the equivalent, and re-run; the required choices are: TypeScript, Tailwind, ESLint, App Router, **no** `src/` dir, import alias `@/*`, npm.
 
 - [ ] **Step 2: Merge generated files into the repo (preserve docs, .gitignore, README)**
 
 Run:
+
 ```bash
 rsync -a \
   --exclude node_modules \
@@ -68,11 +72,13 @@ rsync -a \
   --exclude README.md \
   /tmp/hbp-scaffold/ ./
 ```
+
 Expected: copies `package.json`, configs, `app/`, `public/` into the repo. `docs/`, `ai-dev-workflow.md`, the existing `README.md` and `.gitignore` are untouched.
 
 - [ ] **Step 3: Append stack-specific entries to `.gitignore`**
 
 The existing `.gitignore` already ignores `node_modules/`, `coverage`, `.next`, `out`, `*.tsbuildinfo`. Append the few that are missing:
+
 ```bash
 cat >> .gitignore <<'EOF'
 
@@ -92,9 +98,11 @@ EOF
 - [ ] **Step 4: Install dependencies in the repo**
 
 Run:
+
 ```bash
 npm install
 ```
+
 Expected: creates `node_modules/` from the copied `package-lock.json`; exits 0.
 
 - [ ] **Step 4b: Add the React Query dependency** (dep only — provider is wired in M3, not here)
@@ -102,19 +110,23 @@ Expected: creates `node_modules/` from the copied `package-lock.json`; exits 0.
 ```bash
 npm install @tanstack/react-query
 ```
+
 Verify it appears under `dependencies` in `package.json`.
 
 - [ ] **Step 5: Verify TS strict is on**
 
 Run:
+
 ```bash
 grep '"strict"' tsconfig.json
 ```
+
 Expected: `"strict": true,`. If absent, edit `tsconfig.json` to set `"strict": true` under `compilerOptions`.
 
 - [ ] **Step 6: Add a `typecheck` script**
 
 Edit `package.json` `scripts` to add (keep the scaffolded `dev`/`build`/`start`/`lint`):
+
 ```json
 "typecheck": "tsc --noEmit"
 ```
@@ -122,11 +134,13 @@ Edit `package.json` `scripts` to add (keep the scaffolded `dev`/`build`/`start`/
 - [ ] **Step 7: Verify the app builds, lints, and typechecks**
 
 Run each; all must exit 0:
+
 ```bash
 npm run build      # Expected: "Compiled successfully" / route table printed
 npm run lint       # Expected: "No ESLint warnings or errors"
 npm run typecheck  # Expected: no output, exit 0
 ```
+
 A successful `build` confirms the scaffold is sound. The "app actually serves a page" check is owned by Playwright's `webServer` in Task 5 (and the final gate in Task 8), so there's no fragile manual dev-server smoke here. To eyeball it manually now, optionally run `npm run dev` and open `http://localhost:3000`, then stop the server.
 
 - [ ] **Step 8: Clean up the throwaway dir and commit**
@@ -142,6 +156,7 @@ git commit -m "build: scaffold Next.js 15 + TS strict + Tailwind v4 (M0)"
 ## Task 2: Prettier + import ordering + ESLint integration
 
 **Files:**
+
 - Create: `prettier.config.mjs`
 - Modify: `eslint.config.mjs`, `package.json`
 
@@ -155,6 +170,7 @@ npm install -D prettier eslint-config-prettier \
 - [ ] **Step 2: Create `prettier.config.mjs`**
 
 `prettier-plugin-tailwindcss` must be **last** in the plugins array.
+
 ```js
 /** @type {import("prettier").Config} */
 const config = {
@@ -162,16 +178,8 @@ const config = {
   singleQuote: true,
   trailingComma: 'all',
   printWidth: 100,
-  plugins: [
-    '@ianvs/prettier-plugin-sort-imports',
-    'prettier-plugin-tailwindcss',
-  ],
-  importOrder: [
-    '^(react|react-dom|next)(/.*)?$',
-    '<THIRD_PARTY_MODULES>',
-    '^@/(.*)$',
-    '^[./]',
-  ],
+  plugins: ['@ianvs/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
+  importOrder: ['^(react|react-dom|next)(/.*)?$', '<THIRD_PARTY_MODULES>', '^@/(.*)$', '^[./]'],
 };
 
 export default config;
@@ -180,8 +188,10 @@ export default config;
 - [ ] **Step 3: Disable ESLint formatting rules via `eslint-config-prettier`**
 
 Edit `eslint.config.mjs`. Add the import at the top and append `eslintConfigPrettier` as the **last** item of the exported array. Example (match the scaffold's existing structure — it uses `FlatCompat`):
+
 ```js
 import eslintConfigPrettier from 'eslint-config-prettier';
+
 // ...existing imports and compat setup...
 
 const eslintConfig = [
@@ -219,6 +229,7 @@ git commit -m "build: add Prettier, import ordering, ESLint integration (M0)"
 ## Task 3: Folder skeleton + relocate seed
 
 **Files:**
+
 - Create: `components/.gitkeep`, `hooks/.gitkeep`, `lib/.gitkeep`, `stores/.gitkeep`, `types/.gitkeep`
 - Move: `docs/mock-data.json` → `services/mock/hotels.json`
 
@@ -229,6 +240,7 @@ for d in components hooks lib stores types; do
   mkdir -p "$d" && touch "$d/.gitkeep"
 done
 ```
+
 (`app/` exists from the scaffold; `mocks/` and `e2e/` are created in Tasks 4–5; `services/mock/` is created by the move below.)
 
 - [ ] **Step 2: Move the seed behind the service boundary**
@@ -237,6 +249,7 @@ done
 mkdir -p services/mock
 git mv docs/mock-data.json services/mock/hotels.json
 ```
+
 Expected: `docs/mock-data.json` no longer exists; `services/mock/hotels.json` is staged as a rename.
 
 - [ ] **Step 3: Verify the seed is intact (40-hotel array) and not imported anywhere**
@@ -245,6 +258,7 @@ Expected: `docs/mock-data.json` no longer exists; `services/mock/hotels.json` is
 node -e "const d=require('./services/mock/hotels.json'); if(!Array.isArray(d)||d.length!==40) throw new Error('seed shape changed: '+(Array.isArray(d)?d.length:typeof d)); console.log('seed OK: 40 hotels');"
 grep -rn "hotels.json" app components hooks lib stores types services 2>/dev/null || echo "no importers yet (expected)"
 ```
+
 Expected: `seed OK: 40 hotels`, and no source file imports it yet.
 
 - [ ] **Step 4: Commit**
@@ -259,6 +273,7 @@ git commit -m "build: add folder skeleton; move seed to services/mock/hotels.jso
 ## Task 4: Jest + RTL + jsdom + MSW v2 bootstrap
 
 **Files:**
+
 - Create: `jest.config.js`, `jest.setup.ts`, `jest.polyfills.js`, `mocks/handlers.ts`, `mocks/server.ts`, `mocks/browser.ts`, `mocks/server.test.ts`
 - Modify: `package.json`
 
@@ -270,6 +285,7 @@ npm install -D jest jest-environment-jsdom \
   @types/jest undici
 npm install -D msw@latest
 ```
+
 (`next/jest` ships with `next`; no separate install. `undici` provides `fetch`/`Response` polyfills MSW v2 needs under jsdom.)
 
 - [ ] **Step 2: Create `jest.polyfills.js`** (loaded before the test framework)
@@ -331,6 +347,7 @@ module.exports = createJestConfig(config);
 - [ ] **Step 5: Create the MSW bootstrap files**
 
 `mocks/handlers.ts`:
+
 ```ts
 import type { RequestHandler } from 'msw';
 
@@ -340,18 +357,18 @@ export const handlers: RequestHandler[] = [];
 ```
 
 `mocks/server.ts`:
+
 ```ts
 import { setupServer } from 'msw/node';
-
 import { handlers } from './handlers';
 
 export const server = setupServer(...handlers);
 ```
 
 `mocks/browser.ts`:
+
 ```ts
 import { setupWorker } from 'msw/browser';
-
 import { handlers } from './handlers';
 
 export const worker = setupWorker(...handlers);
@@ -360,6 +377,7 @@ export const worker = setupWorker(...handlers);
 - [ ] **Step 6: Write the failing bootstrap test**
 
 `mocks/server.test.ts`:
+
 ```ts
 import { server } from './server';
 
@@ -376,19 +394,24 @@ describe('MSW server bootstrap', () => {
 - [ ] **Step 7: Run it to verify the toolchain works**
 
 Run:
+
 ```bash
 npx jest mocks/server.test.ts
 ```
+
 Expected: PASS. If it fails importing `Response`/`fetch`, confirm `jest.polyfills.js` is listed under `setupFiles` and `undici` is installed — that chain is the common MSW-v2-under-jsdom failure.
 
 - [ ] **Step 8: Add `test` scripts and verify**
 
 Edit `package.json` `scripts`:
+
 ```json
 "test": "jest --passWithNoTests",
 "test:coverage": "jest --coverage --passWithNoTests"
 ```
+
 Run:
+
 ```bash
 npm test            # Expected: 1 passed (MSW bootstrap)
 npm run test:coverage   # Expected: runs, prints a coverage table, exits 0 (no threshold enforced)
@@ -406,6 +429,7 @@ git commit -m "test: set up Jest + RTL + jsdom and MSW v2 bootstrap (M0)"
 ## Task 5: Playwright + smoke spec
 
 **Files:**
+
 - Create: `playwright.config.ts`, `e2e/smoke.spec.ts`
 - Modify: `package.json`
 
@@ -415,6 +439,7 @@ git commit -m "test: set up Jest + RTL + jsdom and MSW v2 bootstrap (M0)"
 npm install -D @playwright/test
 npx playwright install chromium
 ```
+
 (`playwright install` downloads the browser locally; it is not committed.)
 
 - [ ] **Step 2: Create `playwright.config.ts`**
@@ -445,8 +470,9 @@ export default defineConfig({
 - [ ] **Step 3: Write the smoke spec**
 
 `e2e/smoke.spec.ts`:
+
 ```ts
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('home page loads', async ({ page }) => {
   const response = await page.goto('/');
@@ -458,21 +484,27 @@ test('home page loads', async ({ page }) => {
 - [ ] **Step 4: Add the `test:e2e` script and run it**
 
 Edit `package.json` `scripts`:
+
 ```json
 "test:e2e": "playwright test"
 ```
+
 Run:
+
 ```bash
 npm run test:e2e
 ```
+
 Expected: Playwright boots the dev server and the `home page loads` test PASSES. (First run may take ~30–60s while the dev server compiles.)
 
 - [ ] **Step 5: Confirm Jest does not pick up Playwright specs**
 
 Run:
+
 ```bash
 npx jest --listTests | grep -c "e2e/" || echo "0 (e2e excluded from Jest — correct)"
 ```
+
 Expected: `0` — `e2e/` is excluded via `testPathIgnorePatterns`.
 
 - [ ] **Step 6: Commit**
@@ -487,12 +519,14 @@ git commit -m "test: add Playwright config and home-page smoke spec (M0)"
 ## Task 6: README skeleton
 
 **Files:**
+
 - Modify: `README.md`
 
 - [ ] **Step 1: Replace the one-line README with the install/run/test skeleton**
 
 Overwrite `README.md` with:
-```markdown
+
+````markdown
 # Hotel Booking Portal
 
 Phase 1 — hotel discovery interface. Pick a destination → browse/filter/sort
@@ -511,6 +545,7 @@ hotels → open a hotel → check room availability for dates.
 npm install
 npx playwright install chromium   # one-time, for E2E tests
 ```
+````
 
 ## Run locally
 
@@ -540,7 +575,8 @@ npm run lint
 npm run typecheck
 npm run format:check
 ```
-```
+
+````
 
 - [ ] **Step 2: Verify the markdown is well-formed and commit**
 
@@ -548,22 +584,26 @@ npm run format:check
 npm run format -- README.md   # Expected: formats cleanly
 git add README.md
 git commit -m "docs: add README skeleton (install/run/test) (M0)"
-```
+````
 
 ---
 
 ## Task 7: Doc deltas (progress.md + M1 spec reference)
 
 **Files:**
+
 - Modify: `docs/progress.md`, `docs/superpowers/specs/2026-06-08-m1-data-layer-design.md`
 
 - [ ] **Step 1: Update `docs/progress.md` M0 — date-picker decision (native)**
 
 Replace this line:
+
 ```
 - [ ] Add a **date-picker** dependency (native `<input type="date">` is acceptable — `⚠︎ decision`: library vs native).
 ```
+
 with:
+
 ```
 - [x] Date input: use **native `<input type="date">`** — no library dependency (decision resolved).
 ```
@@ -571,10 +611,13 @@ with:
 - [ ] **Step 2: Update `docs/progress.md` M0 — defer CI**
 
 Replace this line:
+
 ```
 - [ ] **CI pipeline** (GitHub Actions): lint → typecheck → unit (coverage gate **≥85%**) → MSW integration → Playwright E2E; PR can't merge unless green.
 ```
+
 with:
+
 ```
 - [-] **CI pipeline** (GitHub Actions) — **deferred** out of M0 (decision); the lint → typecheck → unit (≥85% gate) → integration → E2E pipeline is wired in a later milestone (M7). M0 ships local scripts only; the coverage gate is non-blocking until `lib/`+`services/` exist.
 ```
@@ -582,10 +625,13 @@ with:
 - [ ] **Step 3: Update `docs/progress.md` M0 — Done-when (local scripts, not CI)**
 
 Replace this line:
+
 ```
 - **Done when:** `dev` server boots a blank page, `test` + `test:e2e` run (even with 0 tests), and CI runs green on an empty PR.
 ```
+
 with:
+
 ```
 - **Done when:** `npm run dev` boots a blank page; `npm run lint`, `npm run typecheck`, `npm test`, and `npm run test:e2e` all pass locally; `services/mock/hotels.json` is in place (no importers yet); the folder skeleton is committed. (CI is deferred — see the CI line above.)
 ```
@@ -593,10 +639,13 @@ with:
 - [ ] **Step 4: Fix the stale seed-path reference in the M1 spec**
 
 In `docs/superpowers/specs/2026-06-08-m1-data-layer-design.md`, replace:
+
 ```
 Verified against `docs/mock-data.json` (40 hotels):
 ```
+
 with:
+
 ```
 Verified against `services/mock/hotels.json` (40 hotels):
 ```
@@ -617,6 +666,7 @@ git commit -m "docs: record M0 decisions (native date, CI deferred); fix M1 seed
 - [ ] **Step 1: Run the full local gate**
 
 Run each; all must exit 0:
+
 ```bash
 npm run lint
 npm run typecheck
@@ -634,6 +684,7 @@ git ls-files components hooks lib stores types | grep -c .gitkeep   # Expected: 
 test ! -f docs/mock-data.json && echo "old seed path removed"
 grep -rn "hotels.json" app components hooks lib stores types 2>/dev/null || echo "no client importers (correct)"
 ```
+
 Expected: `seed in place`, `5`, `old seed path removed`, `no client importers (correct)`.
 
 - [ ] **Step 3: Verify the working tree is clean**
@@ -645,6 +696,7 @@ git status --short   # Expected: empty (everything committed)
 - [ ] **Step 4: (Optional) push the branch**
 
 Only if the user asks to push:
+
 ```bash
 git push -u origin docs/initial-docs
 ```
@@ -654,6 +706,7 @@ git push -u origin docs/initial-docs
 ## Self-Review (completed by plan author)
 
 **Spec coverage** — every M0 in-scope item maps to a task:
+
 - Scaffold Next 15 + TS strict + Tailwind v4 → Task 1
 - `@tanstack/react-query` dep → Task 1, Step 4b
 - ESLint + Prettier + import order → Tasks 1 (ESLint scaffolded) + 2
