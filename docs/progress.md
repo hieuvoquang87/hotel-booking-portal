@@ -22,7 +22,7 @@ and mobile-first design for assumed 80% mobile traffic.
 
 | #   | Milestone                         | Scope                                                       | Status |
 | --- | --------------------------------- | ----------------------------------------------------------- | ------ |
-| M0  | Project setup & tooling           | Next.js/TS/Tailwind/RQ + Jest/RTL/MSW/Playwright + CI       | [ ]    |
+| M0  | Project setup & tooling           | Next.js/TS/Tailwind/RQ + Jest/RTL/MSW/Playwright (CI → M7)  | [x]    |
 | M1  | Data layer & domain               | Domain types, `hotelService`, `availabilityService`, `lib/` | [ ]    |
 | M2  | BFF API routes                    | `/api/locations`, `/api/hotels`, `[id]`, `[id]/rooms`       | [ ]    |
 | M3  | Client state & data hooks         | QueryProvider, AppProvider, the four `use*` hooks           | [ ]    |
@@ -40,19 +40,19 @@ and mobile-first design for assumed 80% mobile traffic.
 **Outcome:** an empty Next.js app boots, the test toolchain runs, and CI is wired
 so every later milestone has a coverage + E2E gate to commit against.
 
-- [ ] Scaffold **Next.js (App Router) + TypeScript**; `tsconfig` `strict: true`.
-- [ ] Add **Tailwind CSS** (config + base styles); mobile-first defaults.
-- [ ] Add **@tanstack/react-query** dependency (provider wired in M3).
-- [ ] Add a **date-picker** dependency (native `<input type="date">` is acceptable — `⚠︎ decision`: library vs native).
-- [ ] Configure **ESLint + Prettier** (project style, import order).
-- [ ] Set up **Jest + React Testing Library** + `jest-environment-jsdom`; add `test`/`test:coverage` scripts.
-- [ ] Set up **MSW** (handlers + node/browser bootstrap) for integration tests.
-- [ ] Set up **Playwright** (config + `e2e/` dir); `test:e2e` script.
-- [ ] Create the folder skeleton per `architecture.md` §5 / roadmap Architecture: `app/`, `app/api/`, `components/`, `hooks/`, `services/` (+ `services/mock/`), `stores/`, `lib/`.
-- [ ] Move `docs/mock-data.json` → `services/mock/hotels.json` (the seed lives behind the service, never imported by the client).
-- [ ] **CI pipeline** (GitHub Actions): lint → typecheck → unit (coverage gate **≥85%**) → MSW integration → Playwright E2E; PR can't merge unless green.
-- [ ] `README.md` skeleton (install / run / test — filled out in M8).
-- **Done when:** `dev` server boots a blank page, `test` + `test:e2e` run (even with 0 tests), and CI runs green on an empty PR.
+- [x] Scaffold **Next.js (App Router) + TypeScript**; `tsconfig` `strict: true`. (Next 16.2.7 / React 19.)
+- [x] Add **Tailwind CSS** (config + base styles); mobile-first defaults. (Tailwind v4, CSS-first.)
+- [x] Add **@tanstack/react-query** dependency (provider wired in M3).
+- [x] Date input: use **native `<input type="date">`** — no library dependency (decision resolved).
+- [x] Configure **ESLint + Prettier** (project style, import order).
+- [x] Set up **Jest + React Testing Library**; add `test`/`test:coverage` scripts. (Uses `jest-fixed-jsdom` — stock `jest-environment-jsdom` strips the Node globals MSW v2 needs.)
+- [x] Set up **MSW** (handlers + node/browser bootstrap) for integration tests.
+- [x] Set up **Playwright** (config + `e2e/` dir); `test:e2e` script.
+- [x] Create the folder skeleton per `architecture.md` §5: `app/`, `components/`, `hooks/`, `services/` (+ `services/mock/`), `stores/`, `types/`, `lib/`, `mocks/`, `e2e/`. (`app/api/` is added in M2 when routes exist.)
+- [x] Move `docs/mock-data.json` → `services/mock/hotels.json` (the seed lives behind the service, never imported by the client).
+- [-] **CI pipeline** (GitHub Actions) — **deferred** out of M0 (decision); the lint → typecheck → unit (≥85% gate) → integration → E2E pipeline is wired in a later milestone (M7). M0 ships local scripts only; the coverage gate is non-blocking until `lib/`+`services/` exist.
+- [x] `README.md` skeleton (install / run / test — filled out in M8).
+- **Done when:** `npm run dev` boots a blank page; `npm run lint`, `npm run typecheck`, `npm test`, and `npm run test:e2e` all pass locally; `services/mock/hotels.json` is in place (no importers yet); the folder skeleton is committed. (CI is deferred — see the CI line above.)
 
 ---
 

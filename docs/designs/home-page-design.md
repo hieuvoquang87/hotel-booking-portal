@@ -2,7 +2,7 @@
 
 > Route: `/` · Drives the mock UI for destination search, refine/sort, and the hotel grid.
 > Companion spec: [hotel-detail-page-design.md](hotel-detail-page-design.md).
-> Sourced from `prd.md`, `architecture.md`, `product-roadmap.md`, `user-flows.md`, `mock-data.json`.
+> Sourced from `prd.md`, `architecture.md`, `product-roadmap.md`, `user-flows.md`, `services/mock/hotels.json`.
 
 **Visual direction:** Clean & modern — neutral grey scale, one blue accent, photo-forward
 rounded cards, generous whitespace. **Mobile-first**, WCAG 2.1 AA.
