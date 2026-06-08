@@ -1,5 +1,5 @@
-import type { Room } from '../types/domain';
-import { isRoomAvailable, nightsInRange } from './availability';
+import type { Room } from '@/types/domain';
+import { isRoomAvailable, nightsInRange } from '@/lib/availability';
 
 const room = (availableDates: string[]): Room => ({
   roomId: 'r',

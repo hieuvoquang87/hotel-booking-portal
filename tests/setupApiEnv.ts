@@ -1,0 +1,1 @@
+process.env.AVAILABILITY_LATENCY_MS = '0';

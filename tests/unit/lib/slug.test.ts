@@ -1,4 +1,4 @@
-import { buildSlugLookup, slugify } from './slug';
+import { buildSlugLookup, slugify } from '@/lib/slug';
 
 describe('slugify', () => {
   it.each([

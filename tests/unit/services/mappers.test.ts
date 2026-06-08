@@ -1,4 +1,4 @@
-import { mapHotel, mapLocation, mapRoom, type RawHotel } from './mappers';
+import { mapHotel, mapLocation, mapRoom, type RawHotel } from '@/services/mappers';
 
 const rawHotel: RawHotel = {
   id: 'hotel-01',

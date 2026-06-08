@@ -1,4 +1,4 @@
-import { server } from './server';
+import { server } from '@/mocks/server';
 
 describe('MSW server bootstrap', () => {
   it('starts and stops without throwing', () => {
