@@ -119,12 +119,12 @@ stores/
 
 ---
 
-## Phase 2: Scale, SEO & Booking
+## Phase 2: Scale, SEO, Booking & Resilience
 
 **Extends Phase 1** — assumes routes, components, and data layer exist.
 
-> **Framing:** Phase 1 _makes it work_ (ship the 3 core features clean). Phase 2
-> _makes it right_ — adds booking, crawlable SEO, a real-API seam, observability,
+> **Framing:** Phase 1 ships the 3 core discovery features. Phase 2 makes them
+> production-grade — adding booking, crawlable SEO, a real-API seam, observability,
 > and the operability/resilience hardening in §6 below. Nothing in Phase 2 is
 > implemented yet; the items here are **designed plans**.
 
@@ -222,7 +222,7 @@ type Event =
 
 **Layers:** `error.tsx` · `not-found.tsx` · `loading.tsx` · `global-error.tsx`
 
-### 6. Operability & Resilience — _Make it right_
+### 6. Operability & Resilience
 
 > **Designed, not implemented.** Full spec:
 > [`superpowers/specs/2026-06-08-operability-resilience-design.md`](superpowers/specs/2026-06-08-operability-resilience-design.md).
