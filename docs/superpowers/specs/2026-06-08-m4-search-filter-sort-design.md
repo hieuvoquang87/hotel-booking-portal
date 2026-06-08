@@ -39,7 +39,7 @@ every breakpoint and state, mobile-first, WCAG 2.1 AA.
   map-pin favicon `app/icon.svg`.
 - `utils/analyticUtil.ts` — the **typed `track()` interface** the UI calls;
   no-op/console-DEV body now, real adapters wired in **M6**.
-- The two cross-milestone reconciliations §3 names (`recommended` sort, page size 8).
+- The two cross-milestone reconciliations §3 names (default sort `rating`, page size 8).
 - RTL component tests + one MSW integration test for the full
   destination → filter → sort → paginate flow (≥85% coverage on M4 modules).
 
@@ -89,30 +89,25 @@ app/page.tsx                         SERVER component (no 'use client')
 Two spots where the design contract outruns what M1/M3 currently encode. M4 owns
 the reconciliation; both are small and additive.
 
-### 3.1 `recommended` sort + new default
+### 3.1 Sort options + default (no `recommended`)
 
-The design spec lists **5** sort options; M1's `SortKey` union has **4**
-(`price-asc | price-desc | rating | stars`) and M3 defaults to `price-asc`. M4:
+The design spec lists 5 sort options including a "Recommended" default. **The seed
+has no `recommended` field**, and synthesizing one (composite score or extra
+tiebreak) was rejected — there's no data to back it. So M4 **drops "Recommended"
+entirely** and ships the **4** sort keys M1 already defines (`price-asc |
+price-desc | rating | stars`) — `SortKey` is unchanged, `lib/sort.ts` needs no edit.
 
-- **Extend `SortKey`** to `'recommended' | 'price-asc' | 'price-desc' | 'rating' | 'stars'`.
-- `sortHotels(hotels, 'recommended')` = `overallRating` **desc**, stable tiebreak by
-  hotel `id` ascending (deterministic, matches the design's "Recommended" definition).
-  Implemented in `lib/sort.ts` (M1's file, additive change + its own unit test).
-  **Note:** `recommended` and `rating` are both `overallRating` desc — the *only*
-  distinction is the tiebreak (`recommended` → id-asc; `rating` → stable input order).
-  On the seed (input is id-ordered) they usually coincide; that's expected, not a
-  missing feature. Both exist because the design spec lists them separately.
-- **Default sort = `'recommended'`** in `useSearchParamsState` (M3's
-  `DEFAULT_SORT`), and it is the omit-from-URL default (`?sort=` only appears for
-  non-default sorts). Update M3's parse/serialize default + its tests accordingly.
+- **Default sort = `'rating'`** (Rating: Highest — `overallRating` desc). This
+  replaces both the design's removed "Recommended" default and M3's interim
+  `price-asc` default; it best preserves the design's "surface the best hotels
+  first" intent (price-asc would anchor on the cheapest). Change M3's `DEFAULT_SORT`
+  from `'price-asc'` to `'rating'` and update its parse/serialize tests.
+- It is the omit-from-URL default: `?sort=` appears only for non-default sorts.
 
-> URL `sort` values map 1:1 to the design spec's parenthesized keys:
-> `recommended` (default) · `price_asc` · `price_desc` · `rating_desc` · `stars_desc`.
-> **Naming note:** the design spec writes `price_asc`/`rating_desc`; M1/M3 use
-> `price-asc`/`rating`. M4 keeps the **code identifiers** (`price-asc`, `price-desc`,
-> `rating`, `stars`, `recommended`) as the URL param values — one vocabulary, hyphen
-> style, matching the existing `SortKey` union. The `SortSelect` option **labels**
-> are the human strings ("Price: Low to High", etc.).
+> URL `sort` values are the **code identifiers** (`rating` default · `price-asc` ·
+> `price-desc` · `stars`) — one hyphen-style vocabulary matching the existing
+> `SortKey` union. The `SortSelect` option **labels** are the human strings
+> ("Rating: Highest", "Price: Low to High", "Price: High to Low", "Stars: Highest").
 
 ### 3.2 Page size = 8
 
@@ -144,7 +139,7 @@ components/home/MobileFilterBar.tsx  sticky "Filters" button + inline sort (< sm
 components/home/FilterSheet.tsx      mobile bottom-sheet dialog (star + price)
 components/home/SegmentedStars.tsx   Any / 3★+ / 4★+ / 5★
 components/home/PriceRange.tsx       two USD number inputs (min / max)
-components/home/SortSelect.tsx       5 options
+components/home/SortSelect.tsx       4 options (rating default, price-asc/desc, stars)
 components/home/ResultCount.tsx      aria-live="polite" count
 components/home/HotelGrid.tsx        responsive 1/2/3/4 cols; renders skeletons
 components/home/HotelCard.tsx        one hotel; whole card → /hotels/[id]
@@ -157,9 +152,9 @@ lib/destinations.ts                  buildDestinationOptions(locations) → opti
 
 utils/analyticUtil.ts                track(event, payload) typed facade (DEV no-op)
 
-lib/sort.ts                          (modify) add 'recommended' to SortKey + sort
 lib/paginate.ts                      (modify) PAGE_SIZE 12 → 8
-hooks/useSearchParamsState.ts        (modify) DEFAULT_SORT → 'recommended'
+hooks/useSearchParamsState.ts        (modify) DEFAULT_SORT → 'rating'
+                                     (lib/sort.ts unchanged — 4 keys already exist)
 ```
 
 ---
@@ -332,11 +327,9 @@ the implementation plan.
 
 **Pure / additive logic (no React):**
 
-- `lib/sort.ts` — new `recommended` key: `overallRating` desc, stable id tiebreak;
-  existing keys unaffected.
 - `lib/paginate.ts` — `PAGE_SIZE === 8`; existing clamp tests updated to 8.
-- `hooks/useSearchParamsState.ts` — `DEFAULT_SORT` is `recommended`; `sort=recommended`
-  omitted from URL; unknown sort → `recommended`.
+- `hooks/useSearchParamsState.ts` — `DEFAULT_SORT` is `rating`; `sort=rating`
+  omitted from URL; unknown sort → `rating`.
 - `lib/destinations.ts` — `buildDestinationOptions`: one country row + its city rows
   per country, deterministic order; country row `params` has `country` only, city row
   has `country`+`city`; `search` is lowercased/diacritic-free.
@@ -373,8 +366,9 @@ reflects each step and back/forward restores. Include a filters-exclude-all path
 **Resolved (this spec):**
 
 - `/` = **static shell + `<Suspense>`-wrapped client `HomeView`** (places M3 §4).
-- **`recommended` sort added** to `SortKey`; it is the default + omit-from-URL value
-  (§3.1).
+- **"Recommended" sort dropped** (no `recommended` field in the seed; synthesizing
+  one rejected). Ship M1's 4 existing keys; **default = `rating`** (M3 `DEFAULT_SORT`
+  changes `price-asc` → `rating`) (§3.1).
 - **Page size = 8**: `lib/paginate.ts` `PAGE_SIZE` 12 → 8 (§3.2).
 - **No new dependencies** — combobox and bottom sheet are hand-rolled (mockup parity,
   minimal-dep ethos).
