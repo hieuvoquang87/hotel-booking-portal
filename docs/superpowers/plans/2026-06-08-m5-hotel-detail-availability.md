@@ -927,7 +927,9 @@ describe('RoomAvailability', () => {
     mockDates = { checkIn: '2026-07-10', checkOut: '2026-07-12' };
     mockAvail = { ...mockAvail, isLoading: true };
     const { container } = render(<RoomAvailability hotelId="hotel-01" />);
-    expect(screen.getByText(/Checking availability/i)).toBeTruthy();
+    // "Checking availability…" appears in BOTH the sr-only aria-live region and the
+    // visible loading text — assert ≥1 match (getByText throws on the duplicate).
+    expect(screen.getAllByText(/Checking availability/i).length).toBeGreaterThan(0);
     expect(container.querySelectorAll('[aria-hidden="true"]').length).toBeGreaterThan(0);
   });
 
@@ -1016,7 +1018,11 @@ export function RoomAvailability({ hotelId }: { hotelId: string }) {
     }
   }, [hotelId, query.isSuccess, query.data]);
 
-  const status = query.isLoading ? 'Checking availability…' : query.data ? `${query.data.length} rooms available` : '';
+  const status = query.isLoading
+    ? 'Checking availability…'
+    : query.data
+      ? `${query.data.length} ${query.data.length === 1 ? 'room' : 'rooms'} available`
+      : '';
 
   return (
     <section className="space-y-4">
@@ -1141,7 +1147,7 @@ describe('HotelDetailPage', () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `npx jest app/hotels/[id]/page.test.tsx`
+Run: `npx jest "hotels/.*/page.test"` (Jest's positional arg is a **regex** — `[id]` would be a char class, so match by pattern, not the literal path)
 Expected: FAIL — cannot find module `./page`.
 
 - [ ] **Step 3: Write the page + not-found**
@@ -1223,7 +1229,7 @@ export default function HotelNotFound() {
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `npx jest app/hotels/[id]/page.test.tsx`
+Run: `npx jest "hotels/.*/page.test"` (Jest's positional arg is a **regex** — `[id]` would be a char class, so match by pattern, not the literal path)
 Expected: PASS (2 tests).
 
 - [ ] **Step 5: Verify build + typecheck**
@@ -1264,7 +1270,10 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 function renderPanel(hotelId: string) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+  // retryDelay:0 is load-bearing: M3's useAvailability sets retry:2 ON THE QUERY, which
+  // overrides the client's retry:false — so the two forced retries still run. Without
+  // retryDelay:0 they back off ~1s+2s and the error test exceeds waitFor's 1s default.
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, retryDelay: 0, gcTime: 0 } } });
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>
       <AppProvider>{children}</AppProvider>
