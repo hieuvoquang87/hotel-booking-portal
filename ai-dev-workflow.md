@@ -23,6 +23,7 @@
 
 1. Create spec and implemenation plan for each milestone
 2. Review and adjust the spec and implementation plan to keep focus on the core requirements.
+3. Create UI mock designs for each page
 
 ## 5. Implementing features as specs and plans
 
