@@ -1,11 +1,23 @@
 # Hotel Booking Portal
 
-Phase 1 — hotel discovery interface. Pick a destination → browse/filter/sort
-hotels → open a hotel → check room availability for dates.
+A mobile-first, client-facing hotel discovery & booking platform: pick a
+destination → browse/filter/sort hotels → open a hotel → check room availability
+for dates, with booking and production hardening planned next.
 
 > Spec-driven. Full architecture in [`docs/architecture.md`](docs/architecture.md);
-> milestone status in [`docs/progress.md`](docs/progress.md). State management and
-> component breakdown are summarized at the end of this file.
+> roadmap in [`docs/product-roadmap.md`](docs/product-roadmap.md); milestone status
+> in [`docs/progress.md`](docs/progress.md). State management and component
+> breakdown are summarized at the end of this file.
+
+## Project phases
+
+Shipped in phases — see [`docs/product-roadmap.md`](docs/product-roadmap.md):
+
+- **Phase 1 — Core Discovery (current):** destination picker, in-memory
+  filter/sort/paginate, hotel detail, and lazy room availability.
+- **Phase 2 — Scale, SEO, Booking & Resilience (designed, not yet built):** booking
+  via Server Actions, crawlable SSG/ISR landing pages, a real-API service swap,
+  observability, and operability/resilience hardening.
 
 ## Prerequisites
 
