@@ -20,7 +20,8 @@
 
 | File                                | Responsibility                                                          |
 | ----------------------------------- | ----------------------------------------------------------------------- |
-| `jest.config.js`                    | Switch to `next/jest`, jsdom env, add `hooks/`+`stores/` to coverage (Task 0) |
+| `jest.config.js`                    | `next/jest`, jsdom, `setupFiles` polyfills, `customExportConditions`, coverage globs (Task 0) |
+| `jest.polyfills.js`                 | Web-API globals for MSW v2 on jsdom + `API_BASE_URL` (Task 0)            |
 | `lib/fetcher.ts`                    | `ApiError`, `getJson<T>` — typed fetch, throws on non-2xx               |
 | `stores/AppProvider.tsx`            | `AppProvider`, `useAppDates()` — check-in/out dates context             |
 | `stores/QueryProvider.tsx`          | `makeQueryClient`, `QueryProvider` — RQ client + provider               |
@@ -39,20 +40,53 @@
 
 ## Task 0: Test config & prerequisites
 
-> If M0 already set up `next/jest` with jsdom and installed RTL + MSW, only verify (Steps 3–4) and skip the rest.
+> **Critical:** MSW v2 imported under a jsdom env throws at module load (`ReferenceError: TextEncoder/Response/ReadableStream is not defined`) unless Web-API globals are polyfilled **and** `customExportConditions` is set. Tasks 7–9 depend on this. If M0 already configured `next/jest` with jsdom, a `setupFiles` polyfill defining those globals, `testEnvironmentOptions.customExportConditions`, and installed RTL + MSW + undici, then only verify (Steps 4–5) and skip the rest. Verifying means *running* a query-hook test, not just reading the config — confirm the polyfills are actually wired, since Step 2 below otherwise overwrites `jest.config.js` wholesale.
 
 **Files:**
 
 - Modify: `jest.config.js`
+- Create: `jest.polyfills.js`
+- Modify: `tsconfig.json` (only if its `include` is narrow — see Step 3)
 
 - [ ] **Step 1: Install test deps if missing**
 
-Run: `npm install -D @testing-library/react @testing-library/dom msw`
-Expected: packages present in `devDependencies` (RTL + MSW; `@tanstack/react-query` came from M0).
+Run: `npm install -D @testing-library/react @testing-library/dom msw undici`
+Expected: packages present in `devDependencies` (RTL + MSW + `undici` for the fetch/Request/Response polyfill; `@tanstack/react-query` came from M0).
 
-- [ ] **Step 2: Replace `jest.config.js` with the `next/jest` setup**
+- [ ] **Step 2: Create `jest.polyfills.js`**
 
-`next/jest` compiles TS/TSX/JSX and wires env vars, so both M1's pure tests and M3's client-hook tests run under one config. jsdom is the global environment (pure tests run fine under it).
+jsdom defines none of the Web APIs MSW v2 needs at load time. This file (loaded via `setupFiles`, before the test framework and before any test module) defines them on `globalThis`. It also sets `API_BASE_URL` here — before any test module evaluates — so the env is reliable regardless of import hoisting.
+
+```js
+// jest.polyfills.js
+const { TextEncoder, TextDecoder } = require('node:util');
+const { ReadableStream, TransformStream } = require('node:stream/web');
+
+Object.defineProperties(globalThis, {
+  TextEncoder: { value: TextEncoder },
+  TextDecoder: { value: TextDecoder },
+  ReadableStream: { value: ReadableStream },
+  TransformStream: { value: TransformStream },
+});
+
+const { fetch, Headers, FormData, Request, Response } = require('undici');
+
+Object.defineProperties(globalThis, {
+  fetch: { value: fetch, writable: true },
+  Headers: { value: Headers },
+  FormData: { value: FormData },
+  Request: { value: Request },
+  Response: { value: Response },
+});
+
+// MSW handlers use an absolute http://localhost origin; getJson prepends this base
+// so Node's fetch can resolve the otherwise-relative /api/* URLs during tests.
+process.env.API_BASE_URL = 'http://localhost';
+```
+
+- [ ] **Step 3: Replace `jest.config.js` with the `next/jest` setup (and widen tsconfig include if needed)**
+
+`next/jest` compiles TS/TSX/JSX and wires env vars, so both M1's pure tests and M3's client-hook tests run under one config. jsdom is the global environment (pure tests run fine under it). `setupFiles` loads the polyfills; `customExportConditions: ['']` makes `msw/node` resolve its Node build under jsdom.
 
 ```js
 // jest.config.js
@@ -63,6 +97,8 @@ const createJestConfig = nextJest({ dir: './' });
 /** @type {import('jest').Config} */
 const config = {
   testEnvironment: 'jsdom',
+  testEnvironmentOptions: { customExportConditions: [''] },
+  setupFiles: ['<rootDir>/jest.polyfills.js'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   collectCoverageFrom: [
     'lib/**/*.ts',
@@ -79,16 +115,18 @@ const config = {
 module.exports = createJestConfig(config);
 ```
 
-- [ ] **Step 3: Verify the existing (M1) suite still runs under the new config**
+Then check `tsconfig.json`: if it has a narrow `include` (M1's interim config used `["lib","services","types","tests"]`), add `"hooks"` and `"stores"` so Task 10's `tsc --noEmit` typechecks them. Next's default `include` (`["**/*.ts", "**/*.tsx", ...]`) already covers them — in that case leave it.
+
+- [ ] **Step 4: Verify the existing (M1) suite still runs under the new config**
 
 Run: `npx jest lib services types --passWithNoTests`
 Expected: M1's `lib/`, `services/`, `types/` suites PASS (or `No tests found` if M1 not yet present).
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add jest.config.js package.json package-lock.json
-git commit -m "chore(test): next/jest + jsdom config for client hooks (M3)"
+git add jest.config.js jest.polyfills.js tsconfig.json package.json package-lock.json
+git commit -m "chore(test): next/jest + jsdom + MSW v2 polyfills for client hooks (M3)"
 ```
 
 ---
@@ -153,7 +191,8 @@ export class ApiError extends Error {
   }
 }
 
-// Read the base per-call so tests can set API_BASE_URL after module load.
+// Read the base per-call (NOT at module load) — load-bearing for tests: jest.polyfills.js
+// sets API_BASE_URL before any module evaluates, and a module-load read would miss it.
 // In the browser API_BASE_URL is unset → '' → URLs stay relative (resolved by origin).
 export async function getJson<T>(url: string): Promise<T> {
   const base = process.env.API_BASE_URL ?? '';
@@ -822,8 +861,7 @@ git commit -m "test(infra): MSW handlers/server and React Query test wrapper"
 
 ```tsx
 // hooks/useLocations.test.tsx
-process.env.API_BASE_URL = 'http://localhost';
-
+// API_BASE_URL is set in jest.polyfills.js (Task 0) before any module loads.
 import { renderHook, waitFor } from '@testing-library/react';
 import { server } from '../tests/msw/server';
 import { createQueryWrapper } from '../tests/utils/queryWrapper';
@@ -892,8 +930,7 @@ git commit -m "feat(hooks): useLocations (fetch-once destination list)"
 
 ```tsx
 // hooks/useHotels.test.tsx
-process.env.API_BASE_URL = 'http://localhost';
-
+// API_BASE_URL is set in jest.polyfills.js (Task 0) before any module loads.
 import { renderHook, waitFor } from '@testing-library/react';
 import { server } from '../tests/msw/server';
 import { createQueryWrapper } from '../tests/utils/queryWrapper';
@@ -978,8 +1015,7 @@ git commit -m "feat(hooks): useHotels keyed by location, enabled when set"
 
 ```tsx
 // hooks/useAvailability.test.tsx
-process.env.API_BASE_URL = 'http://localhost';
-
+// API_BASE_URL is set in jest.polyfills.js (Task 0) before any module loads.
 import { delay, http, HttpResponse } from 'msw';
 import { renderHook, waitFor } from '@testing-library/react';
 import { server } from '../tests/msw/server';
