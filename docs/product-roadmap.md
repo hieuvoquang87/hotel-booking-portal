@@ -127,8 +127,9 @@ stores/
 
 > **Framing:** Phase 1 ships the 3 core discovery features. Phase 2 makes them
 > production-grade — adding booking (§1), crawlable SEO (§2), a real-API seam (§3),
-> observability (§4), error boundaries (§5), and operability/resilience hardening
-> (§6). Nothing in Phase 2 is implemented yet; the items here are **designed plans**.
+> observability (§4), error boundaries (§5), operability/resilience hardening (§6),
+> and internationalization (§7). Nothing in Phase 2 is implemented yet; the items
+> here are **designed plans**.
 
 ### 1. Booking (New Feature)
 
@@ -267,6 +268,32 @@ and recovers. Design thinking, not a wishlist. **New seams:** `services/resilien
 `services/cache.ts`, `services/config.ts`, `load/` (k6/autocannon), `docs/runbooks/`
 (incident playbooks: detection → diagnosis → mitigation → recovery).
 
+### 7. Internationalization (i18n)
+
+> **Designed, not implemented.** Target locales: **English + Spanish / French /
+> German** — all Latin-script, left-to-right, so no RTL, transliteration, or font
+> work. Scoped deliberately to keep the first pass cheap.
+
+Two independent axes: **UI chrome + formatting** (owned in code, built first) and
+**content localization** (owned by the data source, deferred until localized data exists).
+
+**Layered — cheapest seams first:**
+
+| Layer | What | Cost |
+| --- | --- | --- |
+| Formatting seams | `formatCurrency / formatDate / formatNumber` via `Intl.*`, locale-aware — route every price/date/number through them | low — bake in early; expensive to retrofit |
+| Message catalog | `messages/{en,es,fr,de}.json` + a catalog library (e.g. `next-intl`, routing verified against Next 16 i18n docs); no hardcoded strings | medium |
+| Locale routing | `app/[locale]/…` segment + `middleware.ts` Accept-Language negotiation; `LocaleSwitcher` | medium |
+| SEO (with §2) | `hreflang` alternates, per-locale `generateMetadata`, per-locale sitemap | medium |
+| Content | localized hotel fields selected at the `mappers.ts` boundary by locale | deferred — needs real localized data |
+
+**Locale lives in the URL path** (`/fr/hotel/…`), not a cookie — shareable, crawlable,
+consistent with URL-as-source-of-truth. `lib/slug.ts` is unaffected (es/fr/de
+diacritics are already stripped). Display currency goes through `formatCurrency`;
+display-vs-settlement currency is a booking (§1) concern. The native date picker
+(P1 default) is already locale-aware. **New seams:** `lib/format.ts`, `messages/`,
+`middleware.ts`, `app/[locale]/`, `components/LocaleSwitcher.tsx`.
+
 ---
 
 ## Shared Assumptions & Tradeoffs
@@ -294,6 +321,10 @@ and recovers. Design thinking, not a wishlist. **New seams:** `services/resilien
 | One availability cache, two read policies (P2) | Fresh-within-TTL = cost; stale-past-TTL = resilience fallback; never hard-evict last-known |
 | Breaker + cache state per-instance (P2)        | Fine for demo; Redis/edge-KV is the documented swap seam            |
 | Fault injection ships disabled (P2)            | A test affordance to exercise resilience paths, not prod behavior   |
+| Locale in URL path, not cookie (P2)            | Shareable + crawlable + SEO `hreflang`; consistent with URL-as-source-of-truth |
+| i18n scoped to es/fr/de (P2)                   | Latin-script LTR — no RTL, transliteration, or font work in the first pass |
+| `Intl` format helpers seamed early (P2)        | Route prices/dates/numbers through helpers now; i18n stays additive, not a refactor |
+| UI localized, content English until real data (P2) | Mock seed is English-only; `mappers.ts` is the seam for localized content later |
 
 ---
 
@@ -340,3 +371,4 @@ and recovers. Design thinking, not a wishlist. **New seams:** `services/resilien
 4. Circuit-breaker thresholds — failure count to open, cooldown before half-open? (§6)
 5. Availability cache TTL — and how stale is acceptable as a last-known fallback? (§6)
 6. SLO targets — availability p95 latency and acceptable user-visible error rate? (§6)
+7. i18n launch — which locales ship first, and what's the translation source (static catalogs vs CMS)? (§7)
