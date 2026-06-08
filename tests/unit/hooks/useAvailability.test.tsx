@@ -38,11 +38,15 @@ describe('useAvailability gating', () => {
 
 describe('useAvailability latest-wins', () => {
   it('a delayed response for old dates never replaces the new selection', async () => {
+    // Flag proves the old-date request actually fired AND resolved — so a FRESH result
+    // means the resolved stale response was structurally ignored, not that it never ran.
+    let staleResolved = false;
     server.use(
       http.get('http://localhost/api/hotels/:id/rooms', async ({ request }) => {
         const checkOut = new URL(request.url).searchParams.get('check_out');
         if (checkOut === '2026-07-12') {
           await delay(50);
+          staleResolved = true;
           return HttpResponse.json([
             { roomId: 'STALE', type: 'x', pricePerNight: 1, bedType: 'x', maxOccupancy: 1 },
           ]);
@@ -53,10 +57,9 @@ describe('useAvailability latest-wins', () => {
       }),
     );
 
-    const wrapper = createQueryWrapper();
     const { result, rerender } = renderHook(
       ({ out }: { out: string }) => useAvailability('hotel-01', '2026-07-10', out),
-      { wrapper, initialProps: { out: '2026-07-12' } },
+      { wrapper: createQueryWrapper(), initialProps: { out: '2026-07-12' } },
     );
 
     // Change dates before the slow (old-date) response resolves.
@@ -65,8 +68,10 @@ describe('useAvailability latest-wins', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.[0].roomId).toBe('FRESH');
 
-    // After the delayed stale response lands, the displayed data is still the new key's.
+    // After the delayed stale response has resolved, the displayed data is still the
+    // new key's — the stale payload reached the cache layer and was ignored.
     await new Promise((r) => setTimeout(r, 80));
+    expect(staleResolved).toBe(true);
     expect(result.current.data?.[0].roomId).toBe('FRESH');
   });
 });

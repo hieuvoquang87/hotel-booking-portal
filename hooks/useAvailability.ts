@@ -14,6 +14,6 @@ export function useAvailability(id: string, checkIn: string | null, checkOut: st
         `/api/hotels/${id}/rooms?check_in=${checkIn}&check_out=${checkOut}`,
       ),
     enabled,
-    retry: 2, // the slow third-party path benefits from a couple of retries
+    retry: 2,
   });
 }
