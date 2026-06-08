@@ -9,10 +9,10 @@ export function useAvailability(id: string, checkIn: string | null, checkOut: st
 
   return useQuery({
     queryKey: ['availability', id, checkIn, checkOut],
-    queryFn: () =>
-      getJson<AvailableRoom[]>(
-        `/api/hotels/${id}/rooms?check_in=${checkIn}&check_out=${checkOut}`,
-      ),
+    queryFn: () => {
+      const sp = new URLSearchParams({ check_in: checkIn!, check_out: checkOut! });
+      return getJson<AvailableRoom[]>(`/api/hotels/${encodeURIComponent(id)}/rooms?${sp}`);
+    },
     enabled,
     retry: 2,
   });
