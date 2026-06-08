@@ -4,6 +4,7 @@ const createJestConfig = nextJest({ dir: './' });
 
 /** @type {import('jest').Config} */
 const baseConfig = {
+  setupFiles: ['<rootDir>/tests/setupApiEnv.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   // jest-fixed-jsdom keeps Node's real fetch/Request/Response/streams (stock
   // jest-environment-jsdom strips them, which breaks MSW v2 under Jest). See
