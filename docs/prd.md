@@ -1,7 +1,7 @@
 # PRD — Hotel Discovery Interface (Phase 1)
 
 > High-level product requirements for the Phase 1 discovery experience.
-> Companions: `PHASE-1.md` (technical design), `ASSUMPTIONS-AND-TRADEOFFS.md`.
+> Companions: `architecture.md`, `product-roadmap.md`, `assumptions-and-tradeoffs.md`.
 
 ---
 
@@ -26,7 +26,8 @@ properties, inspect a hotel, and check room availability for their dates.
 
 ## 2. Target Users & Use Cases
 
-**Primary user:** a traveler planning a trip, on mobile or desktop.
+**Primary user:** a traveler planning a trip, primarily on mobile. Assume
+**80% mobile traffic / 20% desktop traffic**, so the experience is mobile-first.
 
 **Use cases**
 1. Choose a destination (country and/or city) and browse its hotels.
@@ -104,8 +105,8 @@ properties, inspect a hotel, and check room availability for their dates.
 | Initial JS (gzip) | < 150KB |
 | In-memory filter response | < 100ms |
 
-Availability/price is the deliberate async path (third-party sim) → skeleton,
-excluded from the filter budget.
+Budgets are evaluated first on mobile. Availability/price is the deliberate async
+path (third-party sim) → skeleton, excluded from the filter budget.
 
 **Accessibility** — WCAG 2.1 AA: semantic HTML, keyboard-operable, visible focus,
 labelled controls, `aria-live` result count, contrast ≥ 4.5:1, no color-only
@@ -126,7 +127,7 @@ Playwright E2E for primary flows; CI coverage gate.
 - Data from a mock seed (40 hotels, 10 cities); isolated behind the services.
 - Prices displayed in USD; hotel photos use a placeholder image.
 - Location URL params are slugified (no diacritics / encoded chars).
-- Responsive / mobile-first.
+- Mobile-first responsive design; desktop is an enhancement path.
 
 ---
 
@@ -168,7 +169,7 @@ Playwright E2E for primary flows; CI coverage gate.
 - Core Web Vitals within budget on mobile.
 
 **Release criteria**
-- All four features meet their acceptance criteria.
+- All five features meet their acceptance criteria.
 - All documented empty/error/loading states function.
 - Performance budget met; WCAG 2.1 AA checks pass.
 - Unit coverage ≥ 85%; integration + E2E primary flows green in CI.

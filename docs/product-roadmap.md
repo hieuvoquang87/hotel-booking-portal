@@ -12,6 +12,7 @@
 | 3 | **Room Availability** | Pick check-in/out dates → lazy-load available rooms + price per night |
 
 **Principles:**
+- Mobile-first: assume 80% mobile traffic; desktop enhances the mobile flow
 - Location-first: user picks destination → only that location's hotels load
 - Refine (star, price) in memory over bounded set
 - Availability lazy-loaded with skeleton (simulates slow third-party)
@@ -238,6 +239,7 @@ type Event =
 
 | Metric | Target |
 |--------|--------|
+| Device split | 80% mobile / 20% desktop |
 | LCP | < 2.5s |
 | INP | < 200ms |
 | CLS | < 0.1 |

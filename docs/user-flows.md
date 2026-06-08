@@ -1,7 +1,8 @@
 # User Flows — Hotel Discovery (Phase 1)
 
 > Primary journeys through the discovery experience.
-> Companions: `PRD.md`, `PHASE-1.md`.
+> Companions: `prd.md`, `architecture.md`.
+> Mobile-first: assume 80% mobile traffic; desktop enhances the same flows.
 
 ---
 

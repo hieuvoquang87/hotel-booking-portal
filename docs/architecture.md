@@ -1,8 +1,9 @@
 # Architecture — Hotel Discovery Interface
 
 > Single technical entry-point for Phase 1. Consolidates `prd.md` (product),
-> `phase-1.md` (build spec), `assumptions-and-tradeoffs.md` (rationale),
-> `deployment.md` (ops). Read those for depth; this maps requirements → design.
+> `requirements.md` (assignment brief), `product-roadmap.md` (phase plan),
+> `assumptions-and-tradeoffs.md` (rationale), `user-flows.md` (journeys),
+> and `deployment.md` (ops). Read those for depth; this maps requirements → design.
 
 ---
 
@@ -29,6 +30,7 @@ data gateway behind a BFF, and pricing/availability decoupled as a slow third-pa
 
 | Area                    | Target                                                                        |
 | ----------------------- | ----------------------------------------------------------------------------- |
+| Mobile-first            | 80% mobile traffic assumed; design/perf/a11y validated mobile-first           |
 | Perf                    | LCP < 2.5s · INP < 200ms · CLS < 0.1 · initial JS < 150KB gz · filter < 100ms |
 | A11y                    | WCAG 2.1 AA — semantic, keyboard, focus, `aria-live` count, contrast ≥ 4.5:1  |
 | Observability           | `error.tsx` boundary · `track()` facade · typed events · structured API logs  |
@@ -57,6 +59,7 @@ data gateway behind a BFF, and pricing/availability decoupled as a slow third-pa
 - Client reaches data **only** via `/api/*`; `hotelService` / `availabilityService` are server-only.
 - Seed = 40 hotels / 10 cities, used as-is (nested JSON), isolated behind services.
 - Prices USD · photos = placeholder · dates = ISO strings (no TZ math).
+- Mobile-first responsive UI; desktop layouts enhance the mobile flow.
 - Location URL params slugified (`new-york`, `united-kingdom`); dates entered each visit, not in URL.
 - Only validation: checkout > check-in.
 
@@ -71,6 +74,50 @@ components (UI) → hooks (logic, RQ fetches) → stores (client state + query c
    → /api (BFF) → services (server-only gateway) → mock data
                   lib/ = pure functions (filters, availability, slug)
 ```
+
+### Planned module map
+
+```
+app/
+├── page.tsx
+├── hotels/[id]/page.tsx
+└── api/
+    ├── locations/route.ts
+    └── hotels/
+        ├── route.ts
+        └── [id]/
+            ├── route.ts
+            └── rooms/route.ts
+
+components/
+├── DestinationDropdown.tsx
+├── FilterPanel.tsx
+├── HotelCard.tsx / HotelGrid.tsx
+├── RoomAvailability.tsx
+└── EmptyState.tsx
+
+hooks/
+├── useLocations.ts
+├── useHotels.ts
+├── useFilteredHotels.ts
+└── useAvailability.ts
+
+services/
+├── hotelService.ts
+├── availabilityService.ts
+└── mock/hotels.json
+
+stores/
+├── QueryProvider.tsx
+└── AppProvider.tsx
+```
+
+### Domain model boundary
+
+The seed is a nested hotel document: hotel identity/details, address/contact,
+amenities/policies, and `rooms[]` with `price_per_night` + `available_dates`.
+Services map that raw shape into domain types before returning data to route
+handlers. The UI should consume normalized fields, never the raw seed directly.
 
 ### Data flow — location-first
 
@@ -111,11 +158,24 @@ SERVER (async, cached) → React Query   useLocations / useHotels / useAvailabil
 CLIENT (UI, sync)      → URL (location + stars/min/max/sort/page) · AppProvider (dates)
 ```
 
+### Edge-state policy
+
+| Area         | Rule                                                                                    |
+| ------------ | --------------------------------------------------------------------------------------- |
+| Destination  | Empty input shows all options; no match shows "No destinations"; slow/fail offers retry |
+| Results      | No location prompts selection; no matching hotels shows reset action                    |
+| URL params   | Bad `sort` defaults, bad `page` clamps, filter/sort changes reset page to 1             |
+| Price range  | `min > max` is blocked or normalized without crashing                                   |
+| Detail       | Unknown hotel id returns `notFound()`                                                   |
+| Dates        | No availability fetch until both dates exist; checkout must be after check-in           |
+| Availability | Latest request wins; loading/empty/error states are inline and never block detail       |
+
 ---
 
 ## 6. Why This Design
 
 - **Location-first** — never ship global inventory; matches travel UX, small payloads, scales with catalog.
+- **Mobile-first** — 80% traffic is mobile; controls, payloads, and Web Vitals optimize for small screens first.
 - **BFF over Server Actions** — reads are cacheable GETs; Actions are POST-only/un-cached → reserved for P2 booking.
 - **Pricing decoupled + lazy** — isolates the slow/costly third-party so a pricing outage degrades partially, protecting the SLA.
 - **URL as source of truth** — shareable, bookmarkable, back-button-correct, crawlable; avoids hydration mismatch.
@@ -142,19 +202,43 @@ which rating on cards, availability latency target.
 
 ## 8. How Requirements Are Satisfied
 
-| Requirement           | Satisfied by                                                                                  |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| Destination picker    | `/api/locations` once → client substring filter → URL `?country=&city=`                       |
-| Filter < 100ms        | `useFilteredHotels` pure in-memory over loaded subset                                         |
-| Shareable filters     | All refine/sort/page state in `searchParams`                                                  |
-| Detail renders fast   | `/api/hotels/[id]` static info; availability decoupled                                        |
+| Requirement           | Satisfied by                                                                                              |
+| --------------------- | --------------------------------------------------------------------------------------------------------- |
+| Destination picker    | `/api/locations` once → client substring filter → URL `?country=&city=`                                   |
+| Filter < 100ms        | `useFilteredHotels` pure in-memory over loaded subset                                                     |
+| Shareable filters     | All refine/sort/page state in `searchParams`                                                              |
+| Detail renders fast   | `/api/hotels/[id]` static info; availability decoupled                                                    |
 | Availability + states | Lazy `useAvailability` (key `[id,check_in,check_out]`): loading skeleton, retry/SWR, empty/blocked states |
-| Perf budget           | Sized lazy images (no CLS), `loading.tsx` skeletons, location-first small payloads            |
-| A11y AA               | Semantic HTML, labelled controls, `aria-live` count, focus-visible, contrast                  |
-| Observability         | `error.tsx`, `track()` facade + typed events, structured API logs                             |
-| Testing ≥ 85%         | Jest/RTL unit, MSW integration, Playwright E2E, CI coverage gate                              |
-| Resilience (P2)       | Cache-first + graceful degradation; Vercel instant promote/rollback (MTTR 20m)                |
+| Mobile-first traffic  | Mobile-first controls/layouts, small location-scoped payloads, mobile Web Vitals validation               |
+| Perf budget           | Sized lazy images (no CLS), `loading.tsx` skeletons, location-first small payloads                        |
+| A11y AA               | Semantic HTML, labelled controls, `aria-live` count, focus-visible, contrast                              |
+| Observability         | `error.tsx`, `track()` facade + typed events, structured API logs                                         |
+| Testing ≥ 85%         | Jest/RTL unit, MSW integration, Playwright E2E, CI coverage gate                                          |
+| Resilience (P2)       | Cache-first + graceful degradation; Vercel instant promote/rollback (MTTR 20m)                            |
+
+---
+
+## 9. Deployment & Release Shape
 
 ```
-
+PR → Preview URL + CI/E2E
+merge to master → Staging auto-deploy tagged vX.Y.Z
+manual promote → Production known build
+rollback → promote previous good immutable Vercel build
 ```
+
+CI gates merge on lint, types, unit/integration coverage, and Playwright E2E.
+The running version should be exposed via an env-backed footer or health route so
+ops can confirm the exact build in staging and production.
+
+---
+
+## 10. Phase 2 Extension Points
+
+| Area               | Extension                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| Booking            | Add `/hotels/[id]/book`; use Server Actions for mutations, idempotency, availability re-check, price lock |
+| SEO                | Add `/hotel/{country}/{state}/{city}` and canonical hotel detail routes with SSG/ISR + JSON-LD            |
+| Real API           | Keep `hotelService` public API stable; add `http.ts`, DTOs, mappers, retry/timeout/error mapping          |
+| Observability      | Wire `track()` to Segment/GA4/Sentry and add Web Vitals reporting                                         |
+| Pricing resilience | Add timeout, circuit breaker, per-hotel/date TTL, and cached indicative fallback                          |
