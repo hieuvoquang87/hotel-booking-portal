@@ -32,7 +32,7 @@ a11y, acceptance). Home → [spec](designs/home-page-design-spec.md) ·
 | M0  | Project setup & tooling           | Next.js/TS/Tailwind/RQ + Jest/RTL/MSW/Playwright (CI → M7)  | [x]    |
 | M1  | Data layer & domain               | Domain types, `hotelService`, `availabilityService`, `lib/` | [x]    |
 | M2  | BFF API routes                    | `/api/locations`, `/api/hotels`, `[id]`, `[id]/rooms`       | [x]    |
-| M3  | Client state & data hooks         | QueryProvider, AppProvider, the four `use*` hooks           | [ ]    |
+| M3  | Client state & data hooks         | QueryProvider, AppProvider, the four `use*` hooks           | [x]    |
 | M4  | Search · filter · sort · paginate | Home page: dropdown, filters, sort, pagination, grid        | [ ]    |
 | M5  | Hotel detail & room availability  | `/hotels/[id]` + lazy availability with all states          | [ ]    |
 | M6  | Cross-cutting (a11y/obs/errors)   | Boundaries, `track()` facade, a11y AA, perf budget          | [ ]    |
@@ -119,15 +119,25 @@ mirror the REST contract 1:1 (architecture §5).
 **Outcome:** server state via React Query (keyed by params), client state split
 between URL (`searchParams`) and `AppProvider` (dates).
 
-- [ ] `stores/QueryProvider.tsx` — React Query client + provider mounted in root layout.
-- [ ] `stores/AppProvider.tsx` — client state: check-in / check-out dates (manual, **not** in URL); URL-synced location + refine where applicable.
-- [ ] URL `searchParams` helpers — read/write `country, city, stars, min, max, sort, page`; back-button correct, no hydration mismatch.
-- [ ] `hooks/useLocations.ts` — destination list, fetched once, `staleTime: ∞`.
-- [ ] `hooks/useHotels.ts` — hotels by location, key `[country, city]`.
-- [ ] `hooks/useFilteredHotels.ts` — pure in-memory filter → sort → paginate over the loaded subset (target **<100ms**).
-- [ ] `hooks/useAvailability.ts` — lazy availability, key `[id, check_in, check_out]`, retry/SWR, enabled only when both dates set; **latest-wins** on stale responses.
-- [ ] **Unit tests** for hooks (esp. `useFilteredHotels` logic and `useAvailability` enabled/stale behavior).
-- **Done when:** hooks return cached, correctly-keyed data; URL round-trips all refine/sort/page state; dates live only in `AppProvider`.
+- [x] `stores/QueryProvider.tsx` — React Query client + provider mounted in root layout.
+- [x] `stores/AppProvider.tsx` — client state: check-in / check-out dates (manual, **not** in URL); URL-synced location + refine where applicable.
+- [x] URL `searchParams` helpers — read/write `country, city, stars, min, max, sort, page`; back-button correct, no hydration mismatch.
+- [x] `hooks/useLocations.ts` — destination list, fetched once, `staleTime: ∞`.
+- [x] `hooks/useHotels.ts` — hotels by location, key `[country, city]`.
+- [x] `hooks/useFilteredHotels.ts` — pure in-memory filter → sort → paginate over the loaded subset (target **<100ms**).
+- [x] `hooks/useAvailability.ts` — lazy availability, key `[id, check_in, check_out]`, retry/SWR, enabled only when both dates set; **latest-wins** on stale responses.
+- [x] **Unit tests** for hooks (esp. `useFilteredHotels` logic and `useAvailability` enabled/stale behavior).
+- [x] **Done when:** hooks return cached, correctly-keyed data; URL round-trips all refine/sort/page state; dates live only in `AppProvider`.
+
+**M3 decisions (from design spec):** URL state is a hand-rolled `useSearchParamsState` (no
+`nuqs`); `useFilteredHotels` takes refine params as arguments (pure); server hooks fetch
+through `lib/fetcher.getJson` (throws typed `ApiError`); the `useSearchParams` subtree must
+sit under a `<Suspense>` boundary (placed in M4) so `/` keeps a static shell — verified the
+production build still prerenders `/` as static after wiring providers; `AppProvider` holds
+dates only (validation in M5); latest-wins on availability is structural via RQ keying.
+`SortKey` is re-exported from `lib/sort.ts` (single source of truth). Tests live under
+`tests/unit/` (per CLAUDE.md), not co-located; Task 0's jest/polyfill setup was already
+satisfied by M0's `jest-fixed-jsdom` config, so only `API_BASE_URL` was added.
 
 ---
 

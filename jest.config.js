@@ -18,6 +18,7 @@ const baseConfig = {
     'lib/**/*.{ts,tsx}',
     'services/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}',
+    'stores/**/*.{ts,tsx}',
     'components/**/*.{ts,tsx}',
     'app/**/*.{ts,tsx}',
   ],
