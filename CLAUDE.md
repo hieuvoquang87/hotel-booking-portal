@@ -51,12 +51,18 @@ npm run lint          # ESLint (eslint-config-next: core-web-vitals + typescript
 npm run typecheck     # tsc --noEmit
 npm run format        # prettier --write .
 npm run format:check  # prettier --check .
-npm test              # Jest unit/integration (RTL + MSW v2, --passWithNoTests)
+npm test              # Jest — all tests (unit + integration, --passWithNoTests)
+npm run test:unit     # Jest — unit tests only (tests/unit/)
+npm run test:integration # Jest — integration tests only (tests/integration/)
 npm run test:coverage # Jest with coverage report (non-blocking gate until M1/M7)
 npm run test:e2e      # Playwright end-to-end (smoke spec in e2e/)
 ```
 
-**Test environment:** Jest uses `jest-fixed-jsdom` (not stock `jest-environment-jsdom`) — this preserves Node's fetch/Request/Response globals that MSW v2 requires. MSW's ESM dependencies are injected into `next/jest`'s `transformIgnorePatterns` rather than replacing them (replacing would silently drop `geist`/`next/dist/*` transforms).
+**Test layout:** Tests do not co-locate with source. All tests live under `tests/`:
+- `tests/unit/` — mirrors source structure (`lib/`, `services/`, `types/`, `mocks/`, `api/_lib/`)
+- `tests/integration/` — API route integration tests (`api/locations`, `api/hotels`, `api/hotels-id`, `api/hotels-id-rooms`)
+
+**Test environment:** Jest uses `jest-fixed-jsdom` (not stock `jest-environment-jsdom`) — this preserves Node's fetch/Request/Response globals that MSW v2 requires. MSW's ESM dependencies are injected into `next/jest`'s `transformIgnorePatterns` rather than replacing them (replacing would silently drop `geist`/`next/dist/*` transforms). Route test files (node-only) carry a `/** @jest-environment node */` docblock to override the default jsdom environment.
 
 ## Conventions & gotchas
 
