@@ -23,7 +23,7 @@ and mobile-first design for assumed 80% mobile traffic.
 | #   | Milestone                         | Scope                                                       | Status |
 | --- | --------------------------------- | ----------------------------------------------------------- | ------ |
 | M0  | Project setup & tooling           | Next.js/TS/Tailwind/RQ + Jest/RTL/MSW/Playwright (CI → M7)  | [x]    |
-| M1  | Data layer & domain               | Domain types, `hotelService`, `availabilityService`, `lib/` | [~]    |
+| M1  | Data layer & domain               | Domain types, `hotelService`, `availabilityService`, `lib/` | [x]    |
 | M2  | BFF API routes                    | `/api/locations`, `/api/hotels`, `[id]`, `[id]/rooms`       | [ ]    |
 | M3  | Client state & data hooks         | QueryProvider, AppProvider, the four `use*` hooks           | [ ]    |
 | M4  | Search · filter · sort · paginate | Home page: dropdown, filters, sort, pagination, grid        | [ ]    |
@@ -71,19 +71,19 @@ available_dates[]`.
 ### Domain & service gateway
 
 - [x] Define **domain types** (`Hotel`, `Room`, `Location`, `Availability`) — domain shape, not raw seed shape (map at the boundary, per assumptions §7).
-- [~] `services/hotelService.ts` (server-only): `getLocations()`, `getHotelsByLocation({country, city})`, `getHotelById(id)`.
+- [x] `services/hotelService.ts` (server-only): `getLocations()`, `getHotelsByLocation({country, city})`, `getHotelById(id)`.
   - **Note:** `getLocations()` is a **derivation** — aggregate the unique `city`+`country` set across the 40 hotels; there is no locations seed file.
-- [~] `services/availabilityService.ts` (server-only): given `(hotelId, check_in, check_out)`, returns available rooms + `price_per_night`, **simulating a slow third-party** (artificial latency). `⚠︎ decision`: latency target (e.g. 800ms–1.5s).
+- [x] `services/availabilityService.ts` (server-only): given `(hotelId, check_in, check_out)`, returns available rooms + `price_per_night`, **simulating a slow third-party** (artificial latency). `⚠︎ decision`: latency target (e.g. 800ms–1.5s).
 - [x] Map seed `address.city`/`country` → `Location`; keep USD assumption + placeholder photo at the mapping layer (seed has no currency/image fields). _(services/mappers.ts `mapLocation()` + `services/seed.ts`)_
 
 ### Pure logic (`lib/`)
 
-- [ ] `lib/slug.ts` — **bidirectional**: `slugify(name)` (`New York`→`new-york`, `United Kingdom`→`united-kingdom`, strip diacritics) **and** reverse-match `slug → city/country` to resolve URL params back to seed values.
-- [ ] `lib/filters.ts` — star-rating filter (`⚠︎ decision`: min "4★ & up" vs exact) + price-range filter against each hotel's **min room `price_per_night`**.
-- [ ] `lib/sort.ts` — sort by price (asc/desc), `overall_rating`, `star_rating`; stable default order.
-- [ ] `lib/paginate.ts` — fixed page size; clamp out-of-range page.
-- [ ] `lib/availability.ts` — a room is available iff **every night** in `[check_in → check_out)` is in `room.available_dates` (`nights.every(d => available_dates.includes(d))`).
-- [ ] **Unit tests** for every `lib/` fn and both services (incl. the ~15% no-availability hotels, and min>check edge of date range).
+- [x] `lib/slug.ts` — **bidirectional**: `slugify(name)` (`New York`→`new-york`, `United Kingdom`→`united-kingdom`, strip diacritics) **and** reverse-match `slug → city/country` to resolve URL params back to seed values.
+- [x] `lib/filters.ts` — star-rating filter (minimum, "4★ & up") + price-range filter: hotel matches if **any** room's `pricePerNight` is in `[min, max]` (decision: any-room-in-range, not min-room).
+- [x] `lib/sort.ts` — sort by price (asc/desc), `overall_rating`, `star_rating`; stable default order.
+- [x] `lib/paginate.ts` — fixed page size; clamp out-of-range page.
+- [x] `lib/availability.ts` — a room is available iff **every night** in `[check_in → check_out)` is in `room.available_dates` (`nights.every(d => available_dates.includes(d))`).
+- [x] **Unit tests** for every `lib/` fn and both services (incl. the ~15% no-availability hotels, and min>check edge of date range).
 - **Done when:** `lib/` + services are fully unit-tested and green; nothing imports `hotels.json` outside `services/`.
 
 ---
