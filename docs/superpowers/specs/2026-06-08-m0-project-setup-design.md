@@ -20,10 +20,10 @@ This is the stable base M1 builds on.
 
 **In scope (M0) — scaffolding only:**
 
-- Scaffold Next.js 15 (App Router, React 19, TS `strict: true`) + Tailwind v4.
+- Scaffold Next.js (App Router, React 19, TS `strict: true`) + Tailwind v4.
 - Add `@tanstack/react-query` as a dependency (provider wired later in M3).
 - ESLint (Next flat config) + Prettier + import-order; npm scripts.
-- Jest + React Testing Library + `jest-environment-jsdom` via `next/jest`.
+- Jest + React Testing Library + `jest-fixed-jsdom` via `next/jest`.
 - MSW v2 bootstrap (handlers + node/browser servers + Jest polyfills).
 - Playwright config + `e2e/` dir + one smoke spec.
 - Folder skeleton (`components/`, `hooks/`, `lib/`, `services/`, `services/mock/`,
@@ -80,7 +80,7 @@ then merge the generated app into the repo.
 
 **Rejected — Approach B (manual):** hand-writing every config drifts from the
 official template's blessed defaults for no benefit. Approach A gives canonical,
-current Next 15 + Tailwind v4 config and confines risk to three known files
+current Next + Tailwind v4 config and confines risk to three known files
 (`.gitignore`, `README.md`, and not clobbering `docs/`).
 
 > Exact flag set and any post-scaffold reconciliation are finalized in the
@@ -96,7 +96,7 @@ Most of M0 is pre-decided by `progress.md` + the approved M1 spec. Defaults are
 
 | Choice           | Decision                                                | Rationale                                                                      |
 | ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Framework        | **Next.js 15**, App Router, React 19, TS `strict: true` | roadmap stack; create-next-app default                                         |
+| Framework        | **Next.js 16.x** (App Router, React 19, TS `strict: true`) | roadmap stack; create-next-app default                                       |
 | Styling          | **Tailwind v4** (CSS-first; no `tailwind.config.js`)    | create-next-app default; mobile-first base                                     |
 | Package manager  | **npm**                                                 | already present (npm 11.3); lockfile committed                                 |
 | Server-state lib | `@tanstack/react-query` v5 — **dependency only**        | provider wired in M3, not M0                                                   |
@@ -113,7 +113,9 @@ All three layers must execute **green with zero real tests** at the end of M0.
 
 - Config built with `next/jest` (`createJestConfig`) — inherits SWC transform, the
   `@/*` path alias, and CSS/asset mocks, so no manual Babel/ts-jest wiring.
-- `testEnvironment: 'jest-environment-jsdom'`.
+- `testEnvironment: 'jest-fixed-jsdom'` (not stock `jest-environment-jsdom`) — stock
+  jsdom strips Node's fetch/Request/Response/streams that MSW v2 requires at startup;
+  `jest-fixed-jsdom` restores them. See MSW docs "Jest missing globals".
 - `jest.setup.ts` imports `@testing-library/jest-dom`; deps include
   `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`.
 - **Runner separation:** Jest `testMatch` = `**/*.test.ts?(x)`;
@@ -138,12 +140,18 @@ Set up now so the first integration test (M4/M5) works without a toolchain detou
 
 - `mocks/handlers.ts` (empty/placeholder array), `mocks/server.ts`
   (`setupServer`), `mocks/browser.ts` (`setupWorker`).
-- **Known Jest+MSW-v2 plumbing handled in M0:** a `jest.polyfills.js`
-  (TextEncoder/TextDecoder + `undici` `fetch`/`Response`/`Request`) loaded before
-  the test framework, and jsdom `testEnvironmentOptions.customExportConditions:
-['']` so MSW resolves its Node interceptors. `transformIgnorePatterns` adjusted
-  if MSW's ESM needs transforming. No handlers are asserted in M0 — only that the
-  server can `listen()`/`close()` without error.
+- **Jest + MSW v2 plumbing:** MSW 2.x ships ESM-only. Under Next 16 + Jest 30, the
+  resolver picks MSW's `.mjs` build which Jest refuses to execute unless explicitly
+  transformed. Resolution: `jest.config.js` post-processes next/jest's generated
+  `transformIgnorePatterns` — **injecting** MSW's ESM deps into the existing
+  `(?!(geist|...)` lookahead rather than replacing the pattern wholesale (replacing
+  would silently stop transforming `geist`/`next/dist/*`, breaking M3–M5 component
+  tests). `testEnvironmentOptions: { customExportConditions: [''] }` ensures MSW
+  resolves its Node interceptors.
+- No `jest.polyfills.js` or `undici` dependency — `jest-fixed-jsdom` (§5.1) already
+  restores all globals MSW needs, making the undici-based polyfill approach redundant.
+- No handlers are asserted in M0 — only that the server can `listen()`/`close()`
+  without error.
 
 ### 5.4 Playwright
 
@@ -184,10 +192,11 @@ doesn't go stale.
 
 ## 7. Tooling Config & Scripts
 
-**Lint/format:** ESLint (Next 15 flat config, `eslint.config.mjs` from the
+**Lint/format:** ESLint (Next 16 flat config, `eslint.config.mjs` from the
 scaffold) + Prettier with `prettier-plugin-tailwindcss` (class ordering) and an
-import-order rule (ESLint `import/order` or a Prettier sort-imports plugin —
-finalized in the plan). `eslint-config-prettier` disables conflicting rules.
+import-order rule (`@ianvs/prettier-plugin-sort-imports`). `eslint-config-prettier`
+disables conflicting rules. Note: Next 16 removes the `next lint` CLI command —
+the `lint` script calls `eslint` directly.
 
 **`package.json` scripts:**
 
@@ -195,7 +204,7 @@ finalized in the plan). `eslint-config-prettier` disables conflicting rules.
 dev            next dev
 build          next build
 start          next start
-lint           next lint
+lint           eslint .
 typecheck      tsc --noEmit
 format         prettier --write .
 format:check   prettier --check .

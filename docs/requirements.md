@@ -109,4 +109,4 @@ To save you time from writing data scripts, use the following master dataset to 
 - **Availability coverage:** Exactly 15% of the inventory is marked with no room availability to test date-boundary layout states
 - **Purpose:** Ensures your filter logic handles multi-result returns cleanly
 
-The complete mock data is available in `docs/mock-data.json`.
+The complete mock data is available in `services/mock/hotels.json` (moved there in M0; behind the service boundary).

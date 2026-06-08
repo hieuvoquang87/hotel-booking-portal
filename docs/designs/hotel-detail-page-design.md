@@ -2,7 +2,7 @@
 
 > Route: `/hotels/[id]` · Drives the mock UI for hotel detail and lazy room availability.
 > Companion spec: [home-page-design.md](home-page-design.md).
-> Sourced from `prd.md`, `architecture.md`, `product-roadmap.md`, `user-flows.md`, `mock-data.json`.
+> Sourced from `prd.md`, `architecture.md`, `product-roadmap.md`, `user-flows.md`, `services/mock/hotels.json`.
 
 **Visual direction:** Clean & modern — neutral grey scale, one blue accent, photo-forward
 rounded cards, generous whitespace. **Mobile-first**, WCAG 2.1 AA.
