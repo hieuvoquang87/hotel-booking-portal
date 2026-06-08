@@ -10,7 +10,7 @@
 ## 2. Creating high-level documents
 
 1. Create Assumptions and Trade-offs
-2. Create PRD (Production Requirements )
+2. Create PRD (Production Requirements Description)
 3. Create User-flows/data-flow documents
 4. Create product feature roadmap
 
@@ -18,6 +18,7 @@
 
 1. Create Architecture document
 2. Create Progress with milestones to implement the product
+3. Create and review tasks for each milestone
 
 ## 4. Creating specs and implementation plans
 
