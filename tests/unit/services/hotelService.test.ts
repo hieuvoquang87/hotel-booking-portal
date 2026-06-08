@@ -1,4 +1,4 @@
-import { getHotelById, getHotelsByLocation, getLocations } from './hotelService';
+import { getHotelById, getHotelsByLocation, getLocations } from '@/services/hotelService';
 
 describe('getLocations', () => {
   it('returns the 10 distinct seed locations, deterministically ordered', () => {

@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { fail, ok } from './respond';
+import { fail, ok } from '@/app/api/_lib/respond';
 
 describe('ok', () => {
   it('returns a 200 JSON response with the data', async () => {

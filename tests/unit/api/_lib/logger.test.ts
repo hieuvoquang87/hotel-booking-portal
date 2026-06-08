@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { logRequest } from './logger';
+import { logRequest } from '@/app/api/_lib/logger';
 
 describe('logRequest', () => {
   afterEach(() => jest.restoreAllMocks());

@@ -1,4 +1,4 @@
-import { HotelNotFoundError, InvalidDateRangeError } from './domain';
+import { HotelNotFoundError, InvalidDateRangeError } from '@/types/domain';
 
 describe('domain errors', () => {
   it('InvalidDateRangeError is an Error with a stable name', () => {

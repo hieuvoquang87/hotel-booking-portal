@@ -11,7 +11,7 @@ const baseConfig = {
   // MSW docs "Jest missing globals".
   testEnvironment: 'jest-fixed-jsdom',
   testEnvironmentOptions: { customExportConditions: [''] },
-  testMatch: ['**/?(*.)+(test).[jt]s?(x)'],
+  testMatch: ['<rootDir>/tests/**/?(*.)+(test).[jt]s?(x)'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/e2e/'],
   // Non-blocking in M0: collect but do NOT enforce a threshold (gate activates in M1/M7).
   collectCoverageFrom: [

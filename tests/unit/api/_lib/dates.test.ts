@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { isCalendarDate } from './dates';
+import { isCalendarDate } from '@/app/api/_lib/dates';
 
 describe('isCalendarDate', () => {
   it.each(['2026-07-10', '2026-02-28', '2024-02-29'])('accepts real date %s', (d) => {

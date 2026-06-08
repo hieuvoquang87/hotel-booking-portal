@@ -1,7 +1,7 @@
 /** @jest-environment node */
 import { HotelNotFoundError, InvalidDateRangeError } from '@/types/domain';
-import { ok } from './respond';
-import { withRoute } from './handle';
+import { ok } from '@/app/api/_lib/respond';
+import { withRoute } from '@/app/api/_lib/handle';
 
 beforeEach(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});

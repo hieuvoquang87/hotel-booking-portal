@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { GET } from './route';
+import { GET } from '@/app/api/locations/route';
 
 beforeEach(() => jest.spyOn(console, 'log').mockImplementation(() => {}));
 afterEach(() => jest.restoreAllMocks());
