@@ -41,7 +41,8 @@ Triggered on `pull_request` and `push` to `main`. Two jobs:
   `npm run test:e2e`. Playwright's `webServer` performs the `next build && next start` in
   CI (§4). Uploads the Playwright HTML report / trace on failure.
 
-Node version pinned to the project's (Node 20+); npm cache via `actions/setup-node`. The
+Node version pinned to the project's **Node 22** (the README requires Node 22+); npm cache
+via `actions/setup-node`. The
 two jobs run independently so a lint failure and an E2E failure surface together.
 
 ---
@@ -71,6 +72,11 @@ pass — fix coverage with tests.
 - Keep `baseURL: 'http://localhost:3000'`, `retries: 2` in CI, `trace: 'on-first-retry'`;
   add `screenshot: 'only-on-failure'`. Chromium-only project (mobile-first; one engine in P1).
 - E2E exercises the **real app + real seed** end-to-end — no MSW, no network mocking.
+- **Runtime env:** the detail page (M5) is a server component whose SSR `getJson` prepends
+  `API_BASE_URL`; `.env.local` is gitignored, so the E2E `webServer` must inject
+  `API_BASE_URL=http://localhost:3000` via `webServer.env` (covers local + CI). Without it,
+  the home-grid spec still passes but every detail-page spec fails when the SSR fetch throws
+  on a relative URL. The plan wires this in the Playwright config.
 
 **Specs (replace the smoke stub):** selectors are role/label/text based (no nth-child),
 and all three share the **Chicago** destination (a real seed city with both a

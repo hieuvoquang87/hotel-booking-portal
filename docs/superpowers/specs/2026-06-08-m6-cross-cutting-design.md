@@ -216,12 +216,17 @@ it verifies the union is complete and emitted): `search_performed` / `no_results
 ### 5.1 Test-enforced (jest-axe) — feeds the M7 ≥85% suite
 
 - Add `jest-axe` (dev-dep) + `expect.extend(toHaveNoViolations)` in the jest setup.
-- Assert `await axe(container)` has **no violations** on the key surfaces: the home page
-  composition (destination combobox, filters, sort, `ResultCount`, results grid), and the
-  detail composition (`HotelHero`, `AmenitiesGrid`, `PoliciesList`, `RoomAvailability` with
-  `DateField`s + `RoomCard`s), plus the four boundary components.
-- Catches: missing/mismatched labels, bad ARIA, duplicate/missing landmarks, heading-order
-  problems, controls without accessible names, `aria-live` region wiring.
+- Assert `await axe(container, componentAxeOptions)` has **no violations** on the key
+  surfaces: the home page composition (destination combobox, filters, sort, `ResultCount`,
+  results grid), the detail composition (`HotelHero`, `AmenitiesGrid`, `PoliciesList`,
+  `RoomAvailability` with `DateField`s + `RoomCard`s), plus the four boundary components.
+- **Scope the page-level rules off for component-level tests.** axe-core's `region`,
+  `landmark-one-main`, and `page-has-heading-one` are *page*-level best-practice rules that
+  false-positive on an isolated component fragment (no `<main>`/`<h1>` in scope). The
+  component tests disable exactly those three (`componentAxeOptions`); whole-page landmark
+  structure is checked in the manual audit (§5.2). Every other rule stays on.
+- Catches: missing/mismatched labels, bad ARIA, heading-order problems within the fragment,
+  controls without accessible names, `aria-live` region wiring.
 
 ### 5.2 Documented manual audit (recorded checklist in the spec/plan)
 
@@ -262,8 +267,10 @@ filter < 100ms. Only the last is deterministically unit-testable.
   `/hotels/[id]`.
 - **LCP / INP / CLS** — one Lighthouse-mobile run against the production build
   (`next build && next start`) for `/` and a detail page; record the three numbers.
-- **No CI perf gate in P1** — wiring Lighthouse-CI / a bundle-size gate into the pipeline
-  is **M7**. M6 establishes the *measurement and the recorded baseline*; M7 may gate it.
+- **No CI perf gate in P1.** M6 establishes the *measurement and the recorded baseline*
+  only. M7's pipeline runs the functional gates (coverage + E2E) but **not** a perf gate;
+  wiring Lighthouse-CI / a bundle-size gate is **P2** (consistent with the M7 spec §1
+  out-of-scope and roadmap P2).
 
 ---
 

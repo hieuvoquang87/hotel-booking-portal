@@ -81,6 +81,18 @@ Create `tests/unit/app/a11y-setup.test.tsx`:
 import { render } from '@testing-library/react';
 import { axe } from 'jest-axe';
 
+// axe-core's `region`, `landmark-one-main`, and `page-has-heading-one` are PAGE-level
+// best-practice rules — they assume a full document. Running them against an isolated
+// component fragment produces false positives (a fragment has no main/h1). Disable them
+// for component-scope tests; full-page composition is verified in the manual audit (spec §5.2).
+const componentAxeOptions = {
+  rules: {
+    region: { enabled: false },
+    'landmark-one-main': { enabled: false },
+    'page-has-heading-one': { enabled: false },
+  },
+};
+
 test('jest-axe matcher is wired and passes on a labelled control', async () => {
   const { container } = render(
     <label>
@@ -88,14 +100,14 @@ test('jest-axe matcher is wired and passes on a labelled control', async () => {
       <input type="email" />
     </label>,
   );
-  expect(await axe(container)).toHaveNoViolations();
+  expect(await axe(container, componentAxeOptions)).toHaveNoViolations();
 });
 ```
 
 - [ ] **Step 4: Run it**
 
 Run: `npx jest tests/unit/app/a11y-setup.test.tsx`
-Expected: PASS (1 test).
+Expected: PASS (1 test). If it instead fails on another page-level/best-practice rule, the disabled list is incomplete for this axe version — add that rule id to `componentAxeOptions` (this set is the expected one, but verify empirically on first run since jest-axe wasn't installed when this plan was written).
 
 - [ ] **Step 5: Commit**
 
@@ -125,7 +137,9 @@ import {
   type AnalyticsEvent,
 } from '../../../utils/analyticUtil';
 
-afterEach(() => __resetAnalyticsAdapters());
+// Reset BEFORE each test so the load-time default DEV adapter never leaks into a test's
+// fan-out count (afterEach would leave it registered for the first test).
+beforeEach(() => __resetAnalyticsAdapters());
 
 const sample: AnalyticsEvent = { name: 'hotel_viewed', hotelId: 'h1' };
 
@@ -239,7 +253,7 @@ if (process.env.NODE_ENV !== 'production') {
 - [ ] **Step 4: Run it to verify it passes**
 
 Run: `npx jest tests/unit/utils/analyticUtil.test.ts`
-Expected: PASS (4 tests). (`__resetAnalyticsAdapters` in `afterEach` removes the default DEV adapter so fan-out counts are exact.)
+Expected: PASS (4 tests). (`__resetAnalyticsAdapters` in `beforeEach` removes the default DEV adapter so fan-out counts are exact.)
 
 - [ ] **Step 5: Add the default-adapter test**
 
@@ -602,40 +616,53 @@ import NotFound from '../../../app/not-found';
 import Loading from '../../../app/loading';
 import AppError from '../../../app/error';
 
+// Disable page-level best-practice rules that false-positive on isolated component
+// fragments (see Task 0 for the rationale). Contrast/focus/keyboard are jsdom-blind and
+// covered by the manual audit (spec §5.2), not here.
+const componentAxeOptions = {
+  rules: {
+    region: { enabled: false },
+    'landmark-one-main': { enabled: false },
+    'page-has-heading-one': { enabled: false },
+  },
+};
+
 test('not-found has no axe violations', async () => {
   const { container } = render(<NotFound />);
-  expect(await axe(container)).toHaveNoViolations();
+  expect(await axe(container, componentAxeOptions)).toHaveNoViolations();
 });
 
 test('loading has no axe violations', async () => {
   const { container } = render(<Loading />);
-  expect(await axe(container)).toHaveNoViolations();
+  expect(await axe(container, componentAxeOptions)).toHaveNoViolations();
 });
 
 test('error boundary has no axe violations', async () => {
   const { container } = render(<AppError error={new Error('x')} unstable_retry={() => {}} />);
-  expect(await axe(container)).toHaveNoViolations();
+  expect(await axe(container, componentAxeOptions)).toHaveNoViolations();
 });
 ```
 
 - [ ] **Step 3: Run it**
 
 Run: `npx jest tests/unit/app/a11y.test.tsx`
-Expected: PASS (3 tests). If a violation is reported, fix the component (add the missing label/role/landmark) — do not weaken the assertion.
+Expected: PASS (3 tests).
+- The three-rule `componentAxeOptions` list is the **expected** set of page-level false positives, but treat it as **provisional** — if the first run still reports a *different* page-level/best-practice rule on an isolated fragment (e.g. `landmark-unique`), add that rule id to `componentAxeOptions`.
+- If instead a *content*-level violation is reported (missing label, bad ARIA, control without an accessible name, bad heading order within the fragment), **fix the component** — never disable a content-level rule or weaken the assertion to pass.
 
 - [ ] **Step 4: Add axe coverage for the M4 home + M5 detail compositions**
 
-Append to `tests/unit/app/a11y.test.tsx` (imports assume M4/M5 shipped these components; wrap any data-driven component in the providers/props its own M4/M5 test already uses):
+Append to `tests/unit/app/a11y.test.tsx`. **Match each component's real export style** (named vs default — check the M4/M5 source before importing) and reuse the providers/props its own M4/M5 test already uses:
 ```tsx
-import { HotelHero } from '../../../components/hotel/HotelHero';
+import { HotelHero } from '../../../components/hotel/HotelHero'; // ← use default import if M5 exports it default
 import { makeHotel } from '../../fixtures';
 
 test('hotel hero has no axe violations', async () => {
   const { container } = render(<HotelHero hotel={makeHotel()} />);
-  expect(await axe(container)).toHaveNoViolations();
+  expect(await axe(container, componentAxeOptions)).toHaveNoViolations();
 });
 ```
-> Add one `axe(container)` assertion per key M4/M5 surface you can render in isolation (`HotelHero`, `AmenitiesGrid`, `PoliciesList`, `RoomCard`, `DestinationCombobox`, `HotelCard`, `ResultCount`). Reuse each component's existing M4/M5 test render setup (props, `QueryProvider`/`AppProvider` wrappers) so the only new line is the `axe()` assertion. If a component is not yet built, leave a `test.todo('axe: <Component>')` placeholder and complete it when that milestone lands.
+> Add one `axe(container, componentAxeOptions)` assertion per key M4/M5 surface you can render in isolation (`HotelHero`, `AmenitiesGrid`, `PoliciesList`, `RoomCard`, `DestinationCombobox`, `HotelCard`, `ResultCount`). Reuse each component's existing M4/M5 test render setup (props, `QueryProvider`/`AppProvider` wrappers) so the only new line is the `axe()` assertion. If a component is not yet built, leave a `test.todo('axe: <Component>')` placeholder and complete it when that milestone lands.
 
 - [ ] **Step 5: Run the full a11y file**
 

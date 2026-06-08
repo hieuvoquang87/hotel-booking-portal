@@ -57,9 +57,11 @@ git commit -m "test(M7): enforce global 85% coverage threshold"
 
 ## Task 2: Fill coverage gaps to green
 
-**Files:** Create/extend `tests/unit/**` for each file the Task 1 report flagged < 85%.
+**Files:** Create/extend `tests/unit/**` to lift the **aggregate** coverage to ≥85%.
 
-- [ ] **Step 1:** Run `npm run test:coverage` and open the per-file table (or `coverage/lcov-report/index.html`). For each file below 85%, identify the uncovered lines/branches.
+> `coverageThreshold.global` checks the **aggregate** across every file in `collectCoverageFrom` — not each file individually. A single thin untested file won't fail the gate on its own; the gate fails when the *total* covered ratio dips below 85% on any metric. So target the files with the most uncovered lines/branches first — they move the aggregate the most.
+
+- [ ] **Step 1:** Run `npm run test:coverage` and open the per-file table (or `coverage/lcov-report/index.html`). Rank files by uncovered line/branch *count* (not percentage) and identify the biggest contributors to the shortfall.
 
 - [ ] **Step 2:** For each gap, add a focused unit test in the mirroring `tests/unit/...` path that exercises the missing branch (e.g. an `error.tsx` `useEffect` logging path, a `RoomAvailability` state arm, a `lib/` guard clause). Follow the existing test style for that module. One example shape:
 ```tsx
@@ -98,8 +100,15 @@ webServer: {
   url: 'http://localhost:3000',
   reuseExistingServer: !process.env.CI,
   timeout: 180_000,
+  // The detail page (M5) is a server component that fetches its own BFF route via
+  // getJson, which prepends API_BASE_URL. .env.local (M5 Task 0) is gitignored, so CI
+  // has no origin and the SSR fetch would throw → the detail page renders error.tsx and
+  // primary-flow/no-rooms fail. Provision it here so local AND CI both have an origin.
+  env: { ...process.env, API_BASE_URL: 'http://localhost:3000' },
 },
 ```
+
+> **Why this matters:** without `env.API_BASE_URL`, the `e2e` job passes `no-results` (home grid is client-side React Query — the browser has an origin) but fails `primary-flow` and `no-rooms`, which both navigate into a detail page whose SSR `getJson('/api/hotels/[id]')` throws on a relative URL. `next build` itself does **not** fail (the detail route is dynamic, no build-time fetch) — the failure is purely at test-run time, which is why it slips past a local run that has `.env.local`.
 
 - [ ] **Step 2:** Verify the existing smoke spec still runs locally (dev server).
 
@@ -236,7 +245,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run lint
@@ -254,7 +263,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
