@@ -1,3 +1,4 @@
+/** @jest-environment node */
 import { isCalendarDate } from './dates';
 
 describe('isCalendarDate', () => {
