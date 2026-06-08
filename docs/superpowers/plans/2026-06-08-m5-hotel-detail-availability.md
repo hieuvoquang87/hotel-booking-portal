@@ -1,28 +1,38 @@
-# M5 — Hotel Detail & Room Availability (`/hotels/[id]`) — Implementation Plan
+# M5 — Design-System Foundation, M4 Refactor & Hotel Detail/Availability — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build `/hotels/[id]` — a server-rendered hotel detail (hero, overview, amenities, policies, ratings) that paints immediately and a decoupled client availability island that lazily loads available rooms + price/night for chosen dates, covering PRD F4, F5.
+**Goal:** Deliver PRD **F4/F5** (hotel detail + lazy availability) on a small, consistent
+shadcn/ui primitive layer, and bring M4's UI onto that layer. Runs in **three phases on one
+branch, after M4 has merged to `main`**:
 
-**Architecture:** `app/hotels/[id]/page.tsx` is a server component that fetches its own BFF route `/api/hotels/[id]` via M3's `getJson` (BFF-only data access), exposes `generateMetadata` (hotel-name title), and calls `notFound()` on a 404. The only client island is `RoomAvailability`, which seeds demo-default dates, validates, and drives M3's `useAvailability` through the BFF's slow `/rooms` route — never blocking the detail. TDD throughout; ≥85% coverage on M5 modules.
+- **Phase A (Tasks A1–A3) — Design-system foundation:** `shadcn init`, token reconciliation in
+  `app/globals.css`, and the `components/ui/*` primitives (`Button`, `Badge`, `Card`, `Input`,
+  `Skeleton`, `Label`).
+- **Phase B (Tasks B1–B2) — M4 refactor:** migrate `components/EmptyState.tsx` + `components/home/*`
+  onto the primitives, M4's existing tests staying green.
+- **Phase C (Tasks 0–12) — Hotel detail & availability:** the original M5, built on the primitives.
 
-**Tech Stack:** Next.js 16 (App Router, async `params`) + React 19 + TypeScript (strict), Tailwind v4, `@tanstack/react-query` (via M3 hooks), Jest + `next/jest` (jsdom) + React Testing Library + `@testing-library/user-event` + MSW v2.
+**Architecture:** `app/hotels/[id]/page.tsx` is a server component that fetches its own BFF route `/api/hotels/[id]` via M3's `getJson` (BFF-only data access), exposes `generateMetadata` (hotel-name title), and calls `notFound()` on a 404. The only client island is `RoomAvailability`, which seeds demo-default dates, validates, and drives M3's `useAvailability` through the BFF's slow `/rooms` route — never blocking the detail. All M5 components and all refactored M4 components compose `components/ui/*` for chrome (color/border/radius/focus); raw Tailwind on app components is for layout only. TDD throughout; ≥85% coverage on M5 modules, no coverage regression on M4 modules.
 
-**Spec:** `docs/superpowers/specs/2026-06-08-m5-hotel-detail-availability-design.md`
+**Tech Stack:** Next.js 16 (App Router, async `params`) + React 19 + TypeScript (strict), Tailwind v4, shadcn/ui (new-york, CSS-variable tokens) + `class-variance-authority` + `tailwind-merge` + `clsx`, `@tanstack/react-query` (via M3 hooks), Jest + `next/jest` (jsdom) + React Testing Library + `@testing-library/user-event` + MSW v2.
 
-**Design contract:** `docs/designs/hotel-detail-page-design-spec.md` + `docs/designs/hotel-detail-page-mockup.html` (open in a browser).
+**Spec:** `docs/superpowers/specs/2026-06-08-m5-hotel-detail-availability-design.md` (§11 primitives, §12 token map)
 
-**Conventions for every task:** run tests with `npx jest <path>`; co-locate `*.test.tsx` next to source; relative imports matching M1/M3/M4; commit after each green task with conventional-commit prefixes. Components are `'use client'` only when they use state/effects/hooks/handlers.
+**Design contract:** `docs/designs/hotel-detail-page-design-spec.md` + `home-page-design-spec.md` (token tables) + the `*-mockup.html` files (open in a browser). shadcn Tailwind-v4 guide: https://ui.shadcn.com/docs/tailwind-v4
 
-**Assumes M0–M4 are done:**
+**Conventions for every task:** run tests with `npx jest <path>`; **tests live under `tests/unit/…` mirroring source (per CLAUDE.md — NOT co-located)**; relative imports matching M1/M3/M4; commit after each green task with conventional-commit prefixes. Components are `'use client'` only when they use state/effects/hooks/handlers.
+
+**Assumes M0–M4 are _merged to `main`_** (Phases A/B edit M4's files directly — they cannot run against an in-flight M4 branch):
 - **M1:** `types/domain.ts` (`Hotel`, `Room`, `AvailableRoom`), `lib/availability.ts` (`nightsInRange`), `services/availabilityService.ts` (room→`AvailableRoom` mapper), `tests/fixtures.ts` (`makeHotel`, `makeRoom`).
 - **M2:** `/api/hotels/[id]` (detail), `/api/hotels/[id]/rooms` (availability).
 - **M3:** `hooks/useAvailability.ts`, `stores/AppProvider.tsx` (`useAppDates`, mounted in root layout), `lib/fetcher.ts` (`getJson`, `ApiError`), `tests/msw/{handlers,server}.ts`, `tests/utils/queryWrapper.tsx`.
-- **M4:** `components/Icon.tsx`, `components/EmptyState.tsx`, `lib/amenities.ts` (`humanizeAmenity`), `utils/analyticUtil.ts` (`track`, `AnalyticsEvent`), the root layout app bar/footer.
+- **M4:** `components/Icon.tsx`, `components/EmptyState.tsx`, `components/home/*` (`HotelCard`, `HotelCardSkeleton`, `HotelGrid`, `Pagination`, `PriceRange`, `ResultCount`, `SegmentedStars`, `SortSelect`, `DestinationCombobox`), `lib/amenities.ts` (`humanizeAmenity`), `utils/analyticUtil.ts` (`track`, `AnalyticsEvent`), the root layout app bar/footer, and M4's `tests/unit/components/**` (the Phase B green-gate).
 
-If a referenced M1–M4 export is missing at execution time, stop and complete that milestone first — M5 is assembly on top of them.
+If a referenced M1–M4 export is missing at execution time, stop and complete that milestone first — M5 is assembly + refactor on top of them.
 
-> **Next 16 caveat (AGENTS.md):** before Tasks 9–11 (`page.tsx`, `generateMetadata`, `notFound`, `not-found.tsx`, async `params`), read `node_modules/next/dist/docs/` — dynamic route `params` is now a Promise (`await params`), and `generateMetadata`/file-based `not-found` conventions differ from training data.
+> **Next 16 caveat (AGENTS.md):** before Phase C Tasks 10–11 (`page.tsx`, `generateMetadata`, `notFound`, `not-found.tsx`, async `params`), read `node_modules/next/dist/docs/` — dynamic route `params` is now a Promise (`await params`), and `generateMetadata`/file-based `not-found` conventions differ from training data.
+> **shadcn caveat:** before Phase A, read https://ui.shadcn.com/docs/tailwind-v4 — the v4 setup has **no `tailwind.config.js`**, writes tokens into `app/globals.css` (`:root` + `@theme inline`, oklch), and differs from older shadcn guides.
 
 ---
 
@@ -30,6 +40,28 @@ If a referenced M1–M4 export is missing at execution time, stop and complete t
 
 | File | Responsibility |
 | --- | --- |
+| **— Phase A —** | |
+| `components.json` | **(create, via `shadcn init`)** new-york, Tailwind v4, cssVariables, base slate |
+| `lib/utils.ts` | **(create, via init)** `cn()` = `clsx` + `tailwind-merge` |
+| `app/globals.css` | **(modify)** shadcn token vars + custom `--success`/`--star`/`--warning`; keep Geist; drop dark block |
+| `components/ui/button.tsx` | Primitive — `variant`/`tone`/`size` via cva; focus-ring + ≥44px |
+| `components/ui/badge.tsx` | Primitive — pill (`default`/`muted`/`success`) |
+| `components/ui/card.tsx` | Primitive — `Card`/`CardHeader`/`CardContent`/`CardFooter` |
+| `components/ui/input.tsx` | Primitive — text/date input chrome |
+| `components/ui/skeleton.tsx` | Primitive — shimmer block |
+| `components/ui/label.tsx` | Primitive — form label |
+| `docs/designs/*-design-spec.md` | **(modify)** token tables define the CSS-variable values (§12) |
+| **— Phase B (modify M4 to consume primitives) —** | |
+| `components/EmptyState.tsx` | **(modify)** Card/Button chrome |
+| `components/home/HotelCard.tsx` | **(modify)** Card + Badge |
+| `components/home/HotelCardSkeleton.tsx` | **(modify)** Skeleton |
+| `components/home/Pagination.tsx` | **(modify)** Button |
+| `components/home/PriceRange.tsx` | **(modify)** Input + Label |
+| `components/home/SegmentedStars.tsx` | **(modify)** Button (segmented) |
+| `components/home/SortSelect.tsx` | **(modify)** Input/Button chrome (non-Radix in Phase B) |
+| `components/home/DestinationCombobox.tsx` | **(modify)** Input chrome (non-Radix in Phase B) |
+| `components/home/{HotelGrid,ResultCount}.tsx` | **(modify, minimal)** layout/text only |
+| **— Phase C —** | |
 | `.env.local` | **(create)** `API_BASE_URL=http://localhost:3000` for SSR fetch |
 | `types/domain.ts` | **(modify)** widen `AvailableRoom` with `bedCount`, `squareFootage`, `amenities` |
 | `services/availabilityService.ts` | **(modify)** mapper populates the new `AvailableRoom` fields |
@@ -50,6 +82,207 @@ If a referenced M1–M4 export is missing at execution time, stop and complete t
 | `docs/progress.md` | **(modify)** check off M5 |
 
 ---
+
+# Phase A — Design-system foundation (shadcn/ui)
+
+> Stand up the primitive layer **before** any component work. Gating on M4 being merged, this
+> is the first thing that runs on the M5 branch. CSS/token work isn't classic red-green TDD;
+> the gate is **build + typecheck + a smoke render**, then per-primitive RTL tests.
+
+## Task A1: `shadcn init` + `app/globals.css` token reconciliation
+
+**Files:**
+- Create (via CLI): `components.json`, `lib/utils.ts`
+- Modify: `app/globals.css`, `package.json` (deps added by init)
+
+- [ ] **Step 1: Read the guide, then init**
+
+Read https://ui.shadcn.com/docs/tailwind-v4 first. Then:
+
+```bash
+npx shadcn@latest init   # style: new-york · base color: slate · CSS variables: yes
+```
+
+This creates `components.json` + `lib/utils.ts` (`cn()`) and adds `class-variance-authority`, `tailwind-merge`, `clsx`, `tw-animate-css`. It rewrites the token block in `app/globals.css`.
+
+- [ ] **Step 2: Reconcile `app/globals.css` (reviewed manual diff)**
+
+After init, edit `app/globals.css` so:
+1. The Geist wiring survives in `@theme inline` (`--font-sans: var(--font-geist-sans)`, `--font-mono: var(--font-geist-mono)`).
+2. The scaffold's `@media (prefers-color-scheme: dark)` block is **deleted** (light-only — spec §10/§12).
+3. The design-spec palette is mapped onto shadcn's `:root` tokens (`--background`→slate-50, `--card`→white, `--primary`→blue-600, `--primary-foreground`→white, `--muted-foreground`→slate-600, `--border`/`--input`→slate-200, `--ring`→blue-500, `--destructive`→red-600), and the **three custom tokens** are added with a matching `@theme inline` pair so the utilities resolve:
+
+```css
+:root {
+  /* …shadcn semantic tokens mapped to the design-spec palette… */
+  --success: oklch(0.63 0.17 149);   /* green-600  #16A34A */
+  --warning: oklch(0.68 0.16 67);    /* amber-600  #D97706 */
+  --star:    oklch(0.77 0.16 78);    /* amber-500  #F59E0B */
+  --radius: 0.5rem;                  /* inputs/buttons rounded-lg; cards rounded-xl */
+}
+@theme inline {
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-star: var(--star);
+}
+```
+
+> Convert each design-spec hex to oklch (shadcn v4 default). Keep the exact hex in a comment so the design-spec table (Step 4) and the CSS stay traceable.
+
+- [ ] **Step 3: Verify build + smoke render**
+
+Run: `npm run build && npx tsc --noEmit`
+Expected: build + typecheck clean. Then a smoke test that the token utilities exist:
+
+```tsx
+// tests/unit/styles/tokens.test.tsx — guards the custom-token wiring didn't get dropped
+import { readFileSync } from 'node:fs';
+it('defines the custom design-spec tokens', () => {
+  const css = readFileSync('app/globals.css', 'utf8');
+  expect(css).toMatch(/--success:/);
+  expect(css).toMatch(/--star:/);
+  expect(css).toMatch(/--color-star:\s*var\(--star\)/);
+});
+```
+
+- [ ] **Step 4: Update the design-spec token tables (docs = contract)**
+
+In `docs/designs/home-page-design-spec.md` and `hotel-detail-page-design-spec.md`, extend the color-token tables with a **CSS-variable** column (per spec §12) so each row names its `--var`. This keeps docs authoritative now that components read `bg-primary` etc.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add components.json lib/utils.ts app/globals.css package.json package-lock.json tests/unit/styles/tokens.test.tsx docs/designs/home-page-design-spec.md docs/designs/hotel-detail-page-design-spec.md
+git commit -m "feat(M5/A): shadcn init + token reconciliation (light-only, custom success/star/warning)"
+```
+
+## Task A2: primitives — `Button`, `Badge`, `Card`
+
+**Files:**
+- Create: `components/ui/button.tsx`, `components/ui/badge.tsx`, `components/ui/card.tsx`
+- Test: `tests/unit/components/ui/{button,badge,card}.test.tsx`
+
+> Generate with `npx shadcn@latest add button badge card`, then trim to the variants the design needs and ensure focus-ring + **≥44px** min height on `Button`. Adjust variant classes to the mapped tokens (`bg-primary`, `bg-destructive`, `text-success`).
+
+- [ ] **Step 1: Write failing tests**
+
+```tsx
+// tests/unit/components/ui/button.test.tsx
+import { render, screen } from '@testing-library/react';
+import { Button } from '@/components/ui/button';
+
+it('renders a button with the default (primary) variant and merges className', () => {
+  render(<Button className="w-full">Go</Button>);
+  const btn = screen.getByRole('button', { name: 'Go' });
+  expect(btn.className).toMatch(/bg-primary/);
+  expect(btn.className).toMatch(/w-full/); // tailwind-merge kept the layout class
+});
+
+it('renders the danger tone for destructive actions', () => {
+  render(<Button tone="danger">Delete</Button>);
+  expect(screen.getByRole('button', { name: 'Delete' }).className).toMatch(/destructive/);
+});
+```
+
+```tsx
+// tests/unit/components/ui/badge.test.tsx
+import { render, screen } from '@testing-library/react';
+import { Badge } from '@/components/ui/badge';
+it('renders content and the success variant', () => {
+  render(<Badge variant="success">Available</Badge>);
+  expect(screen.getByText('Available').className).toMatch(/success/);
+});
+```
+
+```tsx
+// tests/unit/components/ui/card.test.tsx
+import { render, screen } from '@testing-library/react';
+import { Card, CardContent } from '@/components/ui/card';
+it('renders a surface with content', () => {
+  render(<Card><CardContent>Body</CardContent></Card>);
+  expect(screen.getByText('Body')).toBeTruthy();
+});
+```
+
+- [ ] **Step 2: Run to verify they fail** — `npx jest tests/unit/components/ui` → FAIL (modules missing).
+- [ ] **Step 3: Add + adapt the primitives** (`shadcn add`, then map variant classes to the tokens; add the `tone` variant to `Button` and a `success` variant to `Badge`; ensure `min-h-11`).
+- [ ] **Step 4: Run to verify they pass** — `npx jest tests/unit/components/ui` → PASS.
+- [ ] **Step 5: Commit** — `git commit -m "feat(M5/A): ui Button/Badge/Card primitives"`
+
+## Task A3: primitives — `Input`, `Label`, `Skeleton`
+
+**Files:**
+- Create: `components/ui/input.tsx`, `components/ui/label.tsx`, `components/ui/skeleton.tsx`
+- Test: `tests/unit/components/ui/{input,label,skeleton}.test.tsx`
+
+- [ ] **Step 1: Write failing tests** — `Input` forwards `type`/`value`/`onChange` and applies focus-ring + `min-h-11`; `Label` associates via `htmlFor`; `Skeleton` is `aria-hidden` with `animate-pulse`.
+- [ ] **Step 2: Run to verify they fail.**
+- [ ] **Step 3: Add + adapt** (`npx shadcn@latest add input label skeleton`; `Skeleton` uses `bg-muted`).
+- [ ] **Step 4: Run to verify they pass.**
+- [ ] **Step 5: Commit** — `git commit -m "feat(M5/A): ui Input/Label/Skeleton primitives"`
+
+---
+
+# Phase B — M4 refactor onto the primitives
+
+> **Behavior-preserving.** Each task: run the target's existing M4 test(s) **green first**
+> (baseline), swap chrome to `components/ui/*`, run again — **still green**. No new behavior,
+> no coverage regression.
+>
+> **Preserve semantics, not just classes.** Swapping a native element for a primitive can
+> change the DOM role (an amenity `<li>` → `<Badge>` renders a `<span>`, breaking
+> `getAllByRole('listitem')`; a `Card` wrapper can swallow list/heading structure). So:
+> **keep the semantic element** — wrap the list in `<ul>/<li>` and put `<Badge>` *inside* the
+> `<li>` (or use the primitive's `asChild` to render as the right element), rather than
+> replacing the element wholesale. **Expect to update some role/structure-based assertions**
+> too, not only literal class-string assertions — verify the M4 test (don't assume it's
+> class-free) and re-assert the same user-facing role/text after the swap.
+
+## Task B1: refactor `EmptyState` + `HotelCard` + `HotelCardSkeleton`
+
+**Files:**
+- Modify: `components/EmptyState.tsx`, `components/home/HotelCard.tsx`, `components/home/HotelCardSkeleton.tsx`
+- Touch (only if a class-string assertion breaks): the matching `tests/unit/components/**` files
+
+- [ ] **Step 1: Green baseline** — `npx jest tests/unit/components/EmptyState.test.tsx tests/unit/components/home/HotelCard.test.tsx tests/unit/components/home/HotelCardSkeleton.test.tsx` → PASS.
+- [ ] **Step 2: Refactor** — `HotelCard` surface → `Card`; amenity pills + `+N` + star badge → `Badge`; CTA/links keep semantics. `HotelCardSkeleton` → `Skeleton`. `EmptyState` → `Card` shell + `Button` action. Layout/grid classes stay raw.
+- [ ] **Step 3: Re-run the same tests** → still PASS (update only class-string assertions to role/text).
+- [ ] **Step 4: Commit** — `git commit -m "refactor(M5/B): EmptyState + HotelCard onto ui primitives"`
+
+## Task B2: refactor the home controls
+
+**Files:**
+- Modify: `components/home/{Pagination,PriceRange,SegmentedStars,SortSelect,DestinationCombobox,ResultCount,HotelGrid}.tsx`
+- Touch (only if a class-string assertion breaks): matching `tests/unit/components/home/**`
+
+- [ ] **Step 1: Green baseline** — `npx jest tests/unit/components/home` → PASS.
+- [ ] **Step 2: Refactor** — `Pagination`/`SegmentedStars` buttons → `Button` (`variant`/segmented); `PriceRange` fields → `Input` + `Label`; `SortSelect` + `DestinationCombobox` trigger/field chrome → `Input`/`Button` (**stay non-Radix** — only chrome changes); `ResultCount`/`HotelGrid` minimal (text/grid).
+- [ ] **Step 3: Re-run** `npx jest tests/unit/components/home` → still PASS.
+- [ ] **Step 4: Full suite + typecheck** — `npx jest && npx tsc --noEmit` → green (Phase B introduces no behavior change).
+- [ ] **Step 5: Commit** — `git commit -m "refactor(M5/B): home controls onto ui primitives"`
+
+---
+
+# Phase C — Hotel detail & room availability
+
+> Build the original M5 on the Phase-A primitives. **Every component below composes
+> `components/ui/*` for chrome** — the code samples that follow show structure; where one still
+> shows raw token classes (e.g. `border-red-200`, `rounded-lg border …focus-visible:outline…`),
+> prefer the primitive instead: `InlineError` → `Card` (destructive) + `Button`; `DateField` →
+> `Label` + `Input`; `RoomCard` → `Card` + `Badge`; `RoomSkeleton` → `Skeleton`; `BackToResults`
+> → `Button variant="link"`. Keep `Icon`/`RatingStars` custom.
+>
+> **⚠ Test-path normalization — applies to EVERY Task 0–12 below.** The task bodies were
+> authored before the `tests/unit/` convention and show **co-located** paths in their `// path`
+> comments, `npx jest <path>` commands, and `git add` lines (e.g. `components/hotel/RoomCard.test.tsx`).
+> **Do not place tests there.** Translate each to:
+> - unit test `X.test.tsx` → **`tests/unit/<mirror-of-X>.test.tsx`** (e.g.
+>   `components/hotel/RoomCard.test.tsx` → `tests/unit/components/hotel/RoomCard.test.tsx`;
+>   `app/hotels/[id]/page.test.tsx` → `tests/unit/app/hotels/[id]/page.test.tsx`);
+> - the Task 11 `*.integration.test.tsx` → **`tests/integration/components/hotel/…`**;
+> - inside the test files use **`@/…` absolute imports** (per M4/M3 convention), not the
+>   `../../` relative imports shown in the inherited samples (the depth differs once the file
+>   lives under `tests/`). Update the `npx jest` and `git add` paths to match.
 
 ## Task 0: Reconciliations — widen `AvailableRoom`, analytics events, env
 
@@ -1329,7 +1562,7 @@ git commit -m "test(M5): availability integration (success/empty/error)"
 - [ ] **Step 1: Run the full suite with coverage**
 
 Run: `npx jest --coverage`
-Expected: all suites PASS; M5 modules (`components/hotel/**`, `components/RatingStars.tsx`, `components/InlineError.tsx`, `app/hotels/**`) ≥ 85% across branches/functions/lines/statements.
+Expected: all suites PASS; M5 modules (`components/ui/**`, `components/hotel/**`, `components/RatingStars.tsx`, `components/InlineError.tsx`, `app/hotels/**`) ≥ 85% across branches/functions/lines/statements; **M4 modules show no coverage regression** from the Phase B refactor.
 
 - [ ] **Step 2: Lint, typecheck, build**
 
@@ -1342,19 +1575,25 @@ Run: `npm run dev`, open `/hotels/hotel-01`: detail paints immediately; dates pr
 
 - [ ] **Step 4: Update `docs/progress.md`**
 
-In the **M5** section, check off (`[x]`) every task: detail page renders name/address/description/amenities/policies/ratings; detail renders without availability; SEO/metadata + favicon reuse; `not-found`; `RoomAvailability` date fields; validation; lazy fetch; every-night rule; and all four availability states (loading/success/empty/error) + stale latest-wins. Flip the **Progress at a Glance** M5 row to `[x]`. Append a decisions note:
+In the **M5** section, add + check off (`[x]`) the new **Phase A** (shadcn init, token reconciliation, `ui/*` primitives) and **Phase B** (M4 components refactored onto primitives, tests still green) items, then every **Phase C** task: detail page renders name/address/description/amenities/policies/ratings; detail renders without availability; SEO/metadata + favicon reuse; `not-found`; `RoomAvailability` date fields; validation; lazy fetch; every-night rule; and all four availability states (loading/success/empty/error) + stale latest-wins. Flip the **Progress at a Glance** M5 row to `[x]` (and update its scope cell to mention the shadcn primitive layer + M4 refactor). Append a decisions note:
 
 ```markdown
-**M5 decisions (from design spec):** detail is a **server component** fetching the BFF
-`/api/hotels/[id]` via `getJson` (generateMetadata + notFound()); availability is the
-only client island (`RoomAvailability` via M3 `useAvailability`/`useAppDates`), lazy
-through the slow `/rooms` route, never blocking detail. `AvailableRoom` widened with
-`bedCount`/`squareFootage`/`amenities` (Task 0) so RoomCard meets the design; demo dates
-`2026-07-10→2026-07-12` seeded on mount; "← Back to results" is history-based;
-`API_BASE_URL` set in the runtime for SSR fetch; no booking CTA (P2).
+**M5 decisions (from design spec):** M5 ran in three phases on one branch after M4 merged.
+**Phase A** — adopted **shadcn/ui** (new-york, Tailwind-v4 semantic CSS-variable tokens
+re-skinned to the slate/blue design spec; custom `--success`/`--star`/`--warning`); built
+non-Radix primitives `components/ui/{button,badge,card,input,skeleton,label}`; kept custom
+`Icon` (no lucide) + native date input; **light-only** (dropped the dark media-query block);
+Radix widgets + dark theme deferred to P2. **Phase B** — refactored `EmptyState` +
+`components/home/*` onto the primitives, behavior-preserving (M4 tests stayed green).
+**Phase C** — detail is a **server component** fetching the BFF `/api/hotels/[id]` via
+`getJson` (generateMetadata + notFound()); availability is the only client island
+(`RoomAvailability` via M3 `useAvailability`/`useAppDates`), lazy through the slow `/rooms`
+route, never blocking detail. `AvailableRoom` widened with `bedCount`/`squareFootage`/
+`amenities` (Task 0); demo dates `2026-07-10→2026-07-12` seeded on mount; "← Back to results"
+history-based; `API_BASE_URL` set in the runtime for SSR fetch; no booking CTA (P2).
 ```
 
-> Note: `track()` adapters, route error/loading boundaries, and the formal a11y+perf audit remain M6; Playwright E2E remains M7.
+> Note: `track()` adapters, route error/loading boundaries, and the formal a11y+perf audit remain M6; Playwright E2E remains M7; Radix-backed primitives + dark theme remain P2.
 
 - [ ] **Step 5: Commit**
 
@@ -1369,10 +1608,10 @@ git commit -m "docs(M5): mark hotel detail & room availability milestone complet
 
 **1. Spec coverage** — every spec section maps to a task:
 
-- §1 scope → Tasks 0–12. §2 rendering (server detail via BFF, getJson, generateMetadata, notFound, API_BASE_URL prereq, fetch dedupe) → Task 10 + Task 0 Step 10. §3 module structure → one task per file. §4 data flow (detail-first, lazy availability, latest-wins, dates client-only) → Tasks 9, 10. §5 RoomAvailability (seed, validate, states, analytics) → Task 9. §6.1 RoomCard widened → Tasks 0 + 7. §6.2 DateField → Task 8. §6.3 RatingStars → Task 1. §6.4 InlineError → Task 2. §6.5 BackToResults history-based → Task 3. §7 states (detail loaded, unknown hotel, idle, loading, success, empty, error, blocked, stale) → Tasks 9 (states) + 10 (notFound) + 11 (integration) + M3 (structural latest-wins). §8 a11y/mobile → baked into each component (labels, aria-live, 44px, aspect-video) + smoke Task 12. §9 testing → every task test-first; integration Task 11; analytics Task 0; notFound Task 10. §10 decisions → Task 12 progress note.
+- §1 Phase A (shadcn init, globals/token reconciliation, primitives) → Tasks A1–A3; §11 primitives → A2–A3; §12 token map → A1. §1 Phase B (M4 refactor, green-gate) → Tasks B1–B2; §9 Phase-B green-gate → B1/B2 baseline+re-run. §1 Phase C scope → Tasks 0–12. §2 rendering (server detail via BFF, getJson, generateMetadata, notFound, API_BASE_URL prereq, fetch dedupe) → Task 10 + Task 0 Step 10. §3 module structure → one task per file. §4 data flow (detail-first, lazy availability, latest-wins, dates client-only) → Tasks 9, 10. §5 RoomAvailability (seed, validate, states, analytics) → Task 9. §6.1 RoomCard widened → Tasks 0 + 7. §6.2 DateField → Task 8. §6.3 RatingStars → Task 1. §6.4 InlineError → Task 2. §6.5 BackToResults history-based → Task 3. §7 states (detail loaded, unknown hotel, idle, loading, success, empty, error, blocked, stale) → Tasks 9 (states) + 10 (notFound) + 11 (integration) + M3 (structural latest-wins). §8 a11y/mobile → baked into each component (labels, aria-live, 44px, aspect-video) + smoke Task 12. §9 testing → every task test-first; integration Task 11; analytics Task 0; notFound Task 10. §10 decisions → Task 12 progress note.
 
 **2. Placeholder scan** — no TBD/TODO; every code step shows complete code; every test step shows full assertions. The two notes (Task 8 jsdom date-typing fallback, Task 11 timeout) give concrete alternatives, not vague hand-waving.
 
 **3. Type/name consistency** — `AvailableRoom` widened in Task 0 (`bedCount`, `squareFootage`, `amenities`) is consumed verbatim by `RoomCard` (Task 7), `RoomAvailability` (Task 9), and the integration handlers (Task 0). `AnalyticsEvent` M5 variants (Task 0) used by Task 9 (`hotel_viewed`/`availability_checked`/`no_rooms`). `RatingStars` (Task 1) used by `HotelHero` (Task 4). `InlineError` (Task 2) used by `RoomAvailability` (Task 9). `humanizeAmenity` (M4) used by `AmenitiesGrid` (Task 5) + `RoomCard` (Task 7). `useAppDates` (`checkIn`/`checkOut`/`setCheckIn`/`setCheckOut`) and `useAvailability(id, checkIn, checkOut)` → `{data, isLoading, isError, isSuccess, refetch}` (M3) used in Task 9. `getJson`/`ApiError` (M3) used in Task 10. `nightsInRange` (M1) used in Task 9. `Hotel`/`AvailableRoom` domain fields from M1 used throughout.
 
-**Note for executor:** M5 is assembly over M0–M4. If any M1–M4 export named here is absent, finish that milestone first. Set `API_BASE_URL` in `.env.local` (Task 0) — the SSR detail fetch needs it. Read `node_modules/next/dist/docs/` before Task 10 (Next 16 async `params`/`generateMetadata`/`notFound` differ from training data).
+**Note for executor:** M5 runs **Phase A → B → C in order, only after M4 has merged to `main`** (Phases A/B edit M4's files). If any M1–M4 export named here is absent, finish that milestone first. Phase A is CSS/token-heavy — verify via build + the token smoke test, not just RTL. Phase B is behavior-preserving — keep M4's existing tests green; update an assertion only when it pinned a literal class string. Set `API_BASE_URL` in `.env.local` (Task 0) — the SSR detail fetch needs it. Read `node_modules/next/dist/docs/` before Task 10 (Next 16 async `params`/`generateMetadata`/`notFound`) and https://ui.shadcn.com/docs/tailwind-v4 before Phase A (no `tailwind.config.js`; tokens in `globals.css`).
