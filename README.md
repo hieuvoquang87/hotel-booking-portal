@@ -5,8 +5,9 @@ destination → browse/filter/sort hotels → open a hotel → check room availa
 for dates, with booking and production hardening planned next.
 
 > Spec-driven. Full architecture in [`docs/architecture.md`](docs/architecture.md);
-> roadmap in [`docs/product-roadmap.md`](docs/product-roadmap.md); milestone status
-> in [`docs/progress.md`](docs/progress.md). State management and component
+> roadmap in [`docs/product-roadmap.md`](docs/product-roadmap.md); design rationale in
+> [`docs/assumptions-and-tradeoffs.md`](docs/assumptions-and-tradeoffs.md); milestone
+> status in [`docs/progress.md`](docs/progress.md). State management and component
 > breakdown are summarized at the end of this file.
 
 ## Project phases
@@ -77,4 +78,20 @@ server-only). Module map and per-layer build status:
 
 ```
 components → hooks (React Query) → stores → /api (BFF) → services → lib + mock data
+```
+
+## Project structure
+
+```
+app/          Next.js App Router — pages + /api BFF route handlers
+components/    UI components (presentational)
+hooks/        React Query data hooks + in-memory refine
+stores/       client-state providers (QueryProvider, AppProvider)
+services/     server-only data gateway + mock/ seed
+lib/          pure functions (filters, sort, paginate, slug, availability)
+types/        domain types
+mocks/        MSW request handlers (tests)
+tests/        unit + integration (Jest + RTL)
+e2e/          Playwright end-to-end specs
+docs/         architecture, roadmap, specs, plans, designs
 ```
