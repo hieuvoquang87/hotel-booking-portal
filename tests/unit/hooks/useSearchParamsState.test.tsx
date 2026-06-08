@@ -35,6 +35,16 @@ describe('parseRefineState', () => {
     expect(s.page).toBe(1);
   });
 
+  it('clamps a negative page to 1 and floors a fractional page', () => {
+    expect(parseRefineState(new URLSearchParams('page=-5')).page).toBe(1);
+    expect(parseRefineState(new URLSearchParams('page=2.7')).page).toBe(2);
+  });
+
+  it('treats empty-string numeric params as absent (null), not 0', () => {
+    const s = parseRefineState(new URLSearchParams('stars=&min=&max='));
+    expect(s).toMatchObject({ stars: null, min: null, max: null });
+  });
+
   it('parses all provided values', () => {
     const s = parseRefineState(
       new URLSearchParams('country=usa&city=new-york&stars=4&min=100&max=300&sort=rating&page=2'),

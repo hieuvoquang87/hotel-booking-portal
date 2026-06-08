@@ -2,8 +2,11 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
+import type { SortKey } from '@/lib/sort';
 
-export type SortKey = 'price-asc' | 'price-desc' | 'rating' | 'stars';
+// Re-export so callers can import SortKey from the hook, but keep lib/sort.ts the
+// single source of truth — adding a sort key there can't silently drift from here.
+export type { SortKey };
 
 const SORT_KEYS: SortKey[] = ['price-asc', 'price-desc', 'rating', 'stars'];
 const DEFAULT_SORT: SortKey = 'price-asc';
@@ -20,7 +23,8 @@ export type RefineState = {
 };
 
 function parseNum(raw: string | null): number | null {
-  if (raw === null) return null;
+  // Empty string ('?stars=') must read as absent, not Number('')===0.
+  if (raw === null || raw === '') return null;
   const n = Number(raw);
   return Number.isFinite(n) ? n : null;
 }
