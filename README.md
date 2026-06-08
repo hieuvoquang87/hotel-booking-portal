@@ -18,7 +18,7 @@ Shipped in phases — see [`docs/product-roadmap.md`](docs/product-roadmap.md):
   filter/sort/paginate, hotel detail, and lazy room availability.
 - **Phase 2 — Scale, SEO, Booking & Resilience (designed, not yet built):** booking
   via Server Actions, crawlable SSG/ISR landing pages, a real-API service swap,
-  observability, and operability/resilience hardening.
+  observability, operability/resilience hardening, and internationalization (es/fr/de).
 
 ## Prerequisites
 
