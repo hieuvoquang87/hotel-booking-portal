@@ -15,6 +15,5 @@ export type AnalyticsEvent =
 
 export function track(event: AnalyticsEvent): void {
   if (process.env.NODE_ENV === 'production') return; // M6 wires real adapters here
-  // eslint-disable-next-line no-console
   console.debug('[track]', event);
 }

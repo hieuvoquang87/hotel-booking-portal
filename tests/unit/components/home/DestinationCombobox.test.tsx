@@ -119,6 +119,32 @@ describe('DestinationCombobox', () => {
     expect(onSelect).toHaveBeenCalledWith(options[1]);
   });
 
+  it('displays the already-selected destination label in the closed input', () => {
+    const { rerender } = render(
+      <DestinationCombobox
+        options={options}
+        value={{ country: 'usa', city: 'chicago' }}
+        onSelect={() => {}}
+        loading={false}
+        error={false}
+        onRetry={() => {}}
+      />,
+    );
+    expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('Chicago, IL — USA');
+
+    rerender(
+      <DestinationCombobox
+        options={options}
+        value={{ country: 'usa', city: null }}
+        onSelect={() => {}}
+        loading={false}
+        error={false}
+        onRetry={() => {}}
+      />,
+    );
+    expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('All hotels in USA');
+  });
+
   it('shows a Retry affordance on error', async () => {
     const onRetry = jest.fn();
     render(

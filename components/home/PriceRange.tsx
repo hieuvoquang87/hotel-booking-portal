@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const toNum = (s: string): number | null => {
   const t = s.trim();
@@ -21,9 +21,14 @@ export function PriceRange({
   const [minStr, setMinStr] = useState(min?.toString() ?? '');
   const [maxStr, setMaxStr] = useState(max?.toString() ?? '');
 
-  // Keep local inputs in sync when the URL (props) changes externally (e.g. Reset).
-  useEffect(() => setMinStr(min?.toString() ?? ''), [min]);
-  useEffect(() => setMaxStr(max?.toString() ?? ''), [max]);
+  // Resync local inputs when the URL (props) changes externally (e.g. Reset) by
+  // adjusting state during render — the prop is the source of truth, not an effect.
+  const [prev, setPrev] = useState({ min, max });
+  if (prev.min !== min || prev.max !== max) {
+    setPrev({ min, max });
+    setMinStr(min?.toString() ?? '');
+    setMaxStr(max?.toString() ?? '');
+  }
 
   const commit = () => {
     let lo = toNum(minStr);
