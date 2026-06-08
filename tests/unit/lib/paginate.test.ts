@@ -1,4 +1,4 @@
-import { PAGE_SIZE, paginate } from './paginate';
+import { PAGE_SIZE, paginate } from '@/lib/paginate';
 
 const nums = Array.from({ length: 25 }, (_, i) => i + 1); // 1..25
 

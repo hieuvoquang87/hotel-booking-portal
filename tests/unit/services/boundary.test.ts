@@ -18,7 +18,7 @@ function walk(dir: string): string[] {
 }
 
 it('no module outside services/ imports the raw seed', () => {
-  const root = join(__dirname, '..');
+  const root = join(__dirname, '../../..');
   const offenders = walk(root).filter((file) => readFileSync(file, 'utf8').includes('hotels.json'));
   expect(offenders).toEqual([]);
 });

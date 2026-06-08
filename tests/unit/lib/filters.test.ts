@@ -1,5 +1,5 @@
-import { makeHotel, makeRoom } from '../tests/fixtures';
-import { filterByPrice, filterByStars } from './filters';
+import { makeHotel, makeRoom } from '@/tests/fixtures';
+import { filterByPrice, filterByStars } from '@/lib/filters';
 
 describe('filterByStars (minimum)', () => {
   const hotels = [

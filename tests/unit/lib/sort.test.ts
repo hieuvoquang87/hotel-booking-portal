@@ -1,5 +1,5 @@
-import { makeHotel, makeRoom } from '../tests/fixtures';
-import { sortHotels } from './sort';
+import { makeHotel, makeRoom } from '@/tests/fixtures';
+import { sortHotels } from '@/lib/sort';
 
 const hotel = (id: string, price: number, rating: number, stars: number) =>
   makeHotel({

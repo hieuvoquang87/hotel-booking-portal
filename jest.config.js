@@ -4,13 +4,14 @@ const createJestConfig = nextJest({ dir: './' });
 
 /** @type {import('jest').Config} */
 const baseConfig = {
+  setupFiles: ['<rootDir>/tests/setupApiEnv.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   // jest-fixed-jsdom keeps Node's real fetch/Request/Response/streams (stock
   // jest-environment-jsdom strips them, which breaks MSW v2 under Jest). See
   // MSW docs "Jest missing globals".
   testEnvironment: 'jest-fixed-jsdom',
   testEnvironmentOptions: { customExportConditions: [''] },
-  testMatch: ['**/?(*.)+(test).[jt]s?(x)'],
+  testMatch: ['<rootDir>/tests/**/?(*.)+(test).[jt]s?(x)'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/e2e/'],
   // Non-blocking in M0: collect but do NOT enforce a threshold (gate activates in M1/M7).
   collectCoverageFrom: [

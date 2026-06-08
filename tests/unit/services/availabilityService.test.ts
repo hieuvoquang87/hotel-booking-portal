@@ -1,5 +1,5 @@
-import { HotelNotFoundError, InvalidDateRangeError } from '../types/domain';
-import { checkAvailability } from './availabilityService';
+import { HotelNotFoundError, InvalidDateRangeError } from '@/types/domain';
+import { checkAvailability } from '@/services/availabilityService';
 
 // hotel-01 room available_dates from seed:
 //   room-01a: ['2026-07-10', '2026-07-11', '2026-07-12'] (3 nights)

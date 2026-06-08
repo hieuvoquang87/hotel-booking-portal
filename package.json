@@ -12,6 +12,8 @@
     "format:check": "prettier --check .",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
+    "test:unit": "jest --testPathPatterns='tests/unit' --passWithNoTests",
+    "test:integration": "jest --testPathPatterns='tests/integration' --passWithNoTests",
     "test:e2e": "playwright test"
   },
   "dependencies": {
