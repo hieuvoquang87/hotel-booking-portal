@@ -12,11 +12,13 @@ client-facing discovery surface of a travel platform: pick a destination, browse
 properties, inspect a hotel, and check room availability for their dates.
 
 **User problems**
+
 - Hard to narrow a large catalog to relevant options fast.
 - Property details scattered or shallow when comparing hotels.
 - Unclear which rooms are open for specific dates, and at what price.
 
 **Business objectives**
+
 - Convert destination intent into engaged hotel browsing.
 - Deliver a fast, accessible, maintainable UI that scales to more inventory.
 - Establish a clean architecture (data gateway, BFF, server/client state split)
@@ -30,6 +32,7 @@ properties, inspect a hotel, and check room availability for their dates.
 **80% mobile traffic / 20% desktop traffic**, so the experience is mobile-first.
 
 **Use cases**
+
 1. Choose a destination (country and/or city) and browse its hotels.
 2. Narrow results by star rating and price range.
 3. Open a hotel to read its full details and amenities.
@@ -49,6 +52,7 @@ properties, inspect a hotel, and check room availability for their dates.
 | 5 | Room availability | Pick dates → lazy-loaded available rooms + price/night (simulated third-party) |
 
 **Out of scope (Phase 1)**
+
 - Booking, reservation, checkout (display only — no transaction)
 - Authentication, payments, user accounts
 - SEO landing pages, international URL routing
@@ -59,6 +63,7 @@ properties, inspect a hotel, and check room availability for their dates.
 ## 4. Functional Behavior & Acceptance Criteria
 
 **F1 — Destination picker**
+
 - Given the destination list, when the user types, then options filter by
   substring (city shown with its country).
 - When a country is selected, all its hotels load; when a city is selected, only
@@ -66,12 +71,14 @@ properties, inspect a hotel, and check room availability for their dates.
 - No match → dropdown shows "No destinations".
 
 **F2 — Search & filter**
+
 - When star rating or price range changes, the list updates in-memory (< 100ms),
   no full reload.
 - Filter state is reflected in the URL (shareable, back-button correct).
 - No hotels match → "No hotels found" + reset action.
 
 **F3 — Sort & paginate**
+
 - Results can be sorted by price (asc/desc), overall rating, or star rating;
   default order is stable.
 - Sort + current page are reflected in the URL (`?sort=&page=`).
@@ -79,11 +86,13 @@ properties, inspect a hotel, and check room availability for their dates.
   to page 1.
 
 **F4 — Hotel detail**
+
 - Selecting a hotel opens `/hotels/[id]` showing name, address, description,
   amenities, policies, star rating, overall rating, and review count.
 - Detail renders immediately without waiting on availability.
 
 **F5 — Room availability**
+
 - Given valid check-in/out dates, availability + price/night lazy-load with a
   "Checking availability…" state.
 - A room shows as available only if every night in `[check-in → check-out)` is in
@@ -120,6 +129,7 @@ adapters pluggable); typed events (`search_performed`, `hotel_viewed`,
 Playwright E2E for primary flows; CI coverage gate.
 
 **Environment / constraints**
+
 - Next.js (App Router) + TypeScript; React Query for server state; URL +
   Context for client state.
 - Client reaches data only via `/api/*` (BFF); `hotelService` /
@@ -134,10 +144,12 @@ Playwright E2E for primary flows; CI coverage gate.
 ## 6. Dependencies, Assumptions & Open Questions
 
 **Dependencies**
+
 - Mock data seed (stands in for the hotel inventory API).
 - React Query, a date-picker component, testing tooling (Jest/RTL/MSW/Playwright).
 
 **Assumptions**
+
 - Inventory is owned; pricing/availability is a slow, expensive third-party →
   modeled as a lazy, latency-simulated endpoint.
 - **All prices are USD** (mock has no currency unit; single-currency assumption).
@@ -154,6 +166,7 @@ Playwright E2E for primary flows; CI coverage gate.
 - Dates are ISO strings; no timezone math in v1.
 
 **Open questions**
+
 - Star filter: minimum ("4★ & up") vs exact match?
 - Show both `star_rating` and `overall_rating` on cards, or one?
 - Simulated availability latency target (e.g. 800ms–1.5s)?
@@ -163,12 +176,14 @@ Playwright E2E for primary flows; CI coverage gate.
 ## 7. Success Metrics & Release Criteria
 
 **Success metrics**
+
 - Destination → hotel-detail rate (engagement).
 - Availability-check rate per hotel viewed.
 - `no_results` / `no_rooms` rates (demand vs inventory gaps).
 - Core Web Vitals within budget on mobile.
 
 **Release criteria**
+
 - All five features meet their acceptance criteria.
 - All documented empty/error/loading states function.
 - Performance budget met; WCAG 2.1 AA checks pass.

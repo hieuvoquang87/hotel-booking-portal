@@ -13,22 +13,22 @@ rounded cards, generous whitespace. **Mobile-first**, WCAG 2.1 AA.
 
 ### Color tokens (Tailwind slate + blue)
 
-| Token | Hex | Tailwind | Use |
-|-------|-----|----------|-----|
-| `bg/page` | `#F8FAFC` | slate-50 | Page background |
-| `bg/surface` | `#FFFFFF` | white | Cards, bars, sheets |
-| `border` | `#E2E8F0` | slate-200 | Dividers, card outline, inputs |
-| `text/primary` | `#0F172A` | slate-900 | Headings, key values |
-| `text/secondary` | `#475569` | slate-600 | Body, meta |
-| `text/muted` | `#94A3B8` | slate-400 | Placeholders, hints |
-| `accent` | `#2563EB` | blue-600 | Primary buttons, active fill (≥3:1 UI; 5.1:1 on white) |
-| `accent/text` | `#1D4ED8` | blue-700 | Inline text links / small text on white (extra margin) |
-| `accent/hover` | `#1D4ED8` | blue-700 | Hover for primary |
-| `focus/ring` | `#3B82F6` | blue-500 | 2px ring + 2px offset on focus-visible |
-| `success` | `#16A34A` | green-600 | "Available" status |
-| `warning` | `#D97706` | amber-600 | Soft warnings |
-| `error` | `#DC2626` | red-600 | Validation + inline errors |
-| `star` | `#F59E0B` | amber-500 | Filled rating stars |
+| Token            | Hex       | Tailwind  | Use                                                    |
+| ---------------- | --------- | --------- | ------------------------------------------------------ |
+| `bg/page`        | `#F8FAFC` | slate-50  | Page background                                        |
+| `bg/surface`     | `#FFFFFF` | white     | Cards, bars, sheets                                    |
+| `border`         | `#E2E8F0` | slate-200 | Dividers, card outline, inputs                         |
+| `text/primary`   | `#0F172A` | slate-900 | Headings, key values                                   |
+| `text/secondary` | `#475569` | slate-600 | Body, meta                                             |
+| `text/muted`     | `#94A3B8` | slate-400 | Placeholders, hints                                    |
+| `accent`         | `#2563EB` | blue-600  | Primary buttons, active fill (≥3:1 UI; 5.1:1 on white) |
+| `accent/text`    | `#1D4ED8` | blue-700  | Inline text links / small text on white (extra margin) |
+| `accent/hover`   | `#1D4ED8` | blue-700  | Hover for primary                                      |
+| `focus/ring`     | `#3B82F6` | blue-500  | 2px ring + 2px offset on focus-visible                 |
+| `success`        | `#16A34A` | green-600 | "Available" status                                     |
+| `warning`        | `#D97706` | amber-600 | Soft warnings                                          |
+| `error`          | `#DC2626` | red-600   | Validation + inline errors                             |
+| `star`           | `#F59E0B` | amber-500 | Filled rating stars                                    |
 
 Color is never the sole signal — pair with icon + text (e.g. ✓ "Available", not green alone).
 
@@ -37,14 +37,14 @@ Color is never the sole signal — pair with icon + text (e.g. ✓ "Available", 
 Font: `Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`.
 Prices and counts use `font-variant-numeric: tabular-nums`.
 
-| Role | Mobile → Desktop | Weight | Line-height |
-|------|------------------|--------|-------------|
-| Display / H1 | 30px → 36px | 700 | 1.2 |
-| Section / H2 | 20px → 24px | 600 | 1.25 |
-| Card title / H3 | 16px → 18px | 600 | 1.3 |
-| Body | 16px | 400 | 1.5 |
-| Caption / meta | 14px | 400 | 1.45 |
-| Micro / badge | 12px | 500 | 1.4 |
+| Role            | Mobile → Desktop | Weight | Line-height |
+| --------------- | ---------------- | ------ | ----------- |
+| Display / H1    | 30px → 36px      | 700    | 1.2         |
+| Section / H2    | 20px → 24px      | 600    | 1.25        |
+| Card title / H3 | 16px → 18px      | 600    | 1.3         |
+| Body            | 16px             | 400    | 1.5         |
+| Caption / meta  | 14px             | 400    | 1.45        |
+| Micro / badge   | 12px             | 500    | 1.4         |
 
 ### Spacing, radius, elevation
 
@@ -57,13 +57,13 @@ Prices and counts use `font-variant-numeric: tabular-nums`.
 
 Base styles target the smallest screen; min-width media queries layer up.
 
-| Token | Min width | Primary use |
-|-------|-----------|-------------|
-| (base) | 0 | Single column, stacked, sticky controls |
-| `sm` | 640px | 2-col grid, inline filters begin |
-| `md` | 768px | 3-col grid, full toolbar inline |
-| `lg` | 1024px | 4-col grid, two-pane detail |
-| `xl` | 1280px | Max container, comfortable gutters |
+| Token  | Min width | Primary use                             |
+| ------ | --------- | --------------------------------------- |
+| (base) | 0         | Single column, stacked, sticky controls |
+| `sm`   | 640px     | 2-col grid, inline filters begin        |
+| `md`   | 768px     | 3-col grid, full toolbar inline         |
+| `lg`   | 1024px    | 4-col grid, two-pane detail             |
+| `xl`   | 1280px    | Max container, comfortable gutters      |
 
 ### Shared component primitives
 
@@ -127,12 +127,12 @@ destination is chosen. All refine/sort/page state lives in the URL.
 
 ### Refine toolbar controls
 
-| Control | Type | Values | URL param |
-|---------|------|--------|-----------|
-| Star rating | SegmentedControl (**minimum, "& up"**) | `Any` · `3★ & up` · `4★ & up` · `5★` | `stars` (3/4/5; omit = Any) |
-| Price range | Two number inputs (USD) | min / max, dataset spans **$75–$590** | `min`, `max` |
-| Sort | Select | see below | `sort` |
-| Result count | Text, `aria-live="polite"` | "24 hotels" / "1 hotel" / "No hotels" | — |
+| Control      | Type                                   | Values                                | URL param                   |
+| ------------ | -------------------------------------- | ------------------------------------- | --------------------------- |
+| Star rating  | SegmentedControl (**minimum, "& up"**) | `Any` · `3★ & up` · `4★ & up` · `5★`  | `stars` (3/4/5; omit = Any) |
+| Price range  | Two number inputs (USD)                | min / max, dataset spans **$75–$590** | `min`, `max`                |
+| Sort         | Select                                 | see below                             | `sort`                      |
+| Result count | Text, `aria-live="polite"`             | "24 hotels" / "1 hotel" / "No hotels" | —                           |
 
 > **Resolved open question — star filter:** minimum "& up" (segmented), not exact match.
 
@@ -244,16 +244,17 @@ Changing any filter or sort **resets `page` to 1**. Bad `sort` → default; bad 
 
 Base CSS targets the smallest screen; each breakpoint **adds** capability.
 
-| Zone | base (≤640) | sm (≥640) | md (≥768) | lg (≥1024) | xl (≥1280) |
-|------|-------------|-----------|-----------|------------|------------|
-| Grid columns | **1** | 2 | 3 | 4 | 4 |
-| Refine controls | **Sticky "Filters" button → bottom sheet**; sort inline | filters begin inlining | full toolbar inline | inline | inline |
-| App bar | 56px, condensed | 56px | 64px | 64px | 64px |
-| Gutters | 16px | 16px | 24px | 32px | 32px |
-| Combobox width | full-bleed | full | max 560px | max 560px | max 560px |
-| Card photo | 16:9 full width | 16:9 | 16:9 | 16:9 | 16:9 |
+| Zone            | base (≤640)                                             | sm (≥640)              | md (≥768)           | lg (≥1024) | xl (≥1280) |
+| --------------- | ------------------------------------------------------- | ---------------------- | ------------------- | ---------- | ---------- |
+| Grid columns    | **1**                                                   | 2                      | 3                   | 4          | 4          |
+| Refine controls | **Sticky "Filters" button → bottom sheet**; sort inline | filters begin inlining | full toolbar inline | inline     | inline     |
+| App bar         | 56px, condensed                                         | 56px                   | 64px                | 64px       | 64px       |
+| Gutters         | 16px                                                    | 16px                   | 24px                | 32px       | 32px       |
+| Combobox width  | full-bleed                                              | full                   | max 560px           | max 560px  | max 560px  |
+| Card photo      | 16:9 full width                                         | 16:9                   | 16:9                | 16:9       | 16:9       |
 
 **Mobile-first rules (non-negotiable):**
+
 - Designed and verified at 360px width **first**; larger screens are progressive enhancement.
 - All tap targets ≥ **44×44px**; ≥ 8px between adjacent targets.
 - Refine controls collapse into a **sticky bar + bottom sheet** on mobile — never a cramped inline row.
@@ -265,15 +266,15 @@ Base CSS targets the smallest screen; each breakpoint **adds** capability.
 
 ## 6. States (every state the mock must render)
 
-| State | Trigger | UI |
-|-------|---------|----|
-| **No destination** | Initial load, no `country`/`city` | Hero only; grid area = `EmptyState`: map-pin icon, "Start by choosing a destination", combobox focused |
-| **No destination match** | Combobox text matches nothing | Dropdown shows **"No destinations"** row (non-selectable) |
-| **Loading hotels** | Destination chosen, fetch in flight | **8 skeleton cards** (photo block + 3 text lines shimmer); count reads "Loading hotels…" |
-| **Loaded** | Hotels returned | Grid of `HotelCard`; count "N hotels" (`aria-live`) |
-| **No hotels found** | Filters exclude all | `EmptyState`: "No hotels found", subtext "Try widening your filters", **[Reset filters]** button |
-| **Single page** | ≤ 8 results | Pagination hidden |
-| **Slugified params** | URL `?country=united-kingdom&city=london` | Hydrates combobox + filters from URL; back/forward restores exactly |
+| State                    | Trigger                                   | UI                                                                                                     |
+| ------------------------ | ----------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **No destination**       | Initial load, no `country`/`city`         | Hero only; grid area = `EmptyState`: map-pin icon, "Start by choosing a destination", combobox focused |
+| **No destination match** | Combobox text matches nothing             | Dropdown shows **"No destinations"** row (non-selectable)                                              |
+| **Loading hotels**       | Destination chosen, fetch in flight       | **8 skeleton cards** (photo block + 3 text lines shimmer); count reads "Loading hotels…"               |
+| **Loaded**               | Hotels returned                           | Grid of `HotelCard`; count "N hotels" (`aria-live`)                                                    |
+| **No hotels found**      | Filters exclude all                       | `EmptyState`: "No hotels found", subtext "Try widening your filters", **[Reset filters]** button       |
+| **Single page**          | ≤ 8 results                               | Pagination hidden                                                                                      |
+| **Slugified params**     | URL `?country=united-kingdom&city=london` | Hydrates combobox + filters from URL; back/forward restores exactly                                    |
 
 ---
 
@@ -289,11 +290,11 @@ Base CSS targets the smallest screen; each breakpoint **adds** capability.
 
 ## 8. Analytics events (track() facade)
 
-| Event | Fires when | Payload |
-|-------|-----------|---------|
-| `search_performed` | Destination selected or filter/sort applied | `{ city, country, filters }` |
-| `no_results` | Filters exclude all hotels | `{ filters }` (inventory-gap signal) |
-| `hotel_viewed` | Card click → detail mount (owned by detail page) | `{ hotelId }` |
+| Event              | Fires when                                       | Payload                              |
+| ------------------ | ------------------------------------------------ | ------------------------------------ |
+| `search_performed` | Destination selected or filter/sort applied      | `{ city, country, filters }`         |
+| `no_results`       | Filters exclude all hotels                       | `{ filters }` (inventory-gap signal) |
+| `hotel_viewed`     | Card click → detail mount (owned by detail page) | `{ hotelId }`                        |
 
 ---
 

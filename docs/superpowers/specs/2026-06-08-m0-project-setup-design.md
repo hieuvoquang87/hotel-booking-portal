@@ -19,6 +19,7 @@ skeleton from `architecture.md` §5 exists, and the seed lives behind `services/
 This is the stable base M1 builds on.
 
 **In scope (M0) — scaffolding only:**
+
 - Scaffold Next.js 15 (App Router, React 19, TS `strict: true`) + Tailwind v4.
 - Add `@tanstack/react-query` as a dependency (provider wired later in M3).
 - ESLint (Next flat config) + Prettier + import-order; npm scripts.
@@ -45,14 +46,14 @@ TypeScript project, Jest, and `services/mock/hotels.json` in place."
 The repo is **docs-only** — there is no `package.json`. Scaffolding must preserve
 what exists.
 
-| Present (must survive) | Notes |
-| --- | --- |
-| `.git`, GitHub remote `origin` | branch work continues as-is |
-| `.gitignore` | already a full Node ignore file — **merge**, don't overwrite |
-| `README.md` | one line; **replaced** by the M0 skeleton |
-| `docs/` (prd, architecture, roadmap, progress, specs, …) | untouched |
-| `ai-dev-workflow.md` | untouched |
-| `docs/mock-data.json` (40-hotel array) | **moved** to `services/mock/hotels.json` |
+| Present (must survive)                                   | Notes                                                        |
+| -------------------------------------------------------- | ------------------------------------------------------------ |
+| `.git`, GitHub remote `origin`                           | branch work continues as-is                                  |
+| `.gitignore`                                             | already a full Node ignore file — **merge**, don't overwrite |
+| `README.md`                                              | one line; **replaced** by the M0 skeleton                    |
+| `docs/` (prd, architecture, roadmap, progress, specs, …) | untouched                                                    |
+| `ai-dev-workflow.md`                                     | untouched                                                    |
+| `docs/mock-data.json` (40-hotel array)                   | **moved** to `services/mock/hotels.json`                     |
 
 Tooling available: **Node v22.14.0, npm 11.3.0** (supports Next 15 / React 19).
 
@@ -93,14 +94,14 @@ current Next 15 + Tailwind v4 config and confines risk to three known files
 Most of M0 is pre-decided by `progress.md` + the approved M1 spec. Defaults are
 **stated, not polled**:
 
-| Choice | Decision | Rationale |
-| --- | --- | --- |
-| Framework | **Next.js 15**, App Router, React 19, TS `strict: true` | roadmap stack; create-next-app default |
-| Styling | **Tailwind v4** (CSS-first; no `tailwind.config.js`) | create-next-app default; mobile-first base |
-| Package manager | **npm** | already present (npm 11.3); lockfile committed |
-| Server-state lib | `@tanstack/react-query` v5 — **dependency only** | provider wired in M3, not M0 |
-| Date input | **native `<input type="date">`; no library** | resolves progress.md's date-picker `⚠︎ decision`; nothing later needs a library |
-| Test runner | **Jest** (not Vitest) | every doc + the approved M1 spec assume Jest + an 85% gate |
+| Choice           | Decision                                                | Rationale                                                                      |
+| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Framework        | **Next.js 15**, App Router, React 19, TS `strict: true` | roadmap stack; create-next-app default                                         |
+| Styling          | **Tailwind v4** (CSS-first; no `tailwind.config.js`)    | create-next-app default; mobile-first base                                     |
+| Package manager  | **npm**                                                 | already present (npm 11.3); lockfile committed                                 |
+| Server-state lib | `@tanstack/react-query` v5 — **dependency only**        | provider wired in M3, not M0                                                   |
+| Date input       | **native `<input type="date">`; no library**            | resolves progress.md's date-picker `⚠︎ decision`; nothing later needs a library |
+| Test runner      | **Jest** (not Vitest)                                   | every doc + the approved M1 spec assume Jest + an 85% gate                     |
 
 ---
 
@@ -109,6 +110,7 @@ Most of M0 is pre-decided by `progress.md` + the approved M1 spec. Defaults are
 All three layers must execute **green with zero real tests** at the end of M0.
 
 ### 5.1 Jest + RTL + jsdom (via `next/jest`)
+
 - Config built with `next/jest` (`createJestConfig`) — inherits SWC transform, the
   `@/*` path alias, and CSS/asset mocks, so no manual Babel/ts-jest wiring.
 - `testEnvironment: 'jest-environment-jsdom'`.
@@ -120,8 +122,10 @@ All three layers must execute **green with zero real tests** at the end of M0.
 - Scripts run with `--passWithNoTests` so an empty repo is green.
 
 ### 5.2 Coverage gate sequencing (resolves the empty-repo contradiction)
+
 The `progress.md` Done-when implies an ≥85% gate at M0, but a threshold on a repo
 with zero source/tests fails vacuously. Resolution:
+
 - **M0:** no enforced `coverageThreshold` (or set to `0`); `test:coverage` runs and
   reports but never blocks.
 - **Gate activation:** ≥85% is enforced once `lib/` + `services/` exist (M1 raises
@@ -129,17 +133,20 @@ with zero source/tests fails vacuously. Resolution:
   reporter config.
 
 ### 5.3 MSW v2 bootstrap
+
 Set up now so the first integration test (M4/M5) works without a toolchain detour.
+
 - `mocks/handlers.ts` (empty/placeholder array), `mocks/server.ts`
   (`setupServer`), `mocks/browser.ts` (`setupWorker`).
 - **Known Jest+MSW-v2 plumbing handled in M0:** a `jest.polyfills.js`
   (TextEncoder/TextDecoder + `undici` `fetch`/`Response`/`Request`) loaded before
   the test framework, and jsdom `testEnvironmentOptions.customExportConditions:
-  ['']` so MSW resolves its Node interceptors. `transformIgnorePatterns` adjusted
+['']` so MSW resolves its Node interceptors. `transformIgnorePatterns` adjusted
   if MSW's ESM needs transforming. No handlers are asserted in M0 — only that the
   server can `listen()`/`close()` without error.
 
 ### 5.4 Playwright
+
 - `@playwright/test` + `playwright.config.ts` with a `webServer` block booting the
   app (`next dev`, `baseURL http://localhost:3000`), `testDir: 'e2e'`.
 - One trivial **smoke spec** (`e2e/smoke.spec.ts`): load `/`, assert the page
@@ -183,6 +190,7 @@ import-order rule (ESLint `import/order` or a Prettier sort-imports plugin —
 finalized in the plan). `eslint-config-prettier` disables conflicting rules.
 
 **`package.json` scripts:**
+
 ```
 dev            next dev
 build          next build
@@ -228,6 +236,7 @@ Done-when is the local-scripts list above.
 ## 9. Decisions & Doc Deltas
 
 **Resolved decisions:**
+
 - Scaffold via **Approach A** (scaffold-in-temp, merge) — confirmed.
 - **No CI in M0** — confirmed; deferred to a later milestone.
 - Date picker = **native, no dependency** — resolves progress.md decision #4.
@@ -235,6 +244,7 @@ Done-when is the local-scripts list above.
 - Coverage gate is **non-blocking in M0**, activated when code exists (M1/M7).
 
 **Doc deltas M0 implements (keep the doc set consistent):**
+
 - `progress.md` M0: replace the GitHub-Actions/CI task + "CI green on empty PR"
   Done-when with the local-scripts Done-when; record the resolved date-picker
   (native) decision; move CI to the later milestone.
