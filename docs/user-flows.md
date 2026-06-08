@@ -95,25 +95,25 @@ loading        success          empty           error
 
 ## Edge & Empty States
 
-| Point | Trigger | UI / behavior |
-|-------|---------|---------------|
-| Destination | no option matches input | "No destinations" |
-| Destination | empty input | show all options |
-| Destination | `/api/locations` slow/fails | disabled/empty dropdown + retry |
-| Results | no location selected yet | prompt to pick a destination |
-| Results | filters exclude all | "No hotels found" + reset |
-| Filter | price `min > max` | swap or block (no crash) |
-| Sort/page | bad param (`page=99`, `sort=x`) | clamp / default, never error |
-| Pagination | single page | hide controls |
-| Detail | invalid `/hotels/[id]` | not-found page |
-| Detail dates | checkout ≤ check-in | blocked / invalid |
-| Detail dates | partial (only check-in) | no fetch until both set |
-| Availability | loading | "Checking availability…" skeleton |
-| Availability | `available_dates: []` (15% of stock) | "No rooms available for these dates" |
-| Availability | dates outside July 2026 window | "No rooms available" (dataset accepted as-is) |
-| Availability | stale response (dates changed mid-flight) | latest-wins; older response ignored |
-| Availability | timeout / offline | inline error + retry; page not blocked |
-| Navigation | back/forward | restores filters/sort/page (not dates) |
+| Point        | Trigger                                   | UI / behavior                                 |
+| ------------ | ----------------------------------------- | --------------------------------------------- |
+| Destination  | no option matches input                   | "No destinations"                             |
+| Destination  | empty input                               | show all options                              |
+| Destination  | `/api/locations` slow/fails               | disabled/empty dropdown + retry               |
+| Results      | no location selected yet                  | prompt to pick a destination                  |
+| Results      | filters exclude all                       | "No hotels found" + reset                     |
+| Filter       | price `min > max`                         | swap or block (no crash)                      |
+| Sort/page    | bad param (`page=99`, `sort=x`)           | clamp / default, never error                  |
+| Pagination   | single page                               | hide controls                                 |
+| Detail       | invalid `/hotels/[id]`                    | not-found page                                |
+| Detail dates | checkout ≤ check-in                       | blocked / invalid                             |
+| Detail dates | partial (only check-in)                   | no fetch until both set                       |
+| Availability | loading                                   | "Checking availability…" skeleton             |
+| Availability | `available_dates: []` (15% of stock)      | "No rooms available for these dates"          |
+| Availability | dates outside July 2026 window            | "No rooms available" (dataset accepted as-is) |
+| Availability | stale response (dates changed mid-flight) | latest-wins; older response ignored           |
+| Availability | timeout / offline                         | inline error + retry; page not blocked        |
+| Navigation   | back/forward                              | restores filters/sort/page (not dates)        |
 
 ---
 

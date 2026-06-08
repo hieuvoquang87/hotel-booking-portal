@@ -50,13 +50,13 @@ npm run start    # serve the production build
 npm run lint     # ESLint (eslint-config-next: core-web-vitals + typescript)
 ```
 
-**Test toolchain is not wired yet** — it's M0 work. progress.md M0 specifies these *planned* scripts to add: `test` / `test:coverage` (Jest + RTL, ≥85% coverage gate), MSW for integration, and `test:e2e` (Playwright). Don't invoke them until they exist in `package.json`.
+**Test toolchain is not wired yet** — it's M0 work. progress.md M0 specifies these _planned_ scripts to add: `test` / `test:coverage` (Jest + RTL, ≥85% coverage gate), MSW for integration, and `test:e2e` (Playwright). Don't invoke them until they exist in `package.json`.
 
 ## Conventions & gotchas
 
 - **Next.js version caveat (see `@AGENTS.md`): this Next.js has breaking changes vs. training data — read `node_modules/next/dist/docs/` before writing Next-specific code.** Next 16, React 19, App Router, TypeScript `strict: true`.
 - **Path alias:** `@/*` maps to the repo root (e.g. `@/lib/slug`).
-- **Seed data:** lives at `docs/mock-data.json` **today**; M0 moves it to `services/mock/hotels.json`. Either way it stays behind the services and is never imported outside `services/`. No `getLocations()` seed file exists — locations are *derived* by aggregating unique city+country across the 40 hotels.
+- **Seed data:** lives at `docs/mock-data.json` **today**; M0 moves it to `services/mock/hotels.json`. Either way it stays behind the services and is never imported outside `services/`. No `getLocations()` seed file exists — locations are _derived_ by aggregating unique city+country across the 40 hotels.
 - **Slugs:** location URL params are slugified, diacritics stripped (`United Kingdom` → `united-kingdom`); `lib/slug.ts` must reverse-match slug → seed value.
 - Prices are USD; photos are placeholders (seed has no currency/image fields). Dates are ISO strings, no timezone math. Only date validation: checkout > check-in.
 - A room is available iff **every** night in `[check-in → check-out)` is in its `available_dates`.

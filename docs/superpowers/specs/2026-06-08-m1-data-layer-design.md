@@ -16,6 +16,7 @@ server-only services that return **domain types** (not raw seed shape), backed b
 pure, unit-tested logic in `lib/`. No UI, no API routes, no React.
 
 **In scope (M1):**
+
 - Seed accessor that isolates the raw JSON import (the Phase-2 swap seam).
 - Domain types: `Location`, `Hotel`, `Room`, `AvailableRoom`.
 - Mapping raw seed → domain types.
@@ -37,14 +38,14 @@ place. If M0 is not done, the plan creates the minimal pieces M1 needs.
 
 Verified against `services/mock/hotels.json` (40 hotels):
 
-| Fact | Value | Why it matters |
-| --- | --- | --- |
-| Countries | 6: USA, United Kingdom, France, Japan, Australia, Italy | `Location` carries country; USA has 5 cities, others 1 each |
-| Cities | 10 (4 hotels each) | Country selection spans multiple cities only for USA |
-| Availability window | **only `2026-07-10` → `2026-07-14`** (5 dates) | Stays outside this window return no rooms; test fixtures must use it |
-| No-availability inventory | exactly **6 hotels (15%)** have every room empty | Drives the "No rooms available" empty state (surfaced in M5) |
-| Hotel id format | `hotel-01` … `hotel-40` | `getHotelById` lookup key |
-| Currency / photos | seed has neither | USD assumed; `photoUrl` = placeholder constant, set at mapping |
+| Fact                      | Value                                                   | Why it matters                                                       |
+| ------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------- |
+| Countries                 | 6: USA, United Kingdom, France, Japan, Australia, Italy | `Location` carries country; USA has 5 cities, others 1 each          |
+| Cities                    | 10 (4 hotels each)                                      | Country selection spans multiple cities only for USA                 |
+| Availability window       | **only `2026-07-10` → `2026-07-14`** (5 dates)          | Stays outside this window return no rooms; test fixtures must use it |
+| No-availability inventory | exactly **6 hotels (15%)** have every room empty        | Drives the "No rooms available" empty state (surfaced in M5)         |
+| Hotel id format           | `hotel-01` … `hotel-40`                                 | `getHotelById` lookup key                                            |
+| Currency / photos         | seed has neither                                        | USD assumed; `photoUrl` = placeholder constant, set at mapping       |
 
 Raw hotel fields: `id, name, description, star_rating, overall_rating,
 review_count, address{street,city,state,zip_code,country}, contact, amenities[],
@@ -89,22 +90,22 @@ Domain shape, camelCase, decoupled from raw seed (assumptions §7):
 
 ```ts
 export type Location = {
-  city: string;          // "New York"
-  country: string;       // "USA"
-  state: string;         // "NY"
-  citySlug: string;      // "new-york"
-  countrySlug: string;   // "usa"
+  city: string; // "New York"
+  country: string; // "USA"
+  state: string; // "NY"
+  citySlug: string; // "new-york"
+  countrySlug: string; // "usa"
 };
 
 export type Room = {
   roomId: string;
-  type: string;          // "Deluxe King Room"
+  type: string; // "Deluxe King Room"
   bedType: string;
   bedCount: number;
   maxOccupancy: number;
   squareFootage: number;
   pricePerNight: number; // USD
-  amenities: string[];   // from room_amenities
+  amenities: string[]; // from room_amenities
   availableDates: string[]; // ISO date strings
 };
 
@@ -118,8 +119,8 @@ export type Hotel = {
   address: { street: string; city: string; state: string; zipCode: string; country: string };
   amenities: string[];
   policies: { checkInTime: string; checkOutTime: string; cancellation: string };
-  priceFrom: number;     // min room pricePerNight — for the card "from $X"
-  photoUrl: string;      // placeholder constant (seed has no images)
+  priceFrom: number; // min room pricePerNight — for the card "from $X"
+  photoUrl: string; // placeholder constant (seed has no images)
   rooms: Room[];
 };
 
@@ -185,10 +186,12 @@ checkAvailability(
 ## 6. Pure Logic (`lib/`)
 
 ### 6.1 `slug.ts`
+
 ```ts
 slugify(value: string): string
 buildSlugLookup(values: string[]): Map<string, string>   // slug → original
 ```
+
 - `slugify`: lowercase → strip diacritics (NFD + remove combining marks) →
   non-alphanumerics to hyphens → collapse/trim hyphens. `"New York"→"new-york"`,
   `"United Kingdom"→"united-kingdom"`, `"Île-de-France"→"ile-de-france"`.
@@ -197,41 +200,49 @@ buildSlugLookup(values: string[]): Map<string, string>   // slug → original
   expected in this seed; last-wins if they occur (documented, not handled specially).
 
 ### 6.2 `filters.ts`
+
 ```ts
 filterByStars(hotels: Hotel[], minStars: number): Hotel[]   // starRating >= minStars
 filterByPrice(hotels: Hotel[], min: number, max: number): Hotel[]
 ```
+
 - **Star = minimum** ("4★ & up"): keep `starRating >= minStars`.
 - **Price = any room in range** (per decision): keep hotels where
   `rooms.some(r => r.pricePerNight >= min && r.pricePerNight <= max)`.
-  *Known trade-off:* a hotel's card shows `priceFrom` (cheapest room), so a hotel can
+  _Known trade-off:_ a hotel's card shows `priceFrom` (cheapest room), so a hotel can
   appear under a low price filter via one cheap room while displaying a higher "from"
   price. Accepted; documented in ASSUMPTIONS.
 
 ### 6.3 `sort.ts`
+
 ```ts
 type SortKey = 'price-asc' | 'price-desc' | 'rating' | 'stars';
 sortHotels(hotels: Hotel[], key: SortKey): Hotel[]   // pure, returns a new array
 ```
+
 - `price-asc`/`price-desc` sort by `priceFrom`; `rating` by `overallRating` desc;
   `stars` by `starRating` desc. Stable: ties preserve input order (so the unsorted
   seed order is the deterministic default).
 
 ### 6.4 `paginate.ts`
+
 ```ts
 const PAGE_SIZE = 12;   // fixed; tunable constant
 paginate<T>(items: T[], page: number, size?: number): {
   items: T[]; page: number; totalPages: number; total: number;
 }
 ```
+
 - Clamps `page` into `[1, totalPages]` (so `page=99` returns the last page, never
   errors); `totalPages` is `1` when there are zero items.
 
 ### 6.5 `availability.ts`
+
 ```ts
 nightsInRange(checkIn: string, checkOut: string): string[]   // [checkIn .. checkOut)
 isRoomAvailable(room: Room, nights: string[]): boolean
 ```
+
 - `nightsInRange` returns each ISO date from `checkIn` up to **but not including**
   `checkOut` (a 2-night stay `[07-10, 07-12)` → `["2026-07-10","2026-07-11"]`).
   Iterates by UTC day to avoid timezone drift; no TZ math beyond that.
@@ -244,10 +255,10 @@ isRoomAvailable(room: Room, nights: string[]): boolean
 
 M1 throws typed errors; M2 maps them to HTTP. Defined in `types/domain.ts`:
 
-| Error | Thrown when | M2 maps to (later) |
-| --- | --- | --- |
-| `InvalidDateRangeError` | `checkOut <= checkIn` in `checkAvailability` | 400 |
-| `HotelNotFoundError` | `checkAvailability` called with unknown id | 404 |
+| Error                   | Thrown when                                  | M2 maps to (later) |
+| ----------------------- | -------------------------------------------- | ------------------ |
+| `InvalidDateRangeError` | `checkOut <= checkIn` in `checkAvailability` | 400                |
+| `HotelNotFoundError`    | `checkAvailability` called with unknown id   | 404                |
 
 `getHotelById` returns `null` (not a throw) for unknown id — it's an expected lookup
 miss, and M2 turns `null` into 404. Partial/absent dates are **not** M1's concern:
@@ -283,6 +294,7 @@ values inside the `2026-07-10 → 07-14` window**.
 ## 9. Decisions & Open Items
 
 **Resolved decisions:**
+
 - Star filter = **minimum** ("4★ & up").
 - Price filter = **any room in range** (not min-room). → update `progress.md` M1
   wording (currently says "min room price").

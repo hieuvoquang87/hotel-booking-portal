@@ -17,14 +17,7 @@
       "phone": "+1-312-555-0199",
       "email": "stay@grandluminary.com"
     },
-    "amenities": [
-      "pool",
-      "free Wi-Fi",
-      "fitness_center",
-      "spa",
-      "valet_parking",
-      "pet_friendly"
-    ],
+    "amenities": ["pool", "free Wi-Fi", "fitness_center", "spa", "valet_parking", "pet_friendly"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "11:00",
@@ -73,13 +66,7 @@
       "phone": "+1-312-555-0145",
       "email": "reservations@chicagoriverfront.com"
     },
-    "amenities": [
-      "pool",
-      "free Wi-Fi",
-      "fitness_center",
-      "restaurant",
-      "valet_parking"
-    ],
+    "amenities": ["pool", "free Wi-Fi", "fitness_center", "restaurant", "valet_parking"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "12:00",
@@ -128,12 +115,7 @@
       "phone": "+1-312-555-0188",
       "email": "info@windycitysuites.com"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "fitness_center",
-      "laundry_service",
-      "pet_friendly"
-    ],
+    "amenities": ["free Wi-Fi", "fitness_center", "laundry_service", "pet_friendly"],
     "policies": {
       "check_in_time": "16:00",
       "check_out_time": "11:00",
@@ -209,12 +191,7 @@
       "phone": "+1-512-555-0143",
       "email": "hello@urbannestaustin.com"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "fitness_center",
-      "bicycle_rentals",
-      "pet_friendly"
-    ],
+    "amenities": ["free Wi-Fi", "fitness_center", "bicycle_rentals", "pet_friendly"],
     "policies": {
       "check_in_time": "16:00",
       "check_out_time": "12:00",
@@ -301,14 +278,7 @@
       "phone": "+1-512-555-0900",
       "email": "reservations@lonestarluxury.com"
     },
-    "amenities": [
-      "pool",
-      "free Wi-Fi",
-      "spa",
-      "fitness_center",
-      "valet_parking",
-      "restaurant"
-    ],
+    "amenities": ["pool", "free Wi-Fi", "spa", "fitness_center", "valet_parking", "restaurant"],
     "policies": {
       "check_in_time": "16:00",
       "check_out_time": "11:00",
@@ -324,12 +294,7 @@
         "square_footage": 680,
         "price_per_night": 450.0,
         "room_amenities": ["balcony", "fireplace", "espresso_machine"],
-        "available_dates": [
-          "2026-07-10",
-          "2026-07-11",
-          "2026-07-12",
-          "2026-07-13"
-        ]
+        "available_dates": ["2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13"]
       }
     ]
   },
@@ -481,12 +446,7 @@
         "square_footage": 510,
         "price_per_night": 399.0,
         "room_amenities": ["ocean_view", "balcony"],
-        "available_dates": [
-          "2026-07-10",
-          "2026-07-11",
-          "2026-07-12",
-          "2026-07-13"
-        ]
+        "available_dates": ["2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13"]
       }
     ]
   },
@@ -508,13 +468,7 @@
       "phone": "+1-305-555-0155",
       "email": "fun@biscaynebayresort.com"
     },
-    "amenities": [
-      "pool",
-      "free Wi-Fi",
-      "fitness_center",
-      "restaurant",
-      "marina_access"
-    ],
+    "amenities": ["pool", "free Wi-Fi", "fitness_center", "restaurant", "marina_access"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "11:00",
@@ -590,13 +544,7 @@
       "phone": "+1-212-555-0100",
       "email": "reservations@manhattanheights.com"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "fitness_center",
-      "spa",
-      "valet_parking",
-      "restaurant"
-    ],
+    "amenities": ["free Wi-Fi", "fitness_center", "spa", "valet_parking", "restaurant"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "12:00",
@@ -612,12 +560,7 @@
         "square_footage": 550,
         "price_per_night": 495.0,
         "room_amenities": ["soaking_tub", "mini_bar"],
-        "available_dates": [
-          "2026-07-10",
-          "2026-07-11",
-          "2026-07-12",
-          "2026-07-13"
-        ]
+        "available_dates": ["2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13"]
       }
     ]
   },
@@ -677,12 +620,7 @@
       "phone": "+1-718-555-0144",
       "email": "stay@brooklynbrick.com"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "fitness_center",
-      "rooftop_bar",
-      "pet_friendly"
-    ],
+    "amenities": ["free Wi-Fi", "fitness_center", "rooftop_bar", "pet_friendly"],
     "policies": {
       "check_in_time": "16:00",
       "check_out_time": "11:00",
@@ -796,13 +734,7 @@
       "phone": "+1-206-555-0199",
       "email": "stay@pugetsoundvista.com"
     },
-    "amenities": [
-      "pool",
-      "free Wi-Fi",
-      "fitness_center",
-      "spa",
-      "valet_parking"
-    ],
+    "amenities": ["pool", "free Wi-Fi", "fitness_center", "spa", "valet_parking"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "12:00",
@@ -818,12 +750,7 @@
         "square_footage": 480,
         "price_per_night": 315.0,
         "room_amenities": ["water_view", "espresso_machine"],
-        "available_dates": [
-          "2026-07-10",
-          "2026-07-11",
-          "2026-07-12",
-          "2026-07-13"
-        ]
+        "available_dates": ["2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13"]
       },
       {
         "room_id": "room-19b",
@@ -834,12 +761,7 @@
         "square_footage": 480,
         "price_per_night": 315.0,
         "room_amenities": ["water_view", "espresso_machine"],
-        "available_dates": [
-          "2026-07-10",
-          "2026-07-11",
-          "2026-07-12",
-          "2026-07-13"
-        ]
+        "available_dates": ["2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13"]
       }
     ]
   },
@@ -861,12 +783,7 @@
       "phone": "+1-206-555-0143",
       "email": "frontdesk@raincityboutique.com"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "free_breakfast",
-      "bicycle_rentals",
-      "pet_friendly"
-    ],
+    "amenities": ["free Wi-Fi", "free_breakfast", "bicycle_rentals", "pet_friendly"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "11:00",
@@ -960,12 +877,7 @@
       "phone": "+44-20-7555-0199",
       "email": "stay@thamesviewapts.co.uk"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "fitness_center",
-      "laundry_service",
-      "meeting_rooms"
-    ],
+    "amenities": ["free Wi-Fi", "fitness_center", "laundry_service", "meeting_rooms"],
     "policies": {
       "check_in_time": "16:00",
       "check_out_time": "11:00",
@@ -981,12 +893,7 @@
         "square_footage": 410,
         "price_per_night": 245.0,
         "room_amenities": ["river_view", "kitchenette", "smart_tv"],
-        "available_dates": [
-          "2026-07-10",
-          "2026-07-11",
-          "2026-07-12",
-          "2026-07-13"
-        ]
+        "available_dates": ["2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13"]
       }
     ]
   },
@@ -1008,12 +915,7 @@
       "phone": "+44-20-7555-0112",
       "email": "hello@shoreditchhip.co.uk"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "rooftop_bar",
-      "bicycle_rentals",
-      "pet_friendly"
-    ],
+    "amenities": ["free Wi-Fi", "rooftop_bar", "bicycle_rentals", "pet_friendly"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "11:00",
@@ -1145,12 +1047,7 @@
       "phone": "+33-1-5555-0144",
       "email": "stay@maraischic.fr"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "fitness_center",
-      "bicycle_rentals",
-      "courtyard_cafe"
-    ],
+    "amenities": ["free Wi-Fi", "fitness_center", "bicycle_rentals", "courtyard_cafe"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "11:00",
@@ -1275,14 +1172,7 @@
       "phone": "+81-3-5555-0191",
       "email": "stay@shinjukuskytower.jp"
     },
-    "amenities": [
-      "pool",
-      "free Wi-Fi",
-      "fitness_center",
-      "spa",
-      "valet_parking",
-      "sky_bar"
-    ],
+    "amenities": ["pool", "free Wi-Fi", "fitness_center", "spa", "valet_parking", "sky_bar"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "12:00",
@@ -1298,12 +1188,7 @@
         "square_footage": 480,
         "price_per_night": 410.0,
         "room_amenities": ["fuji_view", "deep_soaking_tub"],
-        "available_dates": [
-          "2026-07-10",
-          "2026-07-11",
-          "2026-07-12",
-          "2026-07-13"
-        ]
+        "available_dates": ["2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13"]
       }
     ]
   },
@@ -1325,12 +1210,7 @@
       "phone": "+81-3-5555-0145",
       "email": "hello@shibuyaneonnest.jp"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "fitness_center",
-      "restaurant",
-      "laundry_service"
-    ],
+    "amenities": ["free Wi-Fi", "fitness_center", "restaurant", "laundry_service"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "11:00",
@@ -1406,11 +1286,7 @@
       "phone": "+81-3-5555-0177",
       "email": "welcome@asakusaryokan.jp"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "public_hot_spring_bath",
-      "traditional_breakfast"
-    ],
+    "amenities": ["free Wi-Fi", "public_hot_spring_bath", "traditional_breakfast"],
     "policies": {
       "check_in_time": "15:00",
       "check_out_time": "10:00",
@@ -1493,13 +1369,7 @@
       "phone": "+61-2-5555-0198",
       "email": "surf@bondibeachpad.com.au"
     },
-    "amenities": [
-      "pool",
-      "free Wi-Fi",
-      "beach_access",
-      "bicycle_rentals",
-      "pet_friendly"
-    ],
+    "amenities": ["pool", "free Wi-Fi", "beach_access", "bicycle_rentals", "pet_friendly"],
     "policies": {
       "check_in_time": "14:00",
       "check_out_time": "10:00",
@@ -1658,12 +1528,7 @@
       "phone": "+39-06-5555-0110",
       "email": "stay@trasteverecharm.it"
     },
-    "amenities": [
-      "free Wi-Fi",
-      "free_breakfast",
-      "rooftop_wine_bar",
-      "bicycle_rentals"
-    ],
+    "amenities": ["free Wi-Fi", "free_breakfast", "rooftop_wine_bar", "bicycle_rentals"],
     "policies": {
       "check_in_time": "14:00",
       "check_out_time": "11:00",

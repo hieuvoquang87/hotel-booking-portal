@@ -16,11 +16,11 @@ master ──────────────────→ Staging        
 production ──────────────→ Production       promote a specific build, never auto
 ```
 
-| Env | Trigger | Purpose |
-|-----|---------|---------|
-| Preview (E2E) | open/update PR | isolated URL; CI runs unit + integration + Playwright E2E |
-| Staging | merge to `master` | integrated QA on production-like build |
-| Production | **manual** promote of a chosen version | release control |
+| Env           | Trigger                                | Purpose                                                   |
+| ------------- | -------------------------------------- | --------------------------------------------------------- |
+| Preview (E2E) | open/update PR                         | isolated URL; CI runs unit + integration + Playwright E2E |
+| Staging       | merge to `master`                      | integrated QA on production-like build                    |
+| Production    | **manual** promote of a chosen version | release control                                           |
 
 Gate: a PR can't merge unless CI (lint, types, 85% coverage, E2E) is green.
 
