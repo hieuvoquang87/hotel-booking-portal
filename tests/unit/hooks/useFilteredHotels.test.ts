@@ -1,6 +1,7 @@
 // tests/unit/hooks/useFilteredHotels.test.ts
+import { renderHook } from '@testing-library/react';
 import { makeHotel, makeRoom } from '@/tests/fixtures';
-import { filterSortPaginate } from '@/hooks/useFilteredHotels';
+import { filterSortPaginate, useFilteredHotels } from '@/hooks/useFilteredHotels';
 
 const hotel = (id: string, stars: number, price: number) =>
   makeHotel({ id, starRating: stars, rooms: [makeRoom({ pricePerNight: price })] });
@@ -66,5 +67,22 @@ describe('filterSortPaginate', () => {
       page: 1,
     });
     expect(result.items.map((h) => h.id)).toEqual(['cheap', 'mid']);
+  });
+});
+
+describe('useFilteredHotels (memoized hook)', () => {
+  const hotels = [hotel('a', 3, 300), hotel('b', 5, 100), hotel('c', 4, 200)];
+  const params = { stars: null, min: null, max: null, sort: 'price-asc' as const, page: 1 };
+
+  it('returns the same page view as filterSortPaginate', () => {
+    const { result } = renderHook(() => useFilteredHotels(hotels, params));
+    expect(result.current).toEqual(filterSortPaginate(hotels, params));
+  });
+
+  it('returns a stable reference across re-renders with unchanged inputs', () => {
+    const { result, rerender } = renderHook(() => useFilteredHotels(hotels, params));
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first); // memo holds → no recompute
   });
 });

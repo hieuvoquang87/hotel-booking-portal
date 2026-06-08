@@ -36,7 +36,9 @@ export function filterSortPaginate(hotels: Hotel[], params: RefineParams): Page<
 export function useFilteredHotels(hotels: Hotel[], params: RefineParams): Page<Hotel> {
   return useMemo(
     () => filterSortPaginate(hotels, params),
-    // Primitive deps keep recompute under the <100ms budget on unrelated renders.
+    // Deliberately list params' primitive fields instead of the object: callers
+    // reconstruct params inline each render, so depending on it would defeat the memo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [hotels, params.stars, params.min, params.max, params.sort, params.page],
   );
 }

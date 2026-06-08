@@ -1,5 +1,5 @@
 // tests/unit/lib/fetcher.test.ts
-import { ApiError, getJson } from '@/lib/fetcher';
+import { getJson } from '@/lib/fetcher';
 
 describe('getJson', () => {
   const realFetch = global.fetch;
