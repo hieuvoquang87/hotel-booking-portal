@@ -2004,6 +2004,7 @@ import { useHotels } from '../../hooks/useHotels';
 import { useLocations } from '../../hooks/useLocations';
 import { useSearchParamsState } from '../../hooks/useSearchParamsState';
 import { buildDestinationOptions, type DestinationOption } from '../../lib/destinations';
+import type { Hotel } from '../../types/domain';
 import { track } from '../../utils/analyticUtil';
 import { EmptyState } from '../EmptyState';
 import { DestinationCombobox } from './DestinationCombobox';
@@ -2014,6 +2015,12 @@ import { Pagination } from './Pagination';
 import { RefineToolbar } from './RefineToolbar';
 import { ResultCount } from './ResultCount';
 
+// Stable empty fallback: an inline `?? []` mints a new array every render while
+// hotels.data is undefined (the whole loading period), changing useFilteredHotels'
+// `hotels` dep and defeating its memo. A module-scope constant keeps the reference
+// stable so filter→sort→paginate only recomputes on real input changes. (M3 review.)
+const EMPTY_HOTELS: Hotel[] = [];
+
 export function HomeView() {
   const { state, setParams } = useSearchParamsState();
   const locations = useLocations();
@@ -2023,7 +2030,7 @@ export function HomeView() {
   const options = buildDestinationOptions(locations.data ?? []);
   const hasDestination = !!(state.country || state.city);
 
-  const view = useFilteredHotels(hotels.data ?? [], {
+  const view = useFilteredHotels(hotels.data ?? EMPTY_HOTELS, {
     stars: state.stars,
     min: state.min,
     max: state.max,
