@@ -23,7 +23,7 @@ and mobile-first design for assumed 80% mobile traffic.
 | #   | Milestone                         | Scope                                                       | Status |
 | --- | --------------------------------- | ----------------------------------------------------------- | ------ |
 | M0  | Project setup & tooling           | Next.js/TS/Tailwind/RQ + Jest/RTL/MSW/Playwright (CI → M7)  | [x]    |
-| M1  | Data layer & domain               | Domain types, `hotelService`, `availabilityService`, `lib/` | [ ]    |
+| M1  | Data layer & domain               | Domain types, `hotelService`, `availabilityService`, `lib/` | [~]    |
 | M2  | BFF API routes                    | `/api/locations`, `/api/hotels`, `[id]`, `[id]/rooms`       | [ ]    |
 | M3  | Client state & data hooks         | QueryProvider, AppProvider, the four `use*` hooks           | [ ]    |
 | M4  | Search · filter · sort · paginate | Home page: dropdown, filters, sort, pagination, grid        | [ ]    |
@@ -70,11 +70,11 @@ available_dates[]`.
 
 ### Domain & service gateway
 
-- [ ] Define **domain types** (`Hotel`, `Room`, `Location`, `Availability`) — domain shape, not raw seed shape (map at the boundary, per assumptions §7).
-- [ ] `services/hotelService.ts` (server-only): `getLocations()`, `getHotelsByLocation({country, city})`, `getHotelById(id)`.
+- [x] Define **domain types** (`Hotel`, `Room`, `Location`, `Availability`) — domain shape, not raw seed shape (map at the boundary, per assumptions §7).
+- [~] `services/hotelService.ts` (server-only): `getLocations()`, `getHotelsByLocation({country, city})`, `getHotelById(id)`.
   - **Note:** `getLocations()` is a **derivation** — aggregate the unique `city`+`country` set across the 40 hotels; there is no locations seed file.
-- [ ] `services/availabilityService.ts` (server-only): given `(hotelId, check_in, check_out)`, returns available rooms + `price_per_night`, **simulating a slow third-party** (artificial latency). `⚠︎ decision`: latency target (e.g. 800ms–1.5s).
-- [ ] Map seed `address.city`/`country` → `Location`; keep USD assumption + placeholder photo at the mapping layer (seed has no currency/image fields).
+- [~] `services/availabilityService.ts` (server-only): given `(hotelId, check_in, check_out)`, returns available rooms + `price_per_night`, **simulating a slow third-party** (artificial latency). `⚠︎ decision`: latency target (e.g. 800ms–1.5s).
+- [x] Map seed `address.city`/`country` → `Location`; keep USD assumption + placeholder photo at the mapping layer (seed has no currency/image fields). _(services/mappers.ts `mapLocation()` + `services/seed.ts`)_
 
 ### Pure logic (`lib/`)
 
