@@ -13,7 +13,18 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Generated test artifacts (also gitignored).
+    'coverage/**',
+    'playwright-report/**',
+    'test-results/**',
   ]),
+  // CommonJS tooling config (jest.config.js uses next/jest, which requires CJS).
+  {
+    files: ['**/*.config.js'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
   // Disable ESLint formatting rules that conflict with Prettier. Must be last.
   eslintConfigPrettier,
 ]);
