@@ -123,6 +123,11 @@ stores/
 
 **Extends Phase 1** — assumes routes, components, and data layer exist.
 
+> **Framing:** Phase 1 _makes it work_ (ship the 3 core features clean). Phase 2
+> _makes it right_ — adds booking, crawlable SEO, a real-API seam, observability,
+> and the operability/resilience hardening in §6 below. Nothing in Phase 2 is
+> implemented yet; the items here are **designed plans**.
+
 ### 1. Booking (New Feature)
 
 ```
@@ -217,6 +222,42 @@ type Event =
 
 **Layers:** `error.tsx` · `not-found.tsx` · `loading.tsx` · `global-error.tsx`
 
+### 6. Operability & Resilience — _Make it right_
+
+> **Designed, not implemented.** Full spec:
+> [`superpowers/specs/2026-06-08-operability-resilience-design.md`](superpowers/specs/2026-06-08-operability-resilience-design.md).
+
+Hardens the one expensive/slow/unreliable boundary (availability) and makes it
+operable. Rests on the **M1 `availabilityService` (already built)**, so it is
+buildable independently of the rest of Phase 2. Covers 4 of the 6 AWS
+Well-Architected pillars — **Security is deliberately excluded** (the 6th, out of
+scope for this slice).
+
+**One control-flow path** around availability (not a feature checklist):
+
+```
+breaker OPEN? ───────────────► fallback ladder
+cache fresh (within TTL)? ───► return cached                    [cost]
+else call upstream (timeout-bounded, ≤2 retries + jitter)
+   success   → write cache, return                              [reliability]
+   exhausted → trip breaker → fallback ladder
+fallback ladder: stale cache (last-known) → "pricing unavailable"
+                 (hotel browsing never blocks)
+```
+
+| Pillar | Delivers |
+| --- | --- |
+| Reliability / Resiliency | timeout, bounded retry + jitter, circuit breaker, tiered fallback, stale-cache last-known |
+| Performance | availability cache, edge cache headers on cheap reads, web-vitals CI budget, load-test thresholds |
+| Cost Optimization | cache the expensive upstream, edge caching to cut invocations, deferred sampling noted |
+| Operational Excellence | feature flags, `track()` metric events, SLOs + alerts (designed), load tests, incident playbooks, CI perf/bundle gates |
+
+**Keystone:** a **fault-injection mode** in the mock service makes every resilience
+claim triggerable and testable on mock — the breaker actually trips, serves stale,
+and recovers. Design thinking, not a wishlist. **New seams:** `services/resilience.ts`,
+`services/cache.ts`, `services/config.ts`, `load/` (k6/autocannon), `docs/runbooks/`
+(incident playbooks: detection → diagnosis → mitigation → recovery).
+
 ---
 
 ## Shared Assumptions & Tradeoffs
@@ -240,6 +281,10 @@ type Event =
 | Country segment in URL (Phase 2)    | International = more data, not a route rewrite                       |
 | SSG + ISR (Phase 2)                 | Small inventory → pre-render all; ISR handles price drift            |
 | Intent slugs allow-listed (Phase 2) | Controlled crawl surface; no infinite filter URLs                    |
+| Resilience policy transport-agnostic (P2) | Wraps mock today + real `http.ts` later; lets the breaker trip in a test on mock |
+| One availability cache, two read policies (P2) | Fresh-within-TTL = cost; stale-past-TTL = resilience fallback; never hard-evict last-known |
+| Breaker + cache state per-instance (P2)        | Fine for demo; Redis/edge-KV is the documented swap seam            |
+| Fault injection ships disabled (P2)            | A test affordance to exercise resilience paths, not prod behavior   |
 
 ---
 
@@ -272,3 +317,6 @@ type Event =
 1. City landing content — all hotels or sorted by rating/price?
 2. ISR revalidate window — how fresh must prices/availability be (1h vs 5m)?
 3. State slug for intl — scheme for non-US (e.g., `idf` for Île-de-France)?
+4. Circuit-breaker thresholds — failure count to open, cooldown before half-open? (§6)
+5. Availability cache TTL — and how stale is acceptable as a last-known fallback? (§6)
+6. SLO targets — availability p95 latency and acceptable user-visible error rate? (§6)
