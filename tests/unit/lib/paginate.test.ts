@@ -22,4 +22,11 @@ describe('paginate', () => {
   it('defaults to PAGE_SIZE', () => {
     expect(paginate(nums, 1).items).toHaveLength(PAGE_SIZE);
   });
+  it('uses a page size of 8 (home grid design contract)', () => {
+    expect(PAGE_SIZE).toBe(8);
+    const items = Array.from({ length: 20 }, (_, i) => i);
+    const result = paginate(items, 1);
+    expect(result.items).toHaveLength(8);
+    expect(result.totalPages).toBe(3); // 20 items / 8 = 3 pages
+  });
 });

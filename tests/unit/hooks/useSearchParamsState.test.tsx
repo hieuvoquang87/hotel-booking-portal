@@ -24,14 +24,14 @@ describe('parseRefineState', () => {
       stars: null,
       min: null,
       max: null,
-      sort: 'price-asc',
+      sort: 'rating',
       page: 1,
     });
   });
 
   it('coerces an unknown sort and a bad page', () => {
     const s = parseRefineState(new URLSearchParams('sort=nope&page=0'));
-    expect(s.sort).toBe('price-asc');
+    expect(s.sort).toBe('rating');
     expect(s.page).toBe(1);
   });
 
@@ -76,29 +76,29 @@ describe('nextState page-reset', () => {
 });
 
 describe('toSearchParams', () => {
-  it('omits defaults and nulls, sorts keys', () => {
+  it('omits the default sort (rating) and nulls, sorts keys', () => {
     const qs = toSearchParams({
       country: 'usa',
       city: null,
       stars: 4,
       min: null,
       max: null,
-      sort: 'price-asc',
+      sort: 'rating',
       page: 1,
     }).toString();
     expect(qs).toBe('country=usa&stars=4');
   });
-  it('includes sort and page when non-default', () => {
+  it('includes a non-default sort and page', () => {
     const qs = toSearchParams({
       country: null,
       city: null,
       stars: null,
       min: null,
       max: null,
-      sort: 'rating',
+      sort: 'price-asc',
       page: 2,
     }).toString();
-    expect(qs).toBe('page=2&sort=rating');
+    expect(qs).toBe('page=2&sort=price-asc');
   });
 });
 

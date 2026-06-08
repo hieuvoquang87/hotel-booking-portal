@@ -28,3 +28,40 @@ export const roomsHandler = http.get(`${ORIGIN}/api/hotels/:id/rooms`, () =>
 );
 
 export const m3Handlers = [locationsHandler, hotelsHandler, roomsHandler];
+
+// Richer doubles for the M4 home full-flow integration test: two USA cities and
+// > 8 hotels (so pagination has ≥ 2 pages at page size 8) across a star/price spread.
+const usaHotels = Array.from({ length: 10 }, (_, i) => ({
+  id: `hotel-${String(i + 1).padStart(2, '0')}`,
+  name: `USA Hotel ${i + 1}`,
+  description: '',
+  starRating: (i % 3) + 3, // 3, 4, 5
+  overallRating: 4 + (i % 5) / 10,
+  reviewCount: 100 + i,
+  address: {
+    street: '',
+    city: i < 5 ? 'Chicago' : 'New York',
+    state: i < 5 ? 'IL' : 'NY',
+    zipCode: '',
+    country: 'USA',
+  },
+  amenities: ['free_wifi', 'spa'],
+  policies: { checkInTime: '', checkOutTime: '', cancellation: '' },
+  priceFrom: 100 + i * 25,
+  photoUrl: '',
+  rooms: [],
+}));
+
+export const homeLocationsHandler = http.get(`${ORIGIN}/api/locations`, () =>
+  HttpResponse.json([
+    { city: 'Chicago', state: 'IL', country: 'USA', citySlug: 'chicago', countrySlug: 'usa' },
+    { city: 'New York', state: 'NY', country: 'USA', citySlug: 'new-york', countrySlug: 'usa' },
+  ]),
+);
+
+export const homeHotelsHandler = http.get(`${ORIGIN}/api/hotels`, ({ request }) => {
+  const country = new URL(request.url).searchParams.get('country');
+  return HttpResponse.json(country === 'usa' ? usaHotels : []);
+});
+
+export const homeFlowHandlers = [homeLocationsHandler, homeHotelsHandler];
