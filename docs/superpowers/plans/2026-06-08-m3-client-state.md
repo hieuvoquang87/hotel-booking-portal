@@ -10,7 +10,27 @@
 
 **Spec:** `docs/superpowers/specs/2026-06-08-m3-client-state-design.md`
 
-**Conventions for every task:** run tests with `npx jest <path>`; co-locate `*.test.ts(x)` next to source; relative imports (`../lib/...`, `../types/...`) matching M1; commit after each green task with conventional-commit prefixes.
+> **As-built note (post-implementation).** This plan was drafted against an assumed M0
+> toolchain that differed from what M0 actually shipped; the milestone was built with the
+> deviations below. The code/test snippets further down are kept as the historical plan —
+> where they conflict with this note, the note is what landed (mirrors how the M0 plan
+> annotates its own `jest.polyfills.js`/`undici` divergence).
+>
+> - **Tests live under `tests/unit/{lib,stores,hooks}/` with `@/` alias imports**, mirroring
+>   source — _not_ co-located, and not relative imports (per CLAUDE.md "Test layout").
+> - **Task 0 added no `jest.polyfills.js`, no `undici`, and did not overwrite `jest.config.js`.**
+>   M0's `jest-fixed-jsdom` config already gives MSW v2 its Web-API globals; Task 0 shrank to
+>   adding `process.env.API_BASE_URL='http://localhost'` to `tests/setupApiEnv.ts`.
+> - **Task 6 reused `@/mocks/server`** (created in M0, starts with empty handlers) instead of a
+>   new `tests/msw/`. Default `/api/*` doubles live in `tests/utils/mswHandlers.ts` (`m3Handlers`)
+>   and are opted into per test file via `server.use(...m3Handlers)`; `mocks/handlers.ts` stays
+>   empty so the dev worker and integration tests are unaffected.
+> - **`SortKey` is re-exported from `lib/sort.ts`** (single source of truth) rather than redefined
+>   inline in `useSearchParamsState.ts`.
+> - `tests/utils/queryWrapper.tsx` sets `retryDelay: 0` (load-bearing: a hook's own `retry`
+>   overrides the client default, so without it error-path tests exceed their timeout).
+
+**Conventions for every task:** run tests with `npx jest <path>`; tests live under `tests/unit/` mirroring source with `@/` alias imports (per CLAUDE.md, _not_ co-located); commit after each green task with conventional-commit prefixes.
 
 **Assumes M0–M2 are done:** Next + TS + Tailwind, `@tanstack/react-query`, Jest/RTL/MSW, M1's `types/domain.ts` + `lib/{filters,sort,paginate}.ts` + `tests/fixtures.ts`, and M2's four `/api/*` routes. Task 0 installs/configures only what may be missing.
 
@@ -18,29 +38,35 @@
 
 ## File Map
 
-| File                                | Responsibility                                                          |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| `jest.config.js`                    | `next/jest`, jsdom, `setupFiles` polyfills, `customExportConditions`, coverage globs (Task 0) |
-| `jest.polyfills.js`                 | Web-API globals for MSW v2 on jsdom + `API_BASE_URL` (Task 0)            |
-| `lib/fetcher.ts`                    | `ApiError`, `getJson<T>` — typed fetch, throws on non-2xx               |
-| `stores/AppProvider.tsx`            | `AppProvider`, `useAppDates()` — check-in/out dates context             |
-| `stores/QueryProvider.tsx`          | `makeQueryClient`, `QueryProvider` — RQ client + provider               |
-| `hooks/useSearchParamsState.ts`     | `parseRefineState`, `nextState`, `toSearchParams`, `useSearchParamsState` |
-| `hooks/useFilteredHotels.ts`        | `filterSortPaginate` (pure), `useFilteredHotels` (memoized)             |
-| `tests/msw/handlers.ts`             | MSW request handlers for `/api/*` (test doubles)                        |
-| `tests/msw/server.ts`               | MSW `setupServer` instance                                              |
-| `tests/utils/queryWrapper.tsx`      | `createQueryWrapper` — fresh `QueryClient` per test                     |
-| `hooks/useLocations.ts`             | RQ hook → `/api/locations`                                              |
-| `hooks/useHotels.ts`                | RQ hook → `/api/hotels?country=&city=`                                  |
-| `hooks/useAvailability.ts`          | RQ hook → `/api/hotels/[id]/rooms?check_in=&check_out=`                 |
-| `app/layout.tsx`                    | Mount `QueryProvider` + `AppProvider` (Task 10, if M0 created it)       |
-| `docs/progress.md`                  | Check off M3; note hand-rolled URL hook + Suspense + fetcher (Task 10)  |
+| File                            | Responsibility                                                                                                                                                                     |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/setupApiEnv.ts`          | _As-built (Task 0):_ adds `API_BASE_URL='http://localhost'` — replaces the planned `jest.config.js` rewrite / `jest.polyfills.js` (M0's `jest-fixed-jsdom` already covers globals) |
+| ~~`jest.polyfills.js`~~         | _Not created_ — redundant under M0's `jest-fixed-jsdom`                                                                                                                            |
+| `lib/fetcher.ts`                | `ApiError`, `getJson<T>` — typed fetch, throws on non-2xx                                                                                                                          |
+| `stores/AppProvider.tsx`        | `AppProvider`, `useAppDates()` — check-in/out dates context                                                                                                                        |
+| `stores/QueryProvider.tsx`      | `makeQueryClient`, `QueryProvider` — RQ client + provider                                                                                                                          |
+| `hooks/useSearchParamsState.ts` | `parseRefineState`, `nextState`, `toSearchParams`, `useSearchParamsState`                                                                                                          |
+| `hooks/useFilteredHotels.ts`    | `filterSortPaginate` (pure), `useFilteredHotels` (memoized)                                                                                                                        |
+| `tests/utils/mswHandlers.ts`    | _As-built:_ default `/api/*` doubles (`m3Handlers`), opted in per test via `server.use(...)` — replaces planned `tests/msw/handlers.ts`                                            |
+| `@/mocks/server.ts`             | _As-built:_ reused M0's MSW `setupServer` (starts empty) — replaces planned `tests/msw/server.ts`                                                                                  |
+| `tests/utils/queryWrapper.tsx`  | `createQueryWrapper` — fresh `QueryClient` per test (`retry:false, retryDelay:0, gcTime:0`)                                                                                        |
+| `hooks/useLocations.ts`         | RQ hook → `/api/locations`                                                                                                                                                         |
+| `hooks/useHotels.ts`            | RQ hook → `/api/hotels?country=&city=`                                                                                                                                             |
+| `hooks/useAvailability.ts`      | RQ hook → `/api/hotels/[id]/rooms?check_in=&check_out=`                                                                                                                            |
+| `app/layout.tsx`                | Mount `QueryProvider` + `AppProvider` (Task 10, if M0 created it)                                                                                                                  |
+| `docs/progress.md`              | Check off M3; note hand-rolled URL hook + Suspense + fetcher (Task 10)                                                                                                             |
 
 ---
 
 ## Task 0: Test config & prerequisites
 
-> **Critical:** MSW v2 imported under a jsdom env throws at module load (`ReferenceError: TextEncoder/Response/ReadableStream is not defined`) unless Web-API globals are polyfilled **and** `customExportConditions` is set. Tasks 7–9 depend on this. If M0 already configured `next/jest` with jsdom, a `setupFiles` polyfill defining those globals, `testEnvironmentOptions.customExportConditions`, and installed RTL + MSW + undici, then only verify (Steps 4–5) and skip the rest. Verifying means *running* a query-hook test, not just reading the config — confirm the polyfills are actually wired, since Step 2 below otherwise overwrites `jest.config.js` wholesale.
+> **As-built:** the "skip the rest" branch is what happened — M0 had already wired
+> `jest-fixed-jsdom` + `customExportConditions` + the MSW ESM transform, so Steps 1–3
+> (install `undici`, create `jest.polyfills.js`, overwrite `jest.config.js`) were _not_
+> performed. The only change was adding `process.env.API_BASE_URL='http://localhost'` to
+> `tests/setupApiEnv.ts`, then verifying (Steps 4–5).
+
+> **Critical:** MSW v2 imported under a jsdom env throws at module load (`ReferenceError: TextEncoder/Response/ReadableStream is not defined`) unless Web-API globals are polyfilled **and** `customExportConditions` is set. Tasks 7–9 depend on this. If M0 already configured `next/jest` with jsdom, a `setupFiles` polyfill defining those globals, `testEnvironmentOptions.customExportConditions`, and installed RTL + MSW + undici, then only verify (Steps 4–5) and skip the rest. Verifying means _running_ a query-hook test, not just reading the config — confirm the polyfills are actually wired, since Step 2 below otherwise overwrites `jest.config.js` wholesale.
 
 **Files:**
 
@@ -360,8 +386,8 @@ Expected: FAIL — cannot find module `./QueryProvider`.
 // stores/QueryProvider.tsx
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export function makeQueryClient(): QueryClient {
   return new QueryClient({
@@ -767,6 +793,13 @@ git commit -m "feat(hooks): pure useFilteredHotels (filter->sort->paginate)"
 
 ## Task 6: Test infrastructure — MSW handlers, server, query wrapper
 
+> **As-built:** reused M0's `@/mocks/server` (it already exists and starts with empty
+> handlers), so `tests/msw/server.ts` was _not_ created. The default `/api/*` doubles went
+> into `tests/utils/mswHandlers.ts` (exported as `m3Handlers`) instead of `tests/msw/handlers.ts`,
+> and each query-hook test opts in with `beforeEach(() => server.use(...m3Handlers))` rather
+> than the doubles being baked into the shared server. Only `tests/utils/queryWrapper.tsx` and
+> `tests/utils/mswHandlers.ts` were newly created. Imports use the `@/` alias throughout.
+
 **Files:**
 
 - Create: `tests/msw/handlers.ts`
@@ -801,7 +834,13 @@ export const handlers = [
 
   http.get(`${ORIGIN}/api/hotels/:id/rooms`, () =>
     HttpResponse.json([
-      { roomId: 'room-01a', type: 'Deluxe King', pricePerNight: 299, bedType: 'King', maxOccupancy: 2 },
+      {
+        roomId: 'room-01a',
+        type: 'Deluxe King',
+        pricePerNight: 299,
+        bedType: 'King',
+        maxOccupancy: 2,
+      },
     ]),
   ),
 ];
@@ -821,8 +860,8 @@ export const server = setupServer(...handlers);
 
 ```tsx
 // tests/utils/queryWrapper.tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Fresh client per test; retries off by default and retryDelay 0 so error-path
 // tests resolve fast even when a hook opts into its own retry count.
@@ -1016,8 +1055,8 @@ git commit -m "feat(hooks): useHotels keyed by location, enabled when set"
 ```tsx
 // hooks/useAvailability.test.tsx
 // API_BASE_URL is set in jest.polyfills.js (Task 0) before any module loads.
-import { delay, http, HttpResponse } from 'msw';
 import { renderHook, waitFor } from '@testing-library/react';
+import { delay, http, HttpResponse } from 'msw';
 import { server } from '../tests/msw/server';
 import { createQueryWrapper } from '../tests/utils/queryWrapper';
 import { useAvailability } from './useAvailability';
@@ -1088,7 +1127,10 @@ describe('useAvailability latest-wins', () => {
 describe('useAvailability errors', () => {
   it('surfaces an ApiError carrying the status on a 500', async () => {
     server.use(
-      http.get('http://localhost/api/hotels/:id/rooms', () => new HttpResponse(null, { status: 500 })),
+      http.get(
+        'http://localhost/api/hotels/:id/rooms',
+        () => new HttpResponse(null, { status: 500 }),
+      ),
     );
     const { result } = renderHook(() => useAvailability('hotel-01', '2026-07-10', '2026-07-12'), {
       wrapper: createQueryWrapper(),
@@ -1120,9 +1162,7 @@ export function useAvailability(id: string, checkIn: string | null, checkOut: st
   return useQuery({
     queryKey: ['availability', id, checkIn, checkOut],
     queryFn: () =>
-      getJson<AvailableRoom[]>(
-        `/api/hotels/${id}/rooms?check_in=${checkIn}&check_out=${checkOut}`,
-      ),
+      getJson<AvailableRoom[]>(`/api/hotels/${id}/rooms?check_in=${checkIn}&check_out=${checkOut}`),
     enabled,
     retry: 2, // the slow third-party path benefits from a couple of retries
   });

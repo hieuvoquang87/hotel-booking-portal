@@ -22,7 +22,7 @@ milestones consume these hooks and never touch `fetch` or `/api/*` directly.
 - `stores/QueryProvider.tsx` — `QueryClient` + provider for the root layout.
 - `stores/AppProvider.tsx` — React context holding `checkIn`/`checkOut` dates.
 - `hooks/useSearchParamsState.ts` — typed read/write of `country, city, stars,
-  min, max, sort, page` in the URL, with safe defaults and page-reset semantics.
+min, max, sort, page` in the URL, with safe defaults and page-reset semantics.
 - `lib/fetcher.ts` — a tiny typed `fetch` wrapper (throws on non-2xx).
 - `hooks/useLocations.ts`, `hooks/useHotels.ts`, `hooks/useFilteredHotels.ts`,
   `hooks/useAvailability.ts`.
@@ -44,11 +44,11 @@ upstream piece is missing, the plan notes the minimal stand-in it needs.
 
 Per `architecture.md` §"State split". Three stores, each with one job:
 
-| Store              | Owns                                            | Why there                                                              |
-| ------------------ | ----------------------------------------------- | ---------------------------------------------------------------------- |
-| **URL** params     | `country, city, stars, min, max, sort, page`    | Shareable, bookmarkable, back-button-correct, crawlable                |
-| **`AppProvider`**  | `checkIn`, `checkOut` (dates)                   | Entered each visit; deliberately **not** in the URL (per assumptions)  |
-| **React Query**    | server responses, keyed by params               | Cache, dedup, retry, SWR — server cache only, not app state            |
+| Store             | Owns                                         | Why there                                                             |
+| ----------------- | -------------------------------------------- | --------------------------------------------------------------------- |
+| **URL** params    | `country, city, stars, min, max, sort, page` | Shareable, bookmarkable, back-button-correct, crawlable               |
+| **`AppProvider`** | `checkIn`, `checkOut` (dates)                | Entered each visit; deliberately **not** in the URL (per assumptions) |
+| **React Query**   | server responses, keyed by params            | Cache, dedup, retry, SWR — server cache only, not app state           |
 
 Invariants:
 
@@ -106,7 +106,7 @@ boundary. The roadmap wants `/` to ship as a static shell with LCP < 2.5s.
 
 **Decision:** the search-params-reading subtree is wrapped in a `<Suspense>`
 boundary (a thin fallback) so the surrounding shell stays statically renderable.
-M3 defines `useSearchParamsState` to *require* a `<Suspense>` ancestor and
+M3 defines `useSearchParamsState` to _require_ a `<Suspense>` ancestor and
 documents it; M4 places the boundary when it builds the page. This is
 forward-compatible with the Phase-2 SSG/ISR plan and costs only a wrapper.
 
@@ -125,7 +125,7 @@ stable across re-renders and not shared between requests) and renders
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60_000,          // 1 min; hooks override as needed
+      staleTime: 60_000, // 1 min; hooks override as needed
       gcTime: 5 * 60_000,
       retry: 1,
       refetchOnWindowFocus: false,
@@ -147,13 +147,13 @@ and exposes; **validation lives in M5's `RoomAvailability` component**, not here
 
 ```ts
 type AppDates = {
-  checkIn: string | null;   // ISO date, e.g. "2026-07-10"
+  checkIn: string | null; // ISO date, e.g. "2026-07-10"
   checkOut: string | null;
   setCheckIn: (d: string | null) => void;
   setCheckOut: (d: string | null) => void;
 };
 
-function useAppDates(): AppDates;   // throws if used outside <AppProvider>
+function useAppDates(): AppDates; // throws if used outside <AppProvider>
 ```
 
 - Initial state: both `null` (no fetch until both are set — see §9).
@@ -192,13 +192,13 @@ dependency, matching the project's minimal-dep ethos).
 type SortKey = 'price-asc' | 'price-desc' | 'rating' | 'stars';
 
 type RefineState = {
-  country: string | null;       // slug
-  city: string | null;          // slug
-  stars: number | null;         // min stars; null = no star filter
-  min: number | null;           // price min
-  max: number | null;           // price max
-  sort: SortKey;                // default 'price-asc'
-  page: number;                 // default 1, >= 1
+  country: string | null; // slug
+  city: string | null; // slug
+  stars: number | null; // min stars; null = no star filter
+  min: number | null; // price min
+  max: number | null; // price max
+  sort: SortKey; // default 'price-asc'
+  page: number; // default 1, >= 1
 };
 
 function useSearchParamsState(): {
@@ -219,9 +219,9 @@ function useSearchParamsState(): {
 
 - Merges the patch onto current params, drops keys set to `null`, and calls
   `router.replace(pathname + '?' + qs)` — `replace` (not `push`) so refine tweaks
-  don't flood history; back/forward still restores prior *committed* states.
+  don't flood history; back/forward still restores prior _committed_ states.
 - **Page-reset rule:** if the patch changes any of `country, city, stars, min,
-  max, sort` and does **not** itself set `page`, `page` is reset to `1`. (Matches
+max, sort` and does **not** itself set `page`, `page` is reset to `1`. (Matches
   M4 "changing filters or sort resets to page 1".)
 - Stable serialization (sorted keys) so URLs are deterministic and test-assertable.
 
@@ -246,8 +246,10 @@ function useLocations(): UseQueryResult<Location[]>;
 ### 9.2 `useHotels`
 
 ```ts
-function useHotels(query: { country?: string | null; city?: string | null }):
-  UseQueryResult<Hotel[]>;
+function useHotels(query: {
+  country?: string | null;
+  city?: string | null;
+}): UseQueryResult<Hotel[]>;
 ```
 
 - Key `['hotels', query.country ?? null, query.city ?? null]`.
@@ -261,8 +263,13 @@ function useHotels(query: { country?: string | null; city?: string | null }):
 ```ts
 function useFilteredHotels(
   hotels: Hotel[],
-  params: { stars: number | null; min: number | null; max: number | null;
-            sort: SortKey; page: number },
+  params: {
+    stars: number | null;
+    min: number | null;
+    max: number | null;
+    sort: SortKey;
+    page: number;
+  },
 ): { items: Hotel[]; page: number; totalPages: number; total: number };
 ```
 
@@ -277,8 +284,11 @@ function useFilteredHotels(
 ### 9.4 `useAvailability`
 
 ```ts
-function useAvailability(id: string, checkIn: string | null, checkOut: string | null):
-  UseQueryResult<AvailableRoom[]>;
+function useAvailability(
+  id: string,
+  checkIn: string | null,
+  checkOut: string | null,
+): UseQueryResult<AvailableRoom[]>;
 ```
 
 - Key `['availability', id, checkIn, checkOut]`.
@@ -288,8 +298,8 @@ function useAvailability(id: string, checkIn: string | null, checkOut: string | 
 - `retry: 2` here (the slow third-party path benefits from a couple of retries);
   SWR keeps the last good result visible while refetching.
 - **Latest-wins is structural, not cancellation.** The component subscribes to the
-  *current* `[id, checkIn, checkOut]` key. If the user changes dates mid-flight, a
-  late response for the *old* dates resolves into that old key's cache entry and is
+  _current_ `[id, checkIn, checkOut]` key. If the user changes dates mid-flight, a
+  late response for the _old_ dates resolves into that old key's cache entry and is
   never the data the component reads — so the newest selection always wins without
   any manual abort logic.
 
@@ -299,13 +309,13 @@ function useAvailability(id: string, checkIn: string | null, checkOut: string | 
 
 M3 surfaces errors; it does not render them (boundaries + inline UI are M6/M4/M5).
 
-| Source                         | M3 behavior                                                       |
-| ------------------------------ | ----------------------------------------------------------------- |
-| Non-2xx from `/api/*`          | `getJson` throws `ApiError(status)`; RQ exposes `isError`/`error` |
-| Network failure / timeout      | RQ retry (per-hook count) then `isError`; `refetch()` available    |
-| Partial/invalid dates          | `useAvailability` stays `enabled:false` → never fetches (no error) |
-| No location selected           | `useHotels` stays `enabled:false` → idle, no fetch                 |
-| Empty result (`[]`)            | A valid success, **not** an error (drives M4/M5 empty states)      |
+| Source                    | M3 behavior                                                        |
+| ------------------------- | ------------------------------------------------------------------ |
+| Non-2xx from `/api/*`     | `getJson` throws `ApiError(status)`; RQ exposes `isError`/`error`  |
+| Network failure / timeout | RQ retry (per-hook count) then `isError`; `refetch()` available    |
+| Partial/invalid dates     | `useAvailability` stays `enabled:false` → never fetches (no error) |
+| No location selected      | `useHotels` stays `enabled:false` → idle, no fetch                 |
+| Empty result (`[]`)       | A valid success, **not** an error (drives M4/M5 empty states)      |
 
 `useAppDates`/`useSearchParamsState` misuse outside their provider/Suspense throws a
 developer-facing error (fail fast in dev).
@@ -322,7 +332,7 @@ hooks). Two harnesses by hook kind:
 - **`useFilteredHotels`** — call directly with `makeHotel` fixtures (M1's
   `tests/fixtures.ts`): star floor, price any-room-in-range, open-ended price (one
   bound null), each sort key, pagination clamp; assert the `{items,page,totalPages,
-  total}` shape; assert no mutation of the input array.
+total}` shape; assert no mutation of the input array.
 - **`useSearchParamsState`** — mock `next/navigation` (`useSearchParams`,
   `useRouter`, `usePathname`); parse defaults (bad `sort`→`price-asc`, bad
   `page`→1, absent numbers→null); `setParams` round-trip and key-drop on `null`;
@@ -345,7 +355,7 @@ and MSW serves `/api/*` from M0's handlers.
   - partial dates / `checkOut <= checkIn` → disabled, no request;
   - valid dates → returns rooms;
   - **latest-wins:** an MSW handler delays the response for an old date pair; assert
-    that after switching dates the hook reflects the *new* key's data and never the
+    that after switching dates the hook reflects the _new_ key's data and never the
     stale delayed payload (drives the §9.4 guarantee).
 - **error path** — MSW returns 500 → `isError` true, `error` is an `ApiError` with
   `status 500`.
@@ -365,6 +375,14 @@ and MSW serves `/api/*` from M0's handlers.
 - `QueryClient` defaults: `staleTime 60s`, `retry 1`, no focus refetch;
   `useLocations` overrides to `staleTime: Infinity`, `useAvailability` to
   `retry: 2`.
+
+**As-built notes (implementation matched the design; mechanical specifics):** `SortKey`
+(§8) is re-exported from `lib/sort.ts` rather than redefined in the hook, keeping a single
+source of truth while preserving the hook's public API. Query-hook tests (§11) register the
+default `/api/*` doubles per file via `server.use(...m3Handlers)` against M0's shared
+(initially empty) MSW server, rather than the server bootstrapping with them. Tests live under
+`tests/unit/` with `@/` alias imports (per CLAUDE.md). See the plan's "As-built note" for the
+full toolchain delta.
 
 **Deferred to later milestones (not M3):** all page/component UI and the
 `<Suspense>` placement (M4/M5), error/loading/not-found boundaries and the `track()`
