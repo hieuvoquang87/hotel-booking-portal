@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stayfinder — Hotel detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg-page:#F8FAFC; --bg-surface:#FFFFFF; --border:#E2E8F0; --border-strong:#CBD5E1;
+  --text-primary:#0F172A; --text-secondary:#475569; --text-muted:#94A3B8;
+  --accent:#2563EB; --accent-text:#1D4ED8; --accent-hover:#1D4ED8;
+  --focus:#3B82F6; --success:#16A34A; --warning:#D97706; --error:#DC2626; --star:#F59E0B;
+  --slate-100:#F1F5F9; --slate-50:#F8FAFC;
+  --r-card:12px; --r-ctl:8px;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:0 6px 16px -4px rgba(15,23,42,.12), 0 2px 6px rgba(15,23,42,.06);
+  --shadow-lg:0 16px 40px -8px rgba(15,23,42,.22), 0 4px 12px rgba(15,23,42,.10);
+  --gutter:16px;
+  font-synthesis-weight:none;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+html{background:var(--bg-page);min-height:100%;}
+body{
+  background:var(--bg-page); color:var(--text-primary);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding-top:56px; padding-bottom:84px;
+}
+@media(min-width:768px){body{padding-top:64px;}}
+@media(min-width:1024px){body{padding-bottom:0;}}
+h1,h2,h3,p{margin:0;}
+button{font-family:inherit;}
+a{color:inherit;text-decoration:none;}
+ul{margin:0;padding:0;list-style:none;}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+:where(button,a,input,select,[tabindex]):focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px;}
+
+.container{max-width:1280px;margin:0 auto;padding-inline:var(--gutter);}
+@media(min-width:768px){:root{--gutter:24px;}}
+@media(min-width:1024px){:root{--gutter:32px;}}
+
+.skip-link{position:fixed;left:8px;top:-48px;z-index:60;background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;transition:top .15s ease;}
+.skip-link:focus{top:8px;}
+
+/* ---------- App bar / footer ---------- */
+.appbar{position:fixed;top:0;left:0;right:0;z-index:40;background:var(--bg-surface);border-bottom:1px solid var(--border);}
+.appbar-inner{height:56px;display:flex;align-items:center;}
+@media(min-width:768px){.appbar-inner{height:64px;}}
+.brand{display:inline-flex;align-items:center;gap:9px;font-weight:700;}
+.brand-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--accent);color:#fff;}
+.brand-name{font-size:18px;letter-spacing:-.02em;color:var(--text-primary);}
+.brand-name.sm{font-size:15px;}
+.footer{border-top:1px solid var(--border);background:var(--bg-surface);margin-top:48px;}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;flex-wrap:wrap;padding-block:12px;}
+.build{font-size:12.5px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+
+/* ---------- Back link ---------- */
+.back-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:14px 0 4px;
+  font-size:14.5px;font-weight:600;color:var(--text-secondary);}
+.back-link:hover{color:var(--accent-text);}
+
+/* ---------- Detail grid (two-pane on lg) ---------- */
+.detail-grid{display:grid;grid-template-columns:1fr;gap:24px;padding-bottom:8px;}
+@media(min-width:1024px){
+  .detail-grid{grid-template-columns:minmax(0,1fr) 372px;gap:40px;align-items:start;}
+}
+.detail-content{min-width:0;}
+
+/* ---------- Hero photo ---------- */
+.hero-photo{position:relative;aspect-ratio:16/9;background:var(--slate-100);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;}
+.photo-stripes{position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(148,163,184,.10) 0 2px,transparent 2px 12px);}
+.photo-glyph{position:absolute;inset:0;display:grid;place-items:center;color:#CBD5E1;}
+.photo-cap{position:absolute;left:16px;bottom:14px;color:var(--text-secondary);font-size:13px;font-weight:600;
+  letter-spacing:.02em;text-transform:uppercase;opacity:.85;}
+.star-badge{position:absolute;display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.96);
+  border-radius:999px;box-shadow:var(--shadow-sm);font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.star-badge.lg{top:14px;right:14px;height:32px;padding:0 12px;font-size:14px;gap:4px;}
+.sb-star{fill:var(--star);stroke:none;}
+
+/* ---------- Title block ---------- */
+.title-block{margin-top:20px;}
+.hotel-name{font-size:30px;font-weight:700;line-height:1.15;letter-spacing:-.025em;text-wrap:balance;}
+@media(min-width:768px){.hotel-name{font-size:36px;}}
+.hotel-address{margin-top:8px;color:var(--text-secondary);font-size:15px;}
+.rating-row{display:flex;align-items:center;gap:9px;margin-top:14px;flex-wrap:wrap;}
+.star-pill{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 11px;border-radius:999px;
+  background:#FEF3C7;color:#92400E;font-size:13px;font-weight:700;white-space:nowrap;}
+.star-pill .sb-star{fill:#D97706;}
+.rating-row .dot{color:var(--text-muted);}
+.rr-num{font-size:14px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.rr-count{font-size:13.5px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+
+/* rating stars */
+.rating-stars{position:relative;display:inline-block;line-height:0;}
+.rs-row{display:flex;gap:1.5px;}
+.rs-row svg{display:block;fill:currentColor;}
+.rs-empty{color:#E2E8F0;}
+.rs-fill{position:absolute;top:0;left:0;overflow:hidden;}
+.rs-full{color:var(--star);}
+
+/* ---------- Content blocks ---------- */
+.block{margin-top:30px;}
+.block-title{font-size:20px;font-weight:600;letter-spacing:-.01em;margin-bottom:12px;}
+@media(min-width:768px){.block-title{font-size:22px;}}
+.overview{color:var(--text-secondary);font-size:16px;line-height:1.65;max-width:70ch;text-wrap:pretty;}
+
+.amenity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 18px;}
+@media(min-width:640px){.amenity-grid{grid-template-columns:repeat(3,1fr);}}
+.amenity{display:flex;align-items:center;gap:10px;font-size:14.5px;color:var(--text-primary);min-height:28px;}
+.amenity-ic{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:#EFF4FF;color:var(--accent);flex:none;}
+
+.policy-card{border:1px solid var(--border);border-radius:var(--r-card);background:var(--bg-surface);overflow:hidden;}
+.policy-row{display:flex;gap:16px;padding:13px 16px;border-bottom:1px solid var(--border);}
+.policy-row:last-child{border-bottom:0;}
+.policy-label{flex:0 0 110px;font-size:14px;font-weight:600;color:var(--text-primary);}
+.policy-value{font-size:14px;color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+
+/* ---------- Availability panel ---------- */
+.detail-rail{min-width:0;}
+@media(min-width:1024px){.rail-inner{position:sticky;top:84px;}}
+.avail{background:var(--bg-surface);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow-sm);}
+.avail-title{font-size:18px;font-weight:700;letter-spacing:-.01em;}
+.avail-sub{margin-top:4px;color:var(--text-secondary);font-size:13.5px;}
+.date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+@media(max-width:479px){.date-grid{grid-template-columns:1fr;}}
+@media(min-width:1024px){.detail-rail .date-grid{grid-template-columns:1fr;}}
+.date-field{display:flex;flex-direction:column;gap:6px;}
+.date-field label{font-size:13px;font-weight:600;color:var(--text-secondary);}
+.date-input{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;background:var(--bg-surface);
+  border:1px solid var(--border-strong);border-radius:var(--r-ctl);}
+.date-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.14);}
+.date-input.is-err{border-color:var(--error);}
+.date-ic{color:var(--text-muted);flex:none;}
+.date-input input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:14.5px;
+  color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.date-error{display:flex;align-items:center;gap:6px;margin-top:10px;color:var(--error);font-size:13px;font-weight:500;}
+.nights-note{margin-top:10px;color:var(--text-secondary);font-size:13px;font-variant-numeric:tabular-nums;}
+.avail-status{min-height:0;}
+.status-line{display:inline-block;margin-top:14px;font-size:13.5px;font-weight:600;color:var(--text-primary);}
+.avail-body{margin-top:14px;}
+.room-list{display:flex;flex-direction:column;gap:12px;}
+
+/* ---------- Room card ---------- */
+.room-card{border:1px solid var(--border);border-radius:var(--r-card);background:var(--bg-surface);padding:14px;}
+.room-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.room-type{font-size:15.5px;font-weight:600;line-height:1.3;color:var(--text-primary);text-wrap:pretty;}
+.avail-badge{display:inline-flex;align-items:center;gap:4px;flex:none;height:24px;padding:0 9px;border-radius:999px;
+  background:#DCFCE7;color:#15803D;font-size:12px;font-weight:700;white-space:nowrap;}
+.room-meta{margin-top:6px;color:var(--text-secondary);font-size:13px;font-variant-numeric:tabular-nums;}
+.room-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.pill{display:inline-flex;align-items:center;height:23px;padding:0 9px;border-radius:999px;background:var(--slate-100);
+  color:var(--text-secondary);font-size:12px;font-weight:500;}
+.room-price{margin-top:12px;display:flex;align-items:baseline;gap:5px;}
+.rp-val{font-size:18px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+.rp-unit{font-size:12.5px;color:var(--text-muted);}
+
+/* ---------- Skeletons ---------- */
+.skeleton{pointer-events:none;}
+.sk-line,.sk-pill{background:linear-gradient(100deg,#EEF2F7 30%,#E2E8F0 50%,#EEF2F7 70%);background-size:200% 100%;
+  animation:shimmer 1.3s linear infinite;border-radius:6px;}
+.sk-line{height:12px;margin-top:10px;}
+.sk-line:first-child{margin-top:0;}
+.sk-line.tall{height:18px;}
+.w70{width:70%;}.w55{width:55%;}.w30{width:30%;}
+.sk-pills{display:flex;gap:6px;margin-top:10px;}
+.sk-pill{width:64px;height:22px;border-radius:999px;}
+@keyframes shimmer{to{background-position:-200% 0;}}
+
+/* ---------- Availability states ---------- */
+.avail-state{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:26px 14px;
+  border:1px dashed var(--border-strong);border-radius:var(--r-card);background:var(--slate-50);}
+.avail-state.subtle{border-style:solid;border-color:var(--border);}
+.as-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#EFF4FF;color:var(--accent);margin-bottom:2px;}
+.as-icon.err{background:#FEF2F2;color:var(--error);}
+.as-title{font-size:15px;font-weight:600;color:var(--text-primary);}
+.as-body{font-size:13.5px;color:var(--text-secondary);max-width:34ch;text-wrap:pretty;}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:var(--r-ctl);
+  font-size:15px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-hover);}
+.btn.sm{min-height:40px;padding:0 16px;font-size:14px;margin-top:4px;}
+
+/* ---------- Sticky mobile CTA ---------- */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;z-index:45;background:var(--bg-surface);border-top:1px solid var(--border);
+  box-shadow:0 -6px 20px -8px rgba(15,23,42,.12);padding-bottom:max(0px,env(safe-area-inset-bottom));}
+.sticky-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:72px;}
+.cta-meta{display:flex;align-items:baseline;gap:5px;}
+.cta-from{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+.cta-unit{font-size:13px;color:var(--text-muted);}
+.sticky-cta .btn{padding:0 22px;}
+@media(min-width:1024px){.sticky-cta{display:none;}}
+
+/* ---------- Not found ---------- */
+.notfound{max-width:520px;margin:0 auto;min-height:60vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;gap:10px;padding:40px 20px;}
+.nf-icon{display:grid;place-items:center;width:60px;height:60px;border-radius:16px;background:#EFF4FF;color:var(--accent);margin-bottom:6px;}
+.nf-title{font-size:26px;font-weight:700;letter-spacing:-.02em;}
+.nf-body{color:var(--text-secondary);font-size:15.5px;max-width:42ch;text-wrap:pretty;}
+.notfound .btn{margin-top:14px;}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+window.HOTELS = [{"id":"hotel-01","name":"The Grand Luminary","description":"A luxury oasis in the heart of downtown, featuring panoramic city views, world-class dining, and a serene rooftop escape.","star_rating":5,"overall_rating":4.8,"review_count":1240,"address":{"street":"789 Skyline Blvd","city":"Chicago","state":"IL","zip_code":"60611","country":"USA"},"amenities":["pool","free Wi-Fi","fitness_center","spa","valet_parking","pet_friendly"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-01a","type":"Deluxe King Room","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":450,"price_per_night":299,"room_amenities":["city_view","mini_bar"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]},{"room_id":"room-01b","type":"Standard Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":350,"price_per_night":199,"room_amenities":["courtyard_view"],"available_dates":["2026-07-10","2026-07-11"]}]},{"id":"hotel-02","name":"The Chicago Riverfront Inn","description":"Towering corporate-friendly hotel located in the loop with dynamic architectural views and modern workstations.","star_rating":4,"overall_rating":4.3,"review_count":1410,"address":{"street":"320 N Dearborn St","city":"Chicago","state":"IL","zip_code":"60654","country":"USA"},"amenities":["pool","free Wi-Fi","fitness_center","restaurant","valet_parking"],"policies":{"check_in_time":"15:00","check_out_time":"12:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-02a","type":"Standard Double Queen","bed_type":"Queen","bed_count":2,"max_occupancy":4,"square_footage":380,"price_per_night":175,"room_amenities":["river_view"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]},{"room_id":"room-02b","type":"Standard Double Queen","bed_type":"Queen","bed_count":2,"max_occupancy":4,"square_footage":380,"price_per_night":175,"room_amenities":["river_view"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-03","name":"Windy City Suites","description":"Modern urban suites designed for extended stays, offering fully equipped kitchenettes and an unbeatable central location.","star_rating":3,"overall_rating":4.1,"review_count":520,"address":{"street":"55 E Ontario St","city":"Chicago","state":"IL","zip_code":"60611","country":"USA"},"amenities":["free Wi-Fi","fitness_center","laundry_service","pet_friendly"],"policies":{"check_in_time":"16:00","check_out_time":"11:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-03a","type":"Studio King Suite","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":410,"price_per_night":135,"room_amenities":["kitchenette","smart_tv"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-04","name":"Magnolia Place Chicago","description":"A charming, boutique-style historic building reimagined with contemporary comforts and neighborhood vibes.","star_rating":3,"overall_rating":4.5,"review_count":295,"address":{"street":"1420 N Lincoln Ave","city":"Chicago","state":"IL","zip_code":"60614","country":"USA"},"amenities":["free Wi-Fi","free_breakfast","bicycle_rentals"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Non-refundable booking"},"rooms":[{"room_id":"room-04a","type":"Standard Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":300,"price_per_night":115,"room_amenities":["garden_view"],"available_dates":[]}]},{"id":"hotel-05","name":"Urban Nest Boutique Hotel","description":"A trendy, eco-friendly boutique hotel nestled in a vibrant arts district. Walking distance to local breweries and cafes.","star_rating":4,"overall_rating":4.5,"review_count":612,"address":{"street":"412 Canary Way","city":"Austin","state":"TX","zip_code":"78701","country":"USA"},"amenities":["free Wi-Fi","fitness_center","bicycle_rentals","pet_friendly"],"policies":{"check_in_time":"16:00","check_out_time":"12:00","cancellation":"Non-refundable booking"},"rooms":[{"room_id":"room-05a","type":"Standard Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":310,"price_per_night":145,"room_amenities":["smart_tv"],"available_dates":["2026-07-12","2026-07-13","2026-07-14"]},{"room_id":"room-05b","type":"Double Queen Suite","bed_type":"Queen","bed_count":2,"max_occupancy":4,"square_footage":520,"price_per_night":210,"room_amenities":["kitchenette"],"available_dates":["2026-07-13","2026-07-14"]}]},{"id":"hotel-06","name":"Keep Austin Weird Inn","description":"Embrace the local culture with vibrant murals, vintage decor, and a live acoustic music stage in the lobby.","star_rating":2,"overall_rating":4.2,"review_count":410,"address":{"street":"1503 S Congress Ave","city":"Austin","state":"TX","zip_code":"78704","country":"USA"},"amenities":["pool","free Wi-Fi","free_parking","pet_friendly"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-06a","type":"Retro Double Bed","bed_type":"Full","bed_count":2,"max_occupancy":4,"square_footage":290,"price_per_night":95,"room_amenities":["mini_fridge"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-07","name":"Lone Star Luxury Resort","description":"An expansive premium hill-country estate featuring championship golf courses, cascading pools, and full spa amenities.","star_rating":5,"overall_rating":4.9,"review_count":890,"address":{"street":"9201 Loop 360 N","city":"Austin","state":"TX","zip_code":"78730","country":"USA"},"amenities":["pool","free Wi-Fi","spa","fitness_center","valet_parking","restaurant"],"policies":{"check_in_time":"16:00","check_out_time":"11:00","cancellation":"Free cancellation up to 7 days before check-in"},"rooms":[{"room_id":"room-07a","type":"Hill Country King Villa","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":680,"price_per_night":450,"room_amenities":["balcony","fireplace","espresso_machine"],"available_dates":["2026-07-10","2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-08","name":"ATX Urban Stay","description":"Sleek, minimalist downtown high-rise catering heavily to modern business travelers and digital nomads.","star_rating":4,"overall_rating":4.4,"review_count":315,"address":{"street":"208 E 7th St","city":"Austin","state":"TX","zip_code":"78701","country":"USA"},"amenities":["free Wi-Fi","fitness_center","meeting_rooms"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-08a","type":"Executive King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":360,"price_per_night":185,"room_amenities":["work_desk","smart_tv"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-09","name":"Sunset Coastal Inn","description":"A budget-friendly, relaxed roadside inn located just minutes away from the public beach boardwalk.","star_rating":2,"overall_rating":3.9,"review_count":185,"address":{"street":"102 Ocean Drive","city":"Miami","state":"FL","zip_code":"33139","country":"USA"},"amenities":["pool","free Wi-Fi","free_parking"],"policies":{"check_in_time":"14:00","check_out_time":"10:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-09a","type":"Standard Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":280,"price_per_night":85,"room_amenities":["mini_fridge","microwave"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-10","name":"Neon Palms Motel","description":"A stylishly retro-renovated 1950s roadside motel providing vibrant pastel colors and a classic pool scene.","star_rating":2,"overall_rating":4,"review_count":145,"address":{"street":"2200 Biscayne Blvd","city":"Miami","state":"FL","zip_code":"33137","country":"USA"},"amenities":["pool","free Wi-Fi","free_parking"],"policies":{"check_in_time":"14:00","check_out_time":"11:00","cancellation":"Non-refundable booking"},"rooms":[{"room_id":"room-10a","type":"Retro Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":260,"price_per_night":95,"room_amenities":["mini_fridge"],"available_dates":[]}]},{"id":"hotel-11","name":"South Beach Sanctum","description":"Art Deco masterpiece right on the waterfront, prioritizing intimate luxury, curated cocktail lounges, and private beach loungers.","star_rating":5,"overall_rating":4.7,"review_count":920,"address":{"street":"1301 Ocean Ave","city":"Miami","state":"FL","zip_code":"33139","country":"USA"},"amenities":["pool","free Wi-Fi","beach_access","spa","valet_parking"],"policies":{"check_in_time":"16:00","check_out_time":"12:00","cancellation":"Free cancellation up to 72 hours before check-in"},"rooms":[{"room_id":"room-11a","type":"Oceanfront Ocean King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":510,"price_per_night":399,"room_amenities":["ocean_view","balcony"],"available_dates":["2026-07-10","2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-12","name":"Biscayne Bay Resort","description":"An action-packed family resort boasting an on-site marina, water sports center, and panoramic views of the bay skyline.","star_rating":4,"overall_rating":4.4,"review_count":1150,"address":{"street":"1601 N Bayshore Dr","city":"Miami","state":"FL","zip_code":"33132","country":"USA"},"amenities":["pool","free Wi-Fi","fitness_center","restaurant","marina_access"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-12a","type":"Bay View Double Queen","bed_type":"Queen","bed_count":2,"max_occupancy":4,"square_footage":420,"price_per_night":220,"room_amenities":["water_view","mini_fridge"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-13","name":"The Hudson Neo","description":"Sleek industrial chic in Manhattan. Micro-rooms optimized for urban explorers and business travelers alike.","star_rating":4,"overall_rating":4.2,"review_count":905,"address":{"street":"550 W 42nd St","city":"New York","state":"NY","zip_code":"10036","country":"USA"},"amenities":["free Wi-Fi","fitness_center","rooftop_bar"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-13a","type":"Micro King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":220,"price_per_night":180,"room_amenities":["city_view"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-14","name":"Manhattan Heights Hotel","description":"A historic, soaring architectural landmark offering majestic grandeur and world-class concierges near Midtown.","star_rating":5,"overall_rating":4.6,"review_count":2100,"address":{"street":"301 Park Ave","city":"New York","state":"NY","zip_code":"10022","country":"USA"},"amenities":["free Wi-Fi","fitness_center","spa","valet_parking","restaurant"],"policies":{"check_in_time":"15:00","check_out_time":"12:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-14a","type":"Premier King Suite","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":550,"price_per_night":495,"room_amenities":["soaking_tub","mini_bar"],"available_dates":["2026-07-10","2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-15","name":"Central Park View Inn","description":"Cozy, classic boutique establishment proudly situated right along Central Park South with spectacular foliage lookouts.","star_rating":3,"overall_rating":4.3,"review_count":480,"address":{"street":"120 Central Park S","city":"New York","state":"NY","zip_code":"10019","country":"USA"},"amenities":["free Wi-Fi","free_breakfast","pet_friendly"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-15a","type":"Park View Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":290,"price_per_night":210,"room_amenities":["park_view"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-16","name":"Brooklyn Brick Hotel","description":"Converted historic warehouse in Williamsburg exposing beautiful industrial brick, timber beams, and creative craft spaces.","star_rating":4,"overall_rating":4.5,"review_count":680,"address":{"street":"85 Wythe Ave","city":"New York","state":"NY","zip_code":"11249","country":"USA"},"amenities":["free Wi-Fi","fitness_center","rooftop_bar","pet_friendly"],"policies":{"check_in_time":"16:00","check_out_time":"11:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-16a","type":"Loft Double Queen","bed_type":"Queen","bed_count":2,"max_occupancy":4,"square_footage":450,"price_per_night":265,"room_amenities":["skyline_view"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-17","name":"Pacific Crest Lodge","description":"A rustic timber lodge featuring cozy fireplaces and direct trail access near the scenic foothills.","star_rating":3,"overall_rating":4.6,"review_count":340,"address":{"street":"1200 Mountain Highway","city":"Seattle","state":"WA","zip_code":"98101","country":"USA"},"amenities":["free Wi-Fi","free_parking","hot_tub","pet_friendly"],"policies":{"check_in_time":"16:00","check_out_time":"11:00","cancellation":"Free cancellation up to 7 days before check-in"},"rooms":[{"room_id":"room-17a","type":"Fireplace Suite","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":400,"price_per_night":165,"room_amenities":["fireplace","balcony"],"available_dates":[]}]},{"id":"hotel-18","name":"Emerald City Suites","description":"Modern downtown high-rise accommodations utilizing tech-integrated rooms, voice controls, and automated concierges.","star_rating":4,"overall_rating":4.2,"review_count":510,"address":{"street":"801 Pike St","city":"Seattle","state":"WA","zip_code":"98101","country":"USA"},"amenities":["free Wi-Fi","fitness_center","meeting_rooms"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-18a","type":"Standard King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":310,"price_per_night":140,"room_amenities":["smart_tv"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-19","name":"Puget Sound Vista","description":"Stunning luxury spaces overlooking the historical Pike Place Market and the sweeping waters of the sound.","star_rating":5,"overall_rating":4.8,"review_count":1050,"address":{"street":"1021 1st Ave","city":"Seattle","state":"WA","zip_code":"98104","country":"USA"},"amenities":["pool","free Wi-Fi","fitness_center","spa","valet_parking"],"policies":{"check_in_time":"15:00","check_out_time":"12:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-19a","type":"Waterfront Premier King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":480,"price_per_night":315,"room_amenities":["water_view","espresso_machine"],"available_dates":["2026-07-10","2026-07-11","2026-07-12","2026-07-13"]},{"room_id":"room-19b","type":"Waterfront Premier King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":480,"price_per_night":315,"room_amenities":["water_view","espresso_machine"],"available_dates":["2026-07-10","2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-20","name":"Rain City Boutique","description":"An artsy, indie escape in Capitol Hill displaying massive vinyl record collections, library walls, and locally roasted coffee.","star_rating":3,"overall_rating":4.5,"review_count":275,"address":{"street":"1112 E Pine St","city":"Seattle","state":"WA","zip_code":"98122","country":"USA"},"amenities":["free Wi-Fi","free_breakfast","bicycle_rentals","pet_friendly"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-20a","type":"Standard Queen Loft","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":330,"price_per_night":125,"room_amenities":["record_player"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-21","name":"The Piccadilly Crown","description":"A quintessential British luxury hotel combining timeless Edwardian elegance with modern West End sophistication.","star_rating":5,"overall_rating":4.9,"review_count":1840,"address":{"street":"45 Piccadilly","city":"London","state":"Greater London","zip_code":"W1J 0LP","country":"United Kingdom"},"amenities":["pool","free Wi-Fi","fitness_center","spa","valet_parking","afternoon_tea_lounge"],"policies":{"check_in_time":"15:00","check_out_time":"12:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-21a","type":"Royal King Suite","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":520,"price_per_night":420,"room_amenities":["city_view","mini_bar","espresso_machine"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]},{"room_id":"room-21b","type":"Royal King Suite","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":520,"price_per_night":420,"room_amenities":["city_view","mini_bar","espresso_machine"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-22","name":"Thames View Apartments","description":"Sleek, upscale aparthotel right on the South Bank, offering corporate travelers spacious layouts and beautiful river vistas.","star_rating":4,"overall_rating":4.4,"review_count":620,"address":{"street":"210 Albert Embankment","city":"London","state":"Greater London","zip_code":"SE1 7GR","country":"United Kingdom"},"amenities":["free Wi-Fi","fitness_center","laundry_service","meeting_rooms"],"policies":{"check_in_time":"16:00","check_out_time":"11:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-22a","type":"Executive Studio","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":410,"price_per_night":245,"room_amenities":["river_view","kitchenette","smart_tv"],"available_dates":["2026-07-10","2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-23","name":"Shoreditch Hip Hotel","description":"An industrial-chic boutique hotel featuring exposed brick, local artist galleries, and a highly popular rooftop bar.","star_rating":3,"overall_rating":4.6,"review_count":910,"address":{"street":"96 Great Eastern St","city":"London","state":"Greater London","zip_code":"EC2A 3HX","country":"United Kingdom"},"amenities":["free Wi-Fi","rooftop_bar","bicycle_rentals","pet_friendly"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Non-refundable booking"},"rooms":[{"room_id":"room-23a","type":"Standard Double","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":280,"price_per_night":160,"room_amenities":["record_player","smart_tv"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-24","name":"The Kensington Tavern Inn","description":"A charming, budget-friendly traditional inn situated directly above a historic, cozy pub near the museums.","star_rating":2,"overall_rating":4.1,"review_count":340,"address":{"street":"12 Cromwell Rd","city":"London","state":"Greater London","zip_code":"SW7 2HR","country":"United Kingdom"},"amenities":["free Wi-Fi","free_breakfast","on_site_pub"],"policies":{"check_in_time":"14:00","check_out_time":"10:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-24a","type":"Standard Twin Room","bed_type":"Twin","bed_count":2,"max_occupancy":2,"square_footage":240,"price_per_night":95,"room_amenities":["coffee_maker"],"available_dates":[]}]},{"id":"hotel-25","name":"Le Palace Lumière","description":"An opulent Parisian landmark offering palatial suites, white-glove service, and direct balconies facing the Eiffel Tower.","star_rating":5,"overall_rating":4.9,"review_count":1560,"address":{"street":"25 Avenue Montaigne","city":"Paris","state":"Île-de-France","zip_code":"75008","country":"France"},"amenities":["pool","free Wi-Fi","spa","fitness_center","valet_parking","michelin_restaurant"],"policies":{"check_in_time":"15:00","check_out_time":"12:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-25a","type":"Eiffel View Prestige","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":580,"price_per_night":590,"room_amenities":["eiffel_tower_view","balcony","mini_bar"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]},{"room_id":"room-25b","type":"Eiffel View Prestige","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":580,"price_per_night":590,"room_amenities":["eiffel_tower_view","balcony","mini_bar"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-26","name":"Marais Chic Boutique","description":"Artistic, highly fashionable hotel beautifully hidden away inside a historic 17th-century courtyard in Le Marais.","star_rating":4,"overall_rating":4.7,"review_count":480,"address":{"street":"14 Rue des Rosiers","city":"Paris","state":"Île-de-France","zip_code":"75004","country":"France"},"amenities":["free Wi-Fi","fitness_center","bicycle_rentals","courtyard_cafe"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-26a","type":"Deluxe Double","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":320,"price_per_night":230,"room_amenities":["courtyard_view","smart_tv"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-27","name":"Seine River Vista","description":"A highly comfortable midscale hotel situated directly on the Left Bank, within easy walking distance to Notre Dame.","star_rating":3,"overall_rating":4.3,"review_count":835,"address":{"street":"56 Quai des Grands Augustins","city":"Paris","state":"Île-de-France","zip_code":"75006","country":"France"},"amenities":["free Wi-Fi","free_breakfast","bar"],"policies":{"check_in_time":"14:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-27a","type":"Standard Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":270,"price_per_night":155,"room_amenities":["river_view"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]},{"room_id":"room-27b","type":"Standard Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":270,"price_per_night":155,"room_amenities":["river_view"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-28","name":"Montmartre Retro Hostel","description":"A budget-friendly, high-energy artistic hostel and hotel hybrid situated on the steep, winding hills of Montmartre.","star_rating":2,"overall_rating":4,"review_count":510,"address":{"street":"82 Rue d'Orsel","city":"Paris","state":"Île-de-France","zip_code":"75018","country":"France"},"amenities":["free Wi-Fi","laundry_service","social_lounge"],"policies":{"check_in_time":"15:00","check_out_time":"10:00","cancellation":"Non-refundable booking"},"rooms":[{"room_id":"room-28a","type":"Private Micro Double","bed_type":"Full","bed_count":1,"max_occupancy":2,"square_footage":190,"price_per_night":85,"room_amenities":["city_view"],"available_dates":["2026-07-10","2026-07-11"]}]},{"id":"hotel-29","name":"Shinjuku Sky Tower","description":"An ultra-modern luxury high-rise towering above Tokyo, featuring an indoor pool on the 45th floor and views of Mount Fuji.","star_rating":5,"overall_rating":4.8,"review_count":2210,"address":{"street":"3-2-1 Nishi-Shinjuku","city":"Tokyo","state":"Tokyo-to","zip_code":"160-0023","country":"Japan"},"amenities":["pool","free Wi-Fi","fitness_center","spa","valet_parking","sky_bar"],"policies":{"check_in_time":"15:00","check_out_time":"12:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-29a","type":"Skyline Executive King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":480,"price_per_night":410,"room_amenities":["fuji_view","deep_soaking_tub"],"available_dates":["2026-07-10","2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-30","name":"Shibuya Neon Nest","description":"A tech-forward, high-design boutique hotel catering perfectly to travelers wanting to be steps away from the famous crossing.","star_rating":4,"overall_rating":4.5,"review_count":1130,"address":{"street":"1-22-10 Jinnan","city":"Tokyo","state":"Tokyo-to","zip_code":"150-0041","country":"Japan"},"amenities":["free Wi-Fi","fitness_center","restaurant","laundry_service"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-30a","type":"Superior Double Room","bed_type":"Double","bed_count":1,"max_occupancy":2,"square_footage":290,"price_per_night":220,"room_amenities":["city_view","smart_tv"],"available_dates":["2026-07-12","2026-07-13","2026-07-14"]}]},{"id":"hotel-31","name":"Akihabara Tech Inn","description":"Sleek capsule and micro-room hybrid concept optimized for gaming and tech enthusiasts browsing the electric town.","star_rating":3,"overall_rating":4.2,"review_count":780,"address":{"street":"4-4-2 Sotokanda","city":"Tokyo","state":"Tokyo-to","zip_code":"101-0021","country":"Japan"},"amenities":["free Wi-Fi","gaming_lounge","vending_galore"],"policies":{"check_in_time":"16:00","check_out_time":"10:00","cancellation":"Non-refundable booking"},"rooms":[{"room_id":"room-31a","type":"Premium Micro Pod","bed_type":"Twin","bed_count":1,"max_occupancy":1,"square_footage":140,"price_per_night":75,"room_amenities":["smart_tv"],"available_dates":[]}]},{"id":"hotel-32","name":"Asakusa Traditional Ryokan","description":"An authentic, peaceful inn featuring beautiful tatami mats, paper screens, and a soothing public hinoki wood bath.","star_rating":3,"overall_rating":4.7,"review_count":450,"address":{"street":"2-16-5 Asakusa","city":"Tokyo","state":"Tokyo-to","zip_code":"111-0032","country":"Japan"},"amenities":["free Wi-Fi","public_hot_spring_bath","traditional_breakfast"],"policies":{"check_in_time":"15:00","check_out_time":"10:00","cancellation":"Free cancellation up to 72 hours before check-in"},"rooms":[{"room_id":"room-32a","type":"Tatami Futon Room","bed_type":"Futon","bed_count":2,"max_occupancy":3,"square_footage":340,"price_per_night":165,"room_amenities":["garden_view"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-33","name":"The Harbour Horizon","description":"World-class coastal luxury located directly in Circular Quay, showcasing unobstructed glass views of the Opera House.","star_rating":5,"overall_rating":4.9,"review_count":1980,"address":{"street":"77 George St","city":"Sydney","state":"NSW","zip_code":"2000","country":"Australia"},"amenities":["pool","free Wi-Fi","fitness_center","spa","valet_parking","harbour_restaurant"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-33a","type":"Opera Opera King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":500,"price_per_night":440,"room_amenities":["opera_house_view","balcony"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-34","name":"Bondi Beach Pad","description":"A highly relaxed surf-chic boutique hotel situated just steps away from the golden sands and rolling waves of Bondi.","star_rating":4,"overall_rating":4.6,"review_count":590,"address":{"street":"120 Campbell Parade","city":"Sydney","state":"NSW","zip_code":"2026","country":"Australia"},"amenities":["pool","free Wi-Fi","beach_access","bicycle_rentals","pet_friendly"],"policies":{"check_in_time":"14:00","check_out_time":"10:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-34a","type":"Oceanfront Balcony Double","bed_type":"Queen","bed_count":2,"max_occupancy":4,"square_footage":430,"price_per_night":275,"room_amenities":["ocean_view","balcony"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-35","name":"Newtown Urban Stay","description":"An artistic bohemian hotel celebrating local coffee roasters, vinyl collections, and the bustling inner-west restaurant scene.","star_rating":3,"overall_rating":4.4,"review_count":310,"address":{"street":"294 King St","city":"Sydney","state":"NSW","zip_code":"2042","country":"Australia"},"amenities":["free Wi-Fi","courtyard_lounge","pet_friendly"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-35a","type":"Standard Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":310,"price_per_night":145,"room_amenities":["smart_tv"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-36","name":"Circular Quay Express","description":"A functional, no-frills, highly localized business-focused hotel optimized for transit and exploring the harbor hubs.","star_rating":3,"overall_rating":4.1,"review_count":740,"address":{"street":"15 Pitt St","city":"Sydney","state":"NSW","zip_code":"2000","country":"Australia"},"amenities":["free Wi-Fi","fitness_center","meeting_rooms"],"policies":{"check_in_time":"15:00","check_out_time":"11:00","cancellation":"Non-refundable booking"},"rooms":[{"room_id":"room-36a","type":"Standard King","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":280,"price_per_night":130,"room_amenities":["work_desk"],"available_dates":[]}]},{"id":"hotel-37","name":"Villa Borghese Imperial","description":"A breathtaking historic Renaissance palace restored into an elite, world-class resort overlooking lush Italian private gardens.","star_rating":5,"overall_rating":4.9,"review_count":1105,"address":{"street":"12 Via Veneto","city":"Rome","state":"Lazio","zip_code":"00187","country":"Italy"},"amenities":["pool","free Wi-Fi","spa","fitness_center","valet_parking","fine_dining_terrace"],"policies":{"check_in_time":"15:00","check_out_time":"12:00","cancellation":"Free cancellation up to 48 hours before check-in"},"rooms":[{"room_id":"room-37a","type":"Grand Heritage Suite","bed_type":"King","bed_count":1,"max_occupancy":2,"square_footage":610,"price_per_night":510,"room_amenities":["fresco_ceilings","garden_view"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-38","name":"Trastevere Charm Boutique","description":"An Ivy-draped, romantic boutique escape tucked away safely in the winding, cobblestone alleyways of Trastevere.","star_rating":4,"overall_rating":4.7,"review_count":650,"address":{"street":"45 Via della Lungaretta","city":"Rome","state":"Lazio","zip_code":"00153","country":"Italy"},"amenities":["free Wi-Fi","free_breakfast","rooftop_wine_bar","bicycle_rentals"],"policies":{"check_in_time":"14:00","check_out_time":"11:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-38a","type":"Deluxe Double","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":340,"price_per_night":210,"room_amenities":["terrace_access","smart_tv"],"available_dates":["2026-07-11","2026-07-12","2026-07-13"]}]},{"id":"hotel-39","name":"Colosseum Heritage Inn","description":"Comfortable midscale accommodations with a majestic rooftop terrace providing sweeping lookouts directly over the Colosseum arches.","star_rating":3,"overall_rating":4.4,"review_count":920,"address":{"street":"8 Via dei Fori Imperiali","city":"Rome","state":"Lazio","zip_code":"00184","country":"Italy"},"amenities":["free Wi-Fi","rooftop_terrace","bar"],"policies":{"check_in_time":"15:00","check_out_time":"10:00","cancellation":"Free cancellation up to 24 hours before check-in"},"rooms":[{"room_id":"room-39a","type":"Standard Queen","bed_type":"Queen","bed_count":1,"max_occupancy":2,"square_footage":290,"price_per_night":165,"room_amenities":["ruins_view"],"available_dates":["2026-07-10","2026-07-11","2026-07-12"]}]},{"id":"hotel-40","name":"Roma Termini Rooms","description":"Clean, hyper-affordable micro-hotel setup located adjacent to the central station, geared directly toward budget rail travelers.","star_rating":2,"overall_rating":3.9,"review_count":415,"address":{"street":"142 Via Marsala","city":"Rome","state":"Lazio","zip_code":"00185","country":"Italy"},"amenities":["free Wi-Fi","luggage_storage"],"policies":{"check_in_time":"14:00","check_out_time":"10:00","cancellation":"Non-refundable booking"},"rooms":[{"room_id":"room-40a","type":"Basic Twin Room","bed_type":"Twin","bed_count":2,"max_occupancy":2,"square_footage":210,"price_per_night":80,"room_amenities":["mini_fridge"],"available_dates":["2026-07-10","2026-07-11"]}]}];
+
+</script>
+<script>
+/* ============ Stayfinder Detail · helpers ============ */
+(function () {
+  const HOTELS = window.HOTELS || [];
+
+  const AMENITY_LABEL = {
+    "free Wi-Fi": "Wi-Fi", fitness_center: "Fitness center", valet_parking: "Valet parking",
+    free_parking: "Free parking", pet_friendly: "Pet friendly", free_breakfast: "Free breakfast",
+    laundry_service: "Laundry service", bicycle_rentals: "Bicycle rentals", beach_access: "Beach access",
+    rooftop_bar: "Rooftop bar", rooftop_terrace: "Rooftop terrace", rooftop_wine_bar: "Rooftop wine bar",
+    hot_tub: "Hot tub", meeting_rooms: "Meeting rooms", marina_access: "Marina access",
+    afternoon_tea_lounge: "Afternoon tea lounge", michelin_restaurant: "Michelin restaurant",
+    fine_dining_terrace: "Fine dining terrace", harbour_restaurant: "Harbour restaurant",
+    courtyard_cafe: "Courtyard café", courtyard_lounge: "Courtyard lounge", social_lounge: "Social lounge",
+    gaming_lounge: "Gaming lounge", vending_galore: "Vending machines", on_site_pub: "On-site pub",
+    public_hot_spring_bath: "Hot spring bath", traditional_breakfast: "Traditional breakfast",
+    luggage_storage: "Luggage storage", sky_bar: "Sky bar", restaurant: "Restaurant", pool: "Pool",
+    spa: "Spa", bar: "Bar",
+  };
+  function humanize(a) {
+    if (AMENITY_LABEL[a]) return AMENITY_LABEL[a];
+    return String(a).replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+  }
+
+  const usd = (n) => "$" + Math.round(n).toLocaleString("en-US");
+  const compact = (n) => Number(n).toLocaleString("en-US");
+
+  // ---- dates ----
+  function parseISO(s) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+  function toISO(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  // nights occupied = [checkIn, checkOut)
+  function nightsBetween(checkIn, checkOut) {
+    const out = [];
+    let d = parseISO(checkIn);
+    const end = parseISO(checkOut);
+    while (d < end) { out.push(toISO(d)); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1); }
+    return out;
+  }
+  function fmtLong(iso) {
+    if (!iso) return "";
+    const d = parseISO(iso);
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+  }
+
+  // a room is available iff every night in [in,out) is in its available_dates
+  function roomAvailable(room, nights) {
+    if (!nights.length) return false;
+    const set = new Set(room.available_dates || []);
+    return nights.every((n) => set.has(n));
+  }
+
+  function roomMeta(r) {
+    const beds = r.bed_count + " " + (r.bed_count === 1 ? "bed" : "beds");
+    return [r.bed_type, beds, "Sleeps " + r.max_occupancy, r.square_footage + " sq ft"];
+  }
+
+  function addressLine(a) {
+    return `${a.street}, ${a.city}, ${a.state} ${a.zip_code}, ${a.country}`;
+  }
+  function shortLoc(a) {
+    return `${a.city}, ${a.state} · ${a.country === "USA" ? "USA" : a.country}`;
+  }
+
+  function getHotel(id) { return HOTELS.find((h) => h.id === id) || null; }
+  function minPrice(h) { return Math.min(...h.rooms.map((r) => r.price_per_night)); }
+
+  window.SFD = {
+    HOTELS, humanize, usd, compact, nightsBetween, fmtLong, roomAvailable,
+    roomMeta, addressLine, shortLoc, getHotel, minPrice, toISO, parseISO,
+    DEMO_IN: "2026-07-10", DEMO_OUT: "2026-07-12",
+  };
+})();
+
+</script>
+<script type="text/babel" data-src="components.jsx">
+/* ===================== Stayfinder Detail · components ===================== */
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+const SFD = window.SFD;
+
+/* ---------- Icons ---------- */
+function Icon({ name, size = 20, className = "", stroke = 2 }) {
+  const p = {
+    pin: <><path d="M12 21s-6.5-5.6-6.5-10.5a6.5 6.5 0 1 1 13 0C18.5 15.4 12 21 12 21Z" /><circle cx="12" cy="10.5" r="2.2" /></>,
+    star: <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L12 16.77l-5.2 2.74.99-5.79-4.21-4.1 5.82-.85z" />,
+    arrowLeft: <path d="m14 6-6 6 6 6" />,
+    building: <><path d="M5 21V5.5A1.5 1.5 0 0 1 6.5 4h7A1.5 1.5 0 0 1 15 5.5V21" /><path d="M15 9h2.5A1.5 1.5 0 0 1 19 10.5V21" /><path d="M3 21h18" /><path d="M8 8h0M11 8h0M8 12h0M11 12h0M8 16h0M11 16h0" /></>,
+    check: <path d="m4 12 5 5L20 6" />,
+    checkCircle: <><circle cx="12" cy="12" r="9" /><path d="m8.5 12 2.4 2.4L15.8 9.5" /></>,
+    calendar: <><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" /><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" /></>,
+    alert: <><path d="M12 4.5 21 19.5H3z" /><path d="M12 10v4.2M12 17.2h0" /></>,
+    info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h0" /></>,
+    moon: <path d="M20 14.5A8 8 0 1 1 9.5 4a6.2 6.2 0 0 0 10.5 10.5Z" />,
+    search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.2-3.2" /></>,
+  }[name];
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {p}
+    </svg>
+  );
+}
+
+function RatingStars({ value, size = 16 }) {
+  const pct = Math.max(0, Math.min(100, (value / 5) * 100));
+  const row = (cls) => (
+    <div className={"rs-row " + cls} aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24">
+          <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L12 16.77l-5.2 2.74.99-5.79-4.21-4.1 5.82-.85z" />
+        </svg>
+      ))}
+    </div>
+  );
+  return (
+    <span className="rating-stars">
+      {row("rs-empty")}
+      <span className="rs-fill" style={{ width: pct + "%" }}>{row("rs-full")}</span>
+    </span>
+  );
+}
+
+/* ---------- Hero photo placeholder ---------- */
+function HeroPhoto({ name, stars }) {
+  return (
+    <div className="hero-photo">
+      <div className="photo-stripes" aria-hidden="true" />
+      <div className="photo-glyph" aria-hidden="true"><Icon name="building" size={56} stroke={1.4} /></div>
+      <div className="photo-cap" aria-hidden="true">{name}</div>
+      <div className="star-badge lg" aria-hidden="true">
+        <Icon name="star" size={14} stroke={0} className="sb-star" />
+        <span>{stars}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Amenity item ---------- */
+function AmenityItem({ label }) {
+  return (
+    <li className="amenity">
+      <span className="amenity-ic"><Icon name="check" size={14} stroke={2.4} /></span>
+      <span>{label}</span>
+    </li>
+  );
+}
+
+/* ---------- Policy row ---------- */
+function PolicyRow({ label, value, icon }) {
+  return (
+    <div className="policy-row">
+      <span className="policy-label">{label}</span>
+      <span className="policy-value">{value}</span>
+    </div>
+  );
+}
+
+/* ---------- Room card ---------- */
+function RoomCard({ room }) {
+  const meta = SFD.roomMeta(room);
+  return (
+    <div className="room-card">
+      <div className="room-head">
+        <h3 className="room-type">{room.type}</h3>
+        <span className="avail-badge"><Icon name="checkCircle" size={15} stroke={2} />Available</span>
+      </div>
+      <p className="room-meta">{meta.join(" · ")}</p>
+      {room.room_amenities && room.room_amenities.length > 0 && (
+        <div className="room-pills">
+          {room.room_amenities.map((a) => <span className="pill" key={a}>{SFD.humanize(a)}</span>)}
+        </div>
+      )}
+      <div className="room-price">
+        <span className="rp-val">{SFD.usd(room.price_per_night)}</span>
+        <span className="rp-unit">/ night</span>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Room skeleton ---------- */
+function RoomSkeleton() {
+  return (
+    <div className="room-card skeleton" aria-hidden="true">
+      <div className="sk-line w55 tall" />
+      <div className="sk-line w70" />
+      <div className="sk-pills"><div className="sk-pill" /><div className="sk-pill" /></div>
+      <div className="sk-line w30 tall" />
+    </div>
+  );
+}
+
+/* ---------- Availability empty / error ---------- */
+function AvailEmpty() {
+  return (
+    <div className="avail-state" role="status">
+      <div className="as-icon"><Icon name="calendar" size={22} stroke={1.8} /></div>
+      <p className="as-title">No rooms available for these dates</p>
+      <p className="as-body">Try a different check-in or check-out date.</p>
+    </div>
+  );
+}
+function AvailIdle() {
+  return (
+    <div className="avail-state subtle" role="status">
+      <div className="as-icon"><Icon name="info" size={22} stroke={1.8} /></div>
+      <p className="as-body">Pick check-in and check-out dates to see available rooms.</p>
+    </div>
+  );
+}
+function AvailError({ onRetry }) {
+  return (
+    <div className="avail-state error" role="alert">
+      <div className="as-icon err"><Icon name="alert" size={22} stroke={1.9} /></div>
+      <p className="as-title">Couldn't load availability</p>
+      <p className="as-body">Something went wrong reaching the booking service.</p>
+      <button className="btn btn-primary sm" onClick={onRetry}>Retry</button>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  Icon, RatingStars, HeroPhoto, AmenityItem, PolicyRow, RoomCard, RoomSkeleton,
+  AvailEmpty, AvailIdle, AvailError,
+});
+
+</script>
+<script type="text/babel" data-src="avail.jsx">
+/* ===================== Stayfinder Detail · Availability panel ===================== */
+const { useState: useStateAV, useEffect: useEffectAV, useRef: useRefAV } = React;
+
+function AvailabilityPanel({ hotel, sim, idPrefix }) {
+  const SFD = window.SFD;
+  const [checkIn, setCheckIn] = useStateAV(SFD.DEMO_IN);
+  const [checkOut, setCheckOut] = useStateAV(SFD.DEMO_OUT);
+  const [status, setStatus] = useStateAV("loading"); // idle|loading|success|empty|error|blocked
+  const [rooms, setRooms] = useStateAV([]);
+  const [nonce, setNonce] = useStateAV(0);
+  const reqRef = useRefAV(0);
+  const timerRef = useRefAV(null);
+  const firstRun = useRefAV(true);
+
+  const valid = checkIn && checkOut;
+  const ordered = valid && SFD.parseISO(checkOut) > SFD.parseISO(checkIn);
+  const nights = ordered ? SFD.nightsBetween(checkIn, checkOut) : [];
+
+  useEffectAV(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    if (!valid) { setStatus("idle"); return; }
+    if (!ordered) { setStatus("blocked"); return; }
+
+    const myReq = ++reqRef.current;
+    setStatus("loading");
+    // analytics
+    try { console.log("track:", "availability_checked", { hotelId: hotel.id, nights: nights.length }); } catch (e) {}
+
+    timerRef.current = setTimeout(() => {
+      if (myReq !== reqRef.current) return; // stale — latest wins
+      if (sim === "error") { setStatus("error"); return; }
+      let avail = sim === "empty" ? [] : hotel.rooms.filter((r) => SFD.roomAvailable(r, nights));
+      if (avail.length) { setRooms(avail); setStatus("success"); }
+      else {
+        setStatus("empty");
+        try { console.log("track:", "no_rooms", { hotelId: hotel.id }); } catch (e) {}
+      }
+    }, 1200);
+
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [checkIn, checkOut, nonce]);
+
+  const liveText =
+    status === "loading" ? "Checking availability…" :
+    status === "success" ? `${rooms.length} ${rooms.length === 1 ? "room" : "rooms"} available` :
+    status === "empty" ? "No rooms available for these dates" :
+    status === "blocked" ? "Check-out must be after check-in" :
+    status === "error" ? "Couldn't load availability" : "";
+
+  return (
+    <section className="avail" aria-label="Room availability">
+      <h2 className="avail-title">Room availability</h2>
+      <p className="avail-sub">Select your dates to see available rooms and nightly prices.</p>
+
+      <div className="date-grid">
+        <div className="date-field">
+          <label htmlFor={idPrefix + "-in"}>Check-in</label>
+          <div className={"date-input" + (status === "blocked" ? " is-err" : "")}>
+            <Icon name="calendar" size={18} className="date-ic" />
+            <input id={idPrefix + "-in"} type="date" value={checkIn}
+              onChange={(e) => setCheckIn(e.target.value)} />
+          </div>
+        </div>
+        <div className="date-field">
+          <label htmlFor={idPrefix + "-out"}>Check-out</label>
+          <div className={"date-input" + (status === "blocked" ? " is-err" : "")}>
+            <Icon name="calendar" size={18} className="date-ic" />
+            <input id={idPrefix + "-out"} type="date" value={checkOut} min={checkIn}
+              onChange={(e) => setCheckOut(e.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      {status === "blocked" && (
+        <p className="date-error"><Icon name="alert" size={14} stroke={2} />Check-out must be after check-in</p>
+      )}
+      {ordered && status !== "blocked" && (
+        <p className="nights-note">{nights.length} {nights.length === 1 ? "night" : "nights"} · {SFD.fmtLong(checkIn)} → {SFD.fmtLong(checkOut)}</p>
+      )}
+
+      <div className="avail-status" aria-live="polite">
+        {(status === "loading" || status === "success") && (
+          <span className="status-line">{liveText}</span>
+        )}
+      </div>
+
+      <div className="avail-body">
+        {status === "idle" && <AvailIdle />}
+        {status === "loading" && (
+          <div className="room-list">
+            <RoomSkeleton /><RoomSkeleton /><RoomSkeleton />
+          </div>
+        )}
+        {status === "success" && (
+          <div className="room-list">
+            {rooms.map((r) => <RoomCard key={r.room_id} room={r} />)}
+          </div>
+        )}
+        {status === "empty" && <AvailEmpty />}
+        {status === "error" && <AvailError onRetry={() => setNonce((n) => n + 1)} />}
+      </div>
+    </section>
+  );
+}
+
+window.AvailabilityPanel = AvailabilityPanel;
+
+</script>
+<script type="text/babel" data-src="app.jsx">
+/* ===================== Stayfinder Detail · App ===================== */
+const { useState: useStateApp, useEffect: useEffectApp } = React;
+const SFDA = window.SFD;
+
+function getParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+function NotFound() {
+  return (
+    <main className="notfound">
+      <div className="nf-icon"><Icon name="search" size={28} stroke={1.7} /></div>
+      <h1 className="nf-title">Hotel not found</h1>
+      <p className="nf-body">We couldn't find that hotel. It may have been removed, or the link is incorrect.</p>
+      <a className="btn btn-primary" href="Stayfinder.html">Browse hotels</a>
+    </main>
+  );
+}
+
+function AppBar() {
+  return (
+    <header className="appbar">
+      <div className="container appbar-inner">
+        <a className="brand" href="Stayfinder.html">
+          <span className="brand-mark" aria-hidden="true"><Icon name="pin" size={18} stroke={2.2} /></span>
+          <span className="brand-name">Stayfinder</span>
+        </a>
+      </div>
+    </header>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="footer">
+      <div className="container footer-inner">
+        <span className="brand-name sm">Stayfinder</span>
+        <span className="build">Mock UI · build 2026.06.08 · display-only preview</span>
+      </div>
+    </footer>
+  );
+}
+
+function DetailApp() {
+  const id = getParam("id") || "hotel-01";
+  const sim = getParam("sim"); // 'error' | 'empty' | null
+  const hotel = SFDA.getHotel(id);
+
+  useEffectApp(() => {
+    if (hotel) { try { console.log("track:", "hotel_viewed", { hotelId: hotel.id }); } catch (e) {} }
+  }, [id]);
+
+  if (!hotel) {
+    return (<React.Fragment><AppBar /><NotFound /><Footer /></React.Fragment>);
+  }
+
+  const a = hotel.address;
+  const pol = hotel.policies;
+
+  function focusDates(e) {
+    e.preventDefault();
+    const el = document.getElementById("availability");
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top, behavior: "smooth" });
+    const inp = document.getElementById("m-in");
+    setTimeout(() => inp && inp.focus({ preventScroll: true }), 350);
+  }
+
+  function onBack(e) {
+    if (document.referrer && /Stayfinder\.html/.test(document.referrer)) {
+      e.preventDefault();
+      window.history.back();
+    }
+  }
+
+  return (
+    <React.Fragment>
+      <a className="skip-link" href="#detail-main">Skip to content</a>
+      <AppBar />
+
+      <main id="detail-main">
+        <div className="container">
+          <a className="back-link" href="Stayfinder.html" onClick={onBack}>
+            <Icon name="arrowLeft" size={18} /> Back to results
+          </a>
+
+          <div className="detail-grid">
+            <div className="detail-content">
+              <HeroPhoto name={hotel.name} stars={hotel.star_rating} />
+
+              <div className="title-block">
+                <h1 className="hotel-name">{hotel.name}</h1>
+                <p className="hotel-address">{SFDA.addressLine(a)}</p>
+                <div className="rating-row">
+                  <span className="star-pill"><Icon name="star" size={13} stroke={0} className="sb-star" />{hotel.star_rating + "-star hotel"}</span>
+                  <span className="dot" aria-hidden="true">·</span>
+                  <RatingStars value={hotel.overall_rating} />
+                  <span className="rr-num">{hotel.overall_rating.toFixed(1)}</span>
+                  <span className="rr-count">{SFDA.compact(hotel.review_count)} reviews</span>
+                </div>
+              </div>
+
+              <section className="block" aria-label="Overview">
+                <h2 className="block-title">Overview</h2>
+                <p className="overview">{hotel.description}</p>
+              </section>
+
+              <section className="block" aria-label="Amenities">
+                <h2 className="block-title">Amenities</h2>
+                <ul className="amenity-grid">
+                  {hotel.amenities.map((am) => <AmenityItem key={am} label={SFDA.humanize(am)} />)}
+                </ul>
+              </section>
+
+              <section className="block" aria-label="Policies">
+                <h2 className="block-title">Policies</h2>
+                <div className="policy-card">
+                  <PolicyRow label="Check-in" value={pol.check_in_time} />
+                  <PolicyRow label="Check-out" value={pol.check_out_time} />
+                  <PolicyRow label="Cancellation" value={pol.cancellation} />
+                </div>
+              </section>
+            </div>
+
+            <aside className="detail-rail" id="availability">
+              <div className="rail-inner">
+                <AvailabilityPanel hotel={hotel} sim={sim} idPrefix="m" />
+              </div>
+            </aside>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+
+      <div className="sticky-cta">
+        <div className="container sticky-cta-inner">
+          <div className="cta-meta">
+            <span className="cta-from">from {SFDA.usd(SFDA.minPrice(hotel))}</span>
+            <span className="cta-unit">/ night</span>
+          </div>
+          <button className="btn btn-primary" onClick={focusDates}>Check availability</button>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<DetailApp />);
+
+</script>
+</body>
+</html>

@@ -1,7 +1,8 @@
 # UI/UX Design Spec — Hotel Detail Page (Detail + Room Availability)
 
 > Route: `/hotels/[id]` · Drives the mock UI for hotel detail and lazy room availability.
-> Companion spec: [home-page-design.md](home-page-design.md).
+> Rendered mockup: [hotel-detail-page-mockup.html](hotel-detail-page-mockup.html) (open in a browser).
+> Companion spec: [home-page-design-spec.md](home-page-design-spec.md).
 > Sourced from `prd.md`, `architecture.md`, `product-roadmap.md`, `user-flows.md`, `services/mock/hotels.json`.
 
 **Visual direction:** Clean & modern — neutral grey scale, one blue accent, photo-forward

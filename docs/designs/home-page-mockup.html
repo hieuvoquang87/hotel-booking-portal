@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stayfinder — Find your stay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg-page:#F8FAFC; --bg-surface:#FFFFFF; --border:#E2E8F0; --border-strong:#CBD5E1;
+  --text-primary:#0F172A; --text-secondary:#475569; --text-muted:#94A3B8;
+  --accent:#2563EB; --accent-text:#1D4ED8; --accent-hover:#1D4ED8;
+  --focus:#3B82F6; --success:#16A34A; --warning:#D97706; --error:#DC2626; --star:#F59E0B;
+  --slate-100:#F1F5F9; --slate-50:#F8FAFC;
+  --r-card:12px; --r-ctl:8px;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:0 6px 16px -4px rgba(15,23,42,.12), 0 2px 6px rgba(15,23,42,.06);
+  --shadow-lg:0 16px 40px -8px rgba(15,23,42,.22), 0 4px 12px rgba(15,23,42,.10);
+  --gutter:16px;
+  font-synthesis-weight:none;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+html{background:var(--bg-page);min-height:100%;}
+body{
+  background:var(--bg-page); color:var(--text-primary);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding-top:56px; padding-bottom:61px;
+}
+@media(min-width:768px){body{padding-top:64px;}}
+h1,h2,h3,p{margin:0;}
+button{font-family:inherit;}
+a{color:inherit;text-decoration:none;}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+:where(button,a,input,select,[tabindex]):focus-visible{
+  outline:2px solid var(--focus); outline-offset:2px; border-radius:4px;
+}
+.tnum{font-variant-numeric:tabular-nums;}
+
+/* ---------- Layout ---------- */
+.container{max-width:1280px;margin:0 auto;padding-inline:var(--gutter);}
+@media(min-width:768px){:root{--gutter:24px;}}
+@media(min-width:1024px){:root{--gutter:32px;}}
+
+.skip-link{position:fixed;left:8px;top:-48px;z-index:60;background:var(--accent);color:#fff;
+  padding:10px 16px;border-radius:8px;font-weight:600;transition:top .15s ease;}
+.skip-link:focus{top:8px;}
+
+/* ---------- App bar ---------- */
+.appbar{position:fixed;top:0;left:0;right:0;z-index:40;background:var(--bg-surface);
+  border-bottom:1px solid var(--border);}
+.appbar-inner{height:56px;display:flex;align-items:center;}
+@media(min-width:768px){.appbar-inner{height:64px;}}
+.brand{display:inline-flex;align-items:center;gap:9px;font-weight:700;}
+.brand-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;
+  background:var(--accent);color:#fff;}
+.brand-name{font-size:18px;letter-spacing:-.02em;color:var(--text-primary);}
+.brand-name.sm{font-size:15px;}
+
+/* ---------- Hero ---------- */
+.hero{padding:34px 0 22px;text-align:center;}
+@media(min-width:768px){.hero{padding:52px 0 30px;}}
+.hero-title{font-size:30px;font-weight:700;line-height:1.15;letter-spacing:-.025em;}
+@media(min-width:768px){.hero-title{font-size:36px;}}
+.hero-sub{margin:8px auto 0;color:var(--text-secondary);font-size:16px;max-width:62ch;text-wrap:balance;}
+.hero-search{margin:20px auto 0;max-width:100%;}
+@media(min-width:768px){.hero-search{max-width:560px;}}
+
+/* ---------- Combobox ---------- */
+.combobox{position:relative;}
+.combo-field{display:flex;align-items:center;gap:10px;height:52px;padding:0 12px 0 14px;
+  background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--r-ctl);
+  box-shadow:var(--shadow-sm);transition:border-color .15s,box-shadow .15s;}
+.combo-field:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.14);}
+.combo-lead{color:var(--text-muted);flex:none;}
+.combo-input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:16px;
+  color:var(--text-primary);height:100%;}
+.combo-input::placeholder{color:var(--text-muted);}
+.combo-clear{display:grid;place-items:center;width:30px;height:30px;border:0;background:transparent;
+  color:var(--text-muted);border-radius:6px;cursor:pointer;flex:none;}
+.combo-clear:hover{background:var(--slate-100);color:var(--text-secondary);}
+.combo-caret{color:var(--text-muted);flex:none;transition:transform .18s ease;}
+.combo-caret.up{transform:rotate(180deg);}
+
+.combo-pop{position:absolute;z-index:50;top:calc(100% + 8px);left:0;right:0;max-height:340px;overflow:auto;
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);
+  padding:6px;}
+.combo-empty{padding:18px 14px;color:var(--text-muted);font-size:15px;text-align:center;}
+.combo-opt{display:flex;align-items:center;gap:11px;min-height:48px;padding:8px 10px;border-radius:9px;cursor:pointer;}
+.combo-opt .opt-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;flex:none;
+  background:var(--slate-100);color:var(--text-secondary);}
+.combo-opt.country{ }
+.combo-opt.country .opt-icon{background:rgba(37,99,235,.10);color:var(--accent-text);}
+.combo-opt.is-active{background:var(--slate-50);}
+.combo-opt.is-active.country,.combo-opt.is-active{background:#EFF4FF;}
+.combo-opt.is-selected{background:#E0EAFF;}
+.opt-main{display:flex;flex-direction:column;min-width:0;flex:1;}
+.opt-title{font-size:15px;font-weight:600;color:var(--text-primary);line-height:1.25;}
+.opt-title .opt-sub{font-weight:400;color:var(--text-secondary);}
+.combo-opt.country .opt-title{font-weight:600;}
+.opt-country{font-size:12.5px;color:var(--text-muted);margin-top:1px;}
+.opt-count{font-size:12px;font-weight:500;color:var(--text-muted);background:var(--slate-100);
+  border-radius:999px;padding:2px 9px;flex:none;font-variant-numeric:tabular-nums;}
+
+/* ---------- Refine toolbar ---------- */
+.refine{position:sticky;top:55px;z-index:30;background:var(--bg-page);
+  border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(15,23,42,.02);}
+@media(min-width:768px){.refine{top:63px;}}
+.refine-mobile{display:block;}
+.refine-desktop{display:none;}
+@media(min-width:768px){.refine-mobile{display:none;}.refine-desktop{display:block;}}
+
+.toolbar{display:flex;align-items:center;gap:22px;padding:12px 0;flex-wrap:wrap;}
+.tb-group{display:flex;align-items:center;gap:10px;}
+.tb-label{font-size:13px;font-weight:600;color:var(--text-secondary);}
+.tb-sort{margin-left:0;}
+.tb-count{margin-left:auto;font-size:14px;font-weight:600;color:var(--text-primary);
+  font-variant-numeric:tabular-nums;}
+
+/* Segmented control */
+.segmented{display:inline-flex;background:var(--slate-100);border:1px solid var(--border);
+  border-radius:999px;padding:3px;gap:2px;}
+.seg-btn{appearance:none;border:0;background:transparent;cursor:pointer;
+  min-height:38px;padding:0 14px;border-radius:999px;font-size:13.5px;font-weight:600;
+  color:var(--text-secondary);transition:background .15s,color .15s,box-shadow .15s;white-space:nowrap;}
+.seg-btn:hover{color:var(--text-primary);}
+.seg-btn.is-on{background:var(--bg-surface);color:var(--accent-text);box-shadow:var(--shadow-sm);}
+
+/* Select */
+.select-wrap{position:relative;display:inline-flex;align-items:center;}
+.select-lead{position:absolute;left:11px;color:var(--text-muted);pointer-events:none;}
+.select{appearance:none;-webkit-appearance:none;height:40px;padding:0 34px 0 33px;
+  background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--r-ctl);
+  font-size:14px;font-weight:500;color:var(--text-primary);cursor:pointer;line-height:1;}
+.select:hover{border-color:var(--text-muted);}
+.select-caret{position:absolute;right:10px;color:var(--text-muted);pointer-events:none;}
+
+/* Price range */
+.price-range{display:inline-flex;align-items:center;gap:8px;}
+.price-input{display:inline-flex;align-items:center;height:40px;padding:0 10px;gap:3px;
+  background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--r-ctl);}
+.price-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.14);}
+.price-dollar{color:var(--text-muted);font-size:14px;}
+.num{width:62px;border:0;outline:0;background:transparent;font-size:14px;color:var(--text-primary);
+  font-variant-numeric:tabular-nums;font-family:inherit;}
+.num::-webkit-outer-spin-button,.num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.num{-moz-appearance:textfield;}
+.price-dash{color:var(--text-muted);}
+
+/* Mobile toolbar */
+.toolbar-mobile{padding:10px 0;}
+.tbm-row{display:flex;align-items:center;gap:10px;}
+.filters-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;
+  background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--r-ctl);
+  font-size:14px;font-weight:600;color:var(--text-primary);cursor:pointer;box-shadow:var(--shadow-sm);}
+.filters-badge{display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;
+  background:var(--accent);color:#fff;font-size:12px;font-weight:600;}
+.tbm-row .select-wrap{margin-left:auto;}
+.tbm-row .select{height:44px;}
+.tbm-count{margin-top:8px;font-size:14px;font-weight:600;color:var(--text-primary);
+  font-variant-numeric:tabular-nums;}
+
+/* ---------- Results / grid ---------- */
+.results{padding:22px 0 56px;}
+@media(min-width:768px){.results{padding:28px 0 72px;}}
+.results-head{margin-bottom:16px;}
+.results-title{font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--text-primary);}
+.results-title span{color:var(--accent-text);}
+@media(min-width:768px){.results-title{font-size:24px;}}
+
+.grid{display:grid;grid-template-columns:1fr;gap:18px;}
+@media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr);gap:20px;}}
+@media(min-width:768px){.grid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:1024px){.grid{grid-template-columns:repeat(4,1fr);gap:24px;}}
+
+/* ---------- Hotel card ---------- */
+.card{display:flex;flex-direction:column;background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:var(--r-card);overflow:hidden;box-shadow:var(--shadow-sm);
+  transition:box-shadow .16s ease, transform .16s ease, border-color .16s ease;}
+a.card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--border-strong);}
+a.card:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+
+.photo{position:relative;aspect-ratio:16/9;background:var(--slate-100);overflow:hidden;}
+.photo-stripes{position:absolute;inset:0;
+  background-image:repeating-linear-gradient(135deg,rgba(148,163,184,.10) 0 2px,transparent 2px 11px);}
+.photo-glyph{position:absolute;inset:0;display:grid;place-items:center;color:#CBD5E1;}
+.photo-name{position:absolute;left:12px;right:12px;bottom:10px;color:var(--text-secondary);
+  font-size:12px;font-weight:600;letter-spacing:.01em;opacity:.85;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.star-badge{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:3px;
+  height:26px;padding:0 9px;background:rgba(255,255,255,.96);border-radius:999px;
+  box-shadow:var(--shadow-sm);font-size:12.5px;font-weight:700;color:var(--text-primary);
+  font-variant-numeric:tabular-nums;}
+.sb-star{fill:var(--star);stroke:none;}
+
+.card-body{display:flex;flex-direction:column;gap:8px;padding:14px 14px 16px;}
+.card-title{font-size:16px;font-weight:600;line-height:1.3;color:var(--text-primary);
+  letter-spacing:-.01em;text-wrap:pretty;}
+@media(min-width:768px){.card-title{font-size:17px;}}
+.card-loc{font-size:13.5px;color:var(--text-secondary);}
+.card-rating{display:flex;align-items:center;gap:6px;}
+.rating-num{font-size:13.5px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.rating-count{font-size:13px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+
+/* rating stars */
+.rating-stars{position:relative;display:inline-block;line-height:0;}
+.rs-row{display:flex;gap:1.5px;}
+.rs-row svg{display:block;fill:currentColor;}
+.rs-empty{color:#E2E8F0;}
+.rs-fill{position:absolute;top:0;left:0;overflow:hidden;}
+.rs-full{color:var(--star);}
+
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:1px;}
+.pill{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;
+  background:var(--slate-100);color:var(--text-secondary);font-size:12px;font-weight:500;white-space:nowrap;}
+.pill-more{background:transparent;color:var(--text-muted);border:1px solid var(--border);}
+
+.card-price{display:flex;align-items:baseline;gap:5px;margin-top:4px;padding-top:10px;
+  border-top:1px solid var(--border);}
+.price-from{font-size:12.5px;color:var(--text-muted);}
+.price-val{font-size:18px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;
+  letter-spacing:-.01em;}
+.price-unit{font-size:12.5px;color:var(--text-muted);}
+
+/* ---------- Skeleton ---------- */
+.skeleton{pointer-events:none;}
+.sk-block,.sk-line,.sk-pill{background:linear-gradient(100deg,#EEF2F7 30%,#E2E8F0 50%,#EEF2F7 70%);
+  background-size:200% 100%;animation:shimmer 1.3s linear infinite;border-radius:6px;}
+.sk-block{aspect-ratio:16/9;border-radius:0;}
+.sk-line{height:12px;margin-top:2px;}
+.sk-line.tall{height:20px;}
+.w70{width:70%;}.w55{width:55%;}.w45{width:45%;}.w35{width:35%;}
+.sk-pills{display:flex;gap:6px;margin-top:2px;}
+.sk-pill{width:48px;height:22px;border-radius:999px;}
+@keyframes shimmer{to{background-position:-200% 0;}}
+
+/* ---------- Empty states ---------- */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:56px 20px;gap:8px;}
+.empty-icon{display:grid;place-items:center;width:56px;height:56px;border-radius:16px;
+  background:#EFF4FF;color:var(--accent);margin-bottom:6px;}
+.empty-title{font-size:20px;font-weight:600;color:var(--text-primary);}
+.empty-body{font-size:15px;color:var(--text-secondary);max-width:42ch;text-wrap:pretty;}
+.empty .btn{margin-top:14px;}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;
+  border-radius:var(--r-ctl);font-size:15px;font-weight:600;cursor:pointer;border:1px solid transparent;
+  transition:background .15s,border-color .15s,color .15s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-hover);}
+.btn-ghost{background:transparent;color:var(--text-secondary);border-color:var(--border-strong);}
+.btn-ghost:hover{background:var(--slate-100);color:var(--text-primary);}
+
+/* ---------- Pagination ---------- */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:34px;}
+.page-list{display:flex;align-items:center;gap:6px;list-style:none;margin:0;padding:0;}
+.page-btn{display:grid;place-items:center;min-width:44px;height:44px;padding:0 6px;border-radius:10px;
+  border:1px solid var(--border);background:var(--bg-surface);color:var(--text-secondary);
+  font-size:14px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums;
+  transition:background .14s,color .14s,border-color .14s;}
+.page-btn:hover:not(:disabled){border-color:var(--border-strong);color:var(--text-primary);}
+.page-btn.is-active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.page-btn:disabled{opacity:.4;cursor:default;}
+.page-btn.arrow{color:var(--text-secondary);}
+
+/* ---------- Footer ---------- */
+.footer{position:fixed;bottom:0;left:0;right:0;z-index:40;
+  border-top:1px solid var(--border);background:var(--bg-surface);}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  height:60px;flex-wrap:wrap;}
+.build{font-size:12.5px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+
+/* ---------- Bottom sheet ---------- */
+.sheet-root{position:fixed;inset:0;z-index:70;pointer-events:none;}
+@media(min-width:768px){.sheet-root{display:none;}}
+.sheet-scrim{position:absolute;inset:0;background:rgba(15,23,42,.42);opacity:0;transition:opacity .2s ease;}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--bg-surface);
+  border-radius:18px 18px 0 0;box-shadow:var(--shadow-lg);transform:translateY(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);padding-bottom:max(16px,env(safe-area-inset-bottom));}
+.sheet-root.open{pointer-events:auto;}
+.sheet-root.open .sheet-scrim{opacity:1;}
+.sheet-root.open .sheet{transform:translateY(0);}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 6px;}
+.sheet-title{font-size:18px;font-weight:700;}
+.sheet-close{display:grid;place-items:center;width:40px;height:40px;border:0;background:var(--slate-100);
+  border-radius:10px;color:var(--text-secondary);cursor:pointer;}
+.sheet-body{padding:10px 18px 8px;display:flex;flex-direction:column;gap:20px;}
+.sheet-field{display:flex;flex-direction:column;gap:10px;}
+.sheet-label{font-size:14px;font-weight:600;color:var(--text-primary);}
+.sheet-field .segmented{width:100%;justify-content:stretch;}
+.sheet-field .seg-btn{flex:1;min-height:44px;}
+.sheet-field .price-input{flex:1;height:48px;}
+.sheet-field .price-range{width:100%;}
+.sheet-field .num{width:100%;}
+.sheet-foot{display:flex;gap:12px;padding:14px 18px 6px;border-top:1px solid var(--border);margin-top:6px;}
+.sheet-foot .btn{flex:1;}
+.sheet-foot .btn-ghost{flex:0 0 110px;}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+/* inlined app/data.js */
+window.HOTELS = [
+  {
+    "id": "hotel-01",
+    "name": "The Grand Luminary",
+    "star_rating": 5,
+    "overall_rating": 4.8,
+    "review_count": 1240,
+    "city": "Chicago",
+    "state": "IL",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "fitness_center",
+      "spa",
+      "valet_parking",
+      "pet_friendly"
+    ],
+    "min_price": 199
+  },
+  {
+    "id": "hotel-02",
+    "name": "The Chicago Riverfront Inn",
+    "star_rating": 4,
+    "overall_rating": 4.3,
+    "review_count": 1410,
+    "city": "Chicago",
+    "state": "IL",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "fitness_center",
+      "restaurant",
+      "valet_parking"
+    ],
+    "min_price": 175
+  },
+  {
+    "id": "hotel-03",
+    "name": "Windy City Suites",
+    "star_rating": 3,
+    "overall_rating": 4.1,
+    "review_count": 520,
+    "city": "Chicago",
+    "state": "IL",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "laundry_service",
+      "pet_friendly"
+    ],
+    "min_price": 135
+  },
+  {
+    "id": "hotel-04",
+    "name": "Magnolia Place Chicago",
+    "star_rating": 3,
+    "overall_rating": 4.5,
+    "review_count": 295,
+    "city": "Chicago",
+    "state": "IL",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "free_breakfast",
+      "bicycle_rentals"
+    ],
+    "min_price": 115
+  },
+  {
+    "id": "hotel-05",
+    "name": "Urban Nest Boutique Hotel",
+    "star_rating": 4,
+    "overall_rating": 4.5,
+    "review_count": 612,
+    "city": "Austin",
+    "state": "TX",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "bicycle_rentals",
+      "pet_friendly"
+    ],
+    "min_price": 145
+  },
+  {
+    "id": "hotel-06",
+    "name": "Keep Austin Weird Inn",
+    "star_rating": 2,
+    "overall_rating": 4.2,
+    "review_count": 410,
+    "city": "Austin",
+    "state": "TX",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "free_parking",
+      "pet_friendly"
+    ],
+    "min_price": 95
+  },
+  {
+    "id": "hotel-07",
+    "name": "Lone Star Luxury Resort",
+    "star_rating": 5,
+    "overall_rating": 4.9,
+    "review_count": 890,
+    "city": "Austin",
+    "state": "TX",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "spa",
+      "fitness_center",
+      "valet_parking",
+      "restaurant"
+    ],
+    "min_price": 450
+  },
+  {
+    "id": "hotel-08",
+    "name": "ATX Urban Stay",
+    "star_rating": 4,
+    "overall_rating": 4.4,
+    "review_count": 315,
+    "city": "Austin",
+    "state": "TX",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "meeting_rooms"
+    ],
+    "min_price": 185
+  },
+  {
+    "id": "hotel-09",
+    "name": "Sunset Coastal Inn",
+    "star_rating": 2,
+    "overall_rating": 3.9,
+    "review_count": 185,
+    "city": "Miami",
+    "state": "FL",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "free_parking"
+    ],
+    "min_price": 85
+  },
+  {
+    "id": "hotel-10",
+    "name": "Neon Palms Motel",
+    "star_rating": 2,
+    "overall_rating": 4,
+    "review_count": 145,
+    "city": "Miami",
+    "state": "FL",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "free_parking"
+    ],
+    "min_price": 95
+  },
+  {
+    "id": "hotel-11",
+    "name": "South Beach Sanctum",
+    "star_rating": 5,
+    "overall_rating": 4.7,
+    "review_count": 920,
+    "city": "Miami",
+    "state": "FL",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "beach_access",
+      "spa",
+      "valet_parking"
+    ],
+    "min_price": 399
+  },
+  {
+    "id": "hotel-12",
+    "name": "Biscayne Bay Resort",
+    "star_rating": 4,
+    "overall_rating": 4.4,
+    "review_count": 1150,
+    "city": "Miami",
+    "state": "FL",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "fitness_center",
+      "restaurant",
+      "marina_access"
+    ],
+    "min_price": 220
+  },
+  {
+    "id": "hotel-13",
+    "name": "The Hudson Neo",
+    "star_rating": 4,
+    "overall_rating": 4.2,
+    "review_count": 905,
+    "city": "New York",
+    "state": "NY",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "rooftop_bar"
+    ],
+    "min_price": 180
+  },
+  {
+    "id": "hotel-14",
+    "name": "Manhattan Heights Hotel",
+    "star_rating": 5,
+    "overall_rating": 4.6,
+    "review_count": 2100,
+    "city": "New York",
+    "state": "NY",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "spa",
+      "valet_parking",
+      "restaurant"
+    ],
+    "min_price": 495
+  },
+  {
+    "id": "hotel-15",
+    "name": "Central Park View Inn",
+    "star_rating": 3,
+    "overall_rating": 4.3,
+    "review_count": 480,
+    "city": "New York",
+    "state": "NY",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "free_breakfast",
+      "pet_friendly"
+    ],
+    "min_price": 210
+  },
+  {
+    "id": "hotel-16",
+    "name": "Brooklyn Brick Hotel",
+    "star_rating": 4,
+    "overall_rating": 4.5,
+    "review_count": 680,
+    "city": "New York",
+    "state": "NY",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "rooftop_bar",
+      "pet_friendly"
+    ],
+    "min_price": 265
+  },
+  {
+    "id": "hotel-17",
+    "name": "Pacific Crest Lodge",
+    "star_rating": 3,
+    "overall_rating": 4.6,
+    "review_count": 340,
+    "city": "Seattle",
+    "state": "WA",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "free_parking",
+      "hot_tub",
+      "pet_friendly"
+    ],
+    "min_price": 165
+  },
+  {
+    "id": "hotel-18",
+    "name": "Emerald City Suites",
+    "star_rating": 4,
+    "overall_rating": 4.2,
+    "review_count": 510,
+    "city": "Seattle",
+    "state": "WA",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "meeting_rooms"
+    ],
+    "min_price": 140
+  },
+  {
+    "id": "hotel-19",
+    "name": "Puget Sound Vista",
+    "star_rating": 5,
+    "overall_rating": 4.8,
+    "review_count": 1050,
+    "city": "Seattle",
+    "state": "WA",
+    "country": "USA",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "fitness_center",
+      "spa",
+      "valet_parking"
+    ],
+    "min_price": 315
+  },
+  {
+    "id": "hotel-20",
+    "name": "Rain City Boutique",
+    "star_rating": 3,
+    "overall_rating": 4.5,
+    "review_count": 275,
+    "city": "Seattle",
+    "state": "WA",
+    "country": "USA",
+    "amenities": [
+      "free Wi-Fi",
+      "free_breakfast",
+      "bicycle_rentals",
+      "pet_friendly"
+    ],
+    "min_price": 125
+  },
+  {
+    "id": "hotel-21",
+    "name": "The Piccadilly Crown",
+    "star_rating": 5,
+    "overall_rating": 4.9,
+    "review_count": 1840,
+    "city": "London",
+    "state": "Greater London",
+    "country": "United Kingdom",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "fitness_center",
+      "spa",
+      "valet_parking",
+      "afternoon_tea_lounge"
+    ],
+    "min_price": 420
+  },
+  {
+    "id": "hotel-22",
+    "name": "Thames View Apartments",
+    "star_rating": 4,
+    "overall_rating": 4.4,
+    "review_count": 620,
+    "city": "London",
+    "state": "Greater London",
+    "country": "United Kingdom",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "laundry_service",
+      "meeting_rooms"
+    ],
+    "min_price": 245
+  },
+  {
+    "id": "hotel-23",
+    "name": "Shoreditch Hip Hotel",
+    "star_rating": 3,
+    "overall_rating": 4.6,
+    "review_count": 910,
+    "city": "London",
+    "state": "Greater London",
+    "country": "United Kingdom",
+    "amenities": [
+      "free Wi-Fi",
+      "rooftop_bar",
+      "bicycle_rentals",
+      "pet_friendly"
+    ],
+    "min_price": 160
+  },
+  {
+    "id": "hotel-24",
+    "name": "The Kensington Tavern Inn",
+    "star_rating": 2,
+    "overall_rating": 4.1,
+    "review_count": 340,
+    "city": "London",
+    "state": "Greater London",
+    "country": "United Kingdom",
+    "amenities": [
+      "free Wi-Fi",
+      "free_breakfast",
+      "on_site_pub"
+    ],
+    "min_price": 95
+  },
+  {
+    "id": "hotel-25",
+    "name": "Le Palace Lumière",
+    "star_rating": 5,
+    "overall_rating": 4.9,
+    "review_count": 1560,
+    "city": "Paris",
+    "state": "Île-de-France",
+    "country": "France",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "spa",
+      "fitness_center",
+      "valet_parking",
+      "michelin_restaurant"
+    ],
+    "min_price": 590
+  },
+  {
+    "id": "hotel-26",
+    "name": "Marais Chic Boutique",
+    "star_rating": 4,
+    "overall_rating": 4.7,
+    "review_count": 480,
+    "city": "Paris",
+    "state": "Île-de-France",
+    "country": "France",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "bicycle_rentals",
+      "courtyard_cafe"
+    ],
+    "min_price": 230
+  },
+  {
+    "id": "hotel-27",
+    "name": "Seine River Vista",
+    "star_rating": 3,
+    "overall_rating": 4.3,
+    "review_count": 835,
+    "city": "Paris",
+    "state": "Île-de-France",
+    "country": "France",
+    "amenities": [
+      "free Wi-Fi",
+      "free_breakfast",
+      "bar"
+    ],
+    "min_price": 155
+  },
+  {
+    "id": "hotel-28",
+    "name": "Montmartre Retro Hostel",
+    "star_rating": 2,
+    "overall_rating": 4,
+    "review_count": 510,
+    "city": "Paris",
+    "state": "Île-de-France",
+    "country": "France",
+    "amenities": [
+      "free Wi-Fi",
+      "laundry_service",
+      "social_lounge"
+    ],
+    "min_price": 85
+  },
+  {
+    "id": "hotel-29",
+    "name": "Shinjuku Sky Tower",
+    "star_rating": 5,
+    "overall_rating": 4.8,
+    "review_count": 2210,
+    "city": "Tokyo",
+    "state": "Tokyo-to",
+    "country": "Japan",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "fitness_center",
+      "spa",
+      "valet_parking",
+      "sky_bar"
+    ],
+    "min_price": 410
+  },
+  {
+    "id": "hotel-30",
+    "name": "Shibuya Neon Nest",
+    "star_rating": 4,
+    "overall_rating": 4.5,
+    "review_count": 1130,
+    "city": "Tokyo",
+    "state": "Tokyo-to",
+    "country": "Japan",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "restaurant",
+      "laundry_service"
+    ],
+    "min_price": 220
+  },
+  {
+    "id": "hotel-31",
+    "name": "Akihabara Tech Inn",
+    "star_rating": 3,
+    "overall_rating": 4.2,
+    "review_count": 780,
+    "city": "Tokyo",
+    "state": "Tokyo-to",
+    "country": "Japan",
+    "amenities": [
+      "free Wi-Fi",
+      "gaming_lounge",
+      "vending_galore"
+    ],
+    "min_price": 75
+  },
+  {
+    "id": "hotel-32",
+    "name": "Asakusa Traditional Ryokan",
+    "star_rating": 3,
+    "overall_rating": 4.7,
+    "review_count": 450,
+    "city": "Tokyo",
+    "state": "Tokyo-to",
+    "country": "Japan",
+    "amenities": [
+      "free Wi-Fi",
+      "public_hot_spring_bath",
+      "traditional_breakfast"
+    ],
+    "min_price": 165
+  },
+  {
+    "id": "hotel-33",
+    "name": "The Harbour Horizon",
+    "star_rating": 5,
+    "overall_rating": 4.9,
+    "review_count": 1980,
+    "city": "Sydney",
+    "state": "NSW",
+    "country": "Australia",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "fitness_center",
+      "spa",
+      "valet_parking",
+      "harbour_restaurant"
+    ],
+    "min_price": 440
+  },
+  {
+    "id": "hotel-34",
+    "name": "Bondi Beach Pad",
+    "star_rating": 4,
+    "overall_rating": 4.6,
+    "review_count": 590,
+    "city": "Sydney",
+    "state": "NSW",
+    "country": "Australia",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "beach_access",
+      "bicycle_rentals",
+      "pet_friendly"
+    ],
+    "min_price": 275
+  },
+  {
+    "id": "hotel-35",
+    "name": "Newtown Urban Stay",
+    "star_rating": 3,
+    "overall_rating": 4.4,
+    "review_count": 310,
+    "city": "Sydney",
+    "state": "NSW",
+    "country": "Australia",
+    "amenities": [
+      "free Wi-Fi",
+      "courtyard_lounge",
+      "pet_friendly"
+    ],
+    "min_price": 145
+  },
+  {
+    "id": "hotel-36",
+    "name": "Circular Quay Express",
+    "star_rating": 3,
+    "overall_rating": 4.1,
+    "review_count": 740,
+    "city": "Sydney",
+    "state": "NSW",
+    "country": "Australia",
+    "amenities": [
+      "free Wi-Fi",
+      "fitness_center",
+      "meeting_rooms"
+    ],
+    "min_price": 130
+  },
+  {
+    "id": "hotel-37",
+    "name": "Villa Borghese Imperial",
+    "star_rating": 5,
+    "overall_rating": 4.9,
+    "review_count": 1105,
+    "city": "Rome",
+    "state": "Lazio",
+    "country": "Italy",
+    "amenities": [
+      "pool",
+      "free Wi-Fi",
+      "spa",
+      "fitness_center",
+      "valet_parking",
+      "fine_dining_terrace"
+    ],
+    "min_price": 510
+  },
+  {
+    "id": "hotel-38",
+    "name": "Trastevere Charm Boutique",
+    "star_rating": 4,
+    "overall_rating": 4.7,
+    "review_count": 650,
+    "city": "Rome",
+    "state": "Lazio",
+    "country": "Italy",
+    "amenities": [
+      "free Wi-Fi",
+      "free_breakfast",
+      "rooftop_wine_bar",
+      "bicycle_rentals"
+    ],
+    "min_price": 210
+  },
+  {
+    "id": "hotel-39",
+    "name": "Colosseum Heritage Inn",
+    "star_rating": 3,
+    "overall_rating": 4.4,
+    "review_count": 920,
+    "city": "Rome",
+    "state": "Lazio",
+    "country": "Italy",
+    "amenities": [
+      "free Wi-Fi",
+      "rooftop_terrace",
+      "bar"
+    ],
+    "min_price": 165
+  },
+  {
+    "id": "hotel-40",
+    "name": "Roma Termini Rooms",
+    "star_rating": 2,
+    "overall_rating": 3.9,
+    "review_count": 415,
+    "city": "Rome",
+    "state": "Lazio",
+    "country": "Italy",
+    "amenities": [
+      "free Wi-Fi",
+      "luggage_storage"
+    ],
+    "min_price": 80
+  }
+];
+
+</script>
+<script>
+/* inlined app/helpers.js */
+/* ============ Stayfinder · derived data + formatting helpers ============ */
+(function () {
+  const HOTELS = window.HOTELS || [];
+
+  // ---- Country display + slug -------------------------------------------
+  const COUNTRY_LABEL = {
+    USA: "USA",
+    "United Kingdom": "United Kingdom",
+    France: "France",
+    Japan: "Japan",
+    Australia: "Australia",
+    Italy: "Italy",
+  };
+  const slug = (s) =>
+    String(s)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+  // ---- Destination options (countries + cities) -------------------------
+  // Order: group by country (in first-seen order); a country row, then its cities.
+  function buildDestinations() {
+    const order = [];
+    const byCountry = new Map();
+    HOTELS.forEach((h) => {
+      if (!byCountry.has(h.country)) {
+        byCountry.set(h.country, new Map());
+        order.push(h.country);
+      }
+      const cities = byCountry.get(h.country);
+      if (!cities.has(h.city)) {
+        cities.set(h.city, { city: h.city, state: h.state, country: h.country, count: 0 });
+      }
+      cities.get(h.city).count += 1;
+    });
+
+    const options = [];
+    order.forEach((country) => {
+      const cities = [...byCountry.get(country).values()].sort((a, b) =>
+        a.city.localeCompare(b.city)
+      );
+      const total = cities.reduce((n, c) => n + c.count, 0);
+      options.push({
+        kind: "country",
+        country,
+        countryLabel: COUNTRY_LABEL[country] || country,
+        count: total,
+        label: `All hotels in ${COUNTRY_LABEL[country] || country}`,
+        search: `${country} all`.toLowerCase(),
+        key: "c-" + slug(country),
+        params: { country: slug(country) },
+      });
+      cities.forEach((c) => {
+        options.push({
+          kind: "city",
+          city: c.city,
+          state: c.state,
+          country: c.country,
+          countryLabel: COUNTRY_LABEL[c.country] || c.country,
+          count: c.count,
+          label: `${c.city}, ${c.state} — ${COUNTRY_LABEL[c.country] || c.country}`,
+          short: `${c.city}, ${c.state}`,
+          search: `${c.city} ${c.state} ${c.country}`.toLowerCase(),
+          key: "city-" + slug(c.city),
+          params: { country: slug(c.country), city: slug(c.city) },
+        });
+      });
+    });
+    return options;
+  }
+
+  // ---- Amenity humanization ---------------------------------------------
+  const AMENITY_LABEL = {
+    "free Wi-Fi": "Wi-Fi",
+    fitness_center: "Fitness center",
+    valet_parking: "Valet parking",
+    free_parking: "Free parking",
+    pet_friendly: "Pet friendly",
+    free_breakfast: "Free breakfast",
+    laundry_service: "Laundry",
+    bicycle_rentals: "Bikes",
+    beach_access: "Beach access",
+    rooftop_bar: "Rooftop bar",
+    rooftop_terrace: "Rooftop terrace",
+    rooftop_wine_bar: "Rooftop wine bar",
+    hot_tub: "Hot tub",
+    meeting_rooms: "Meeting rooms",
+    marina_access: "Marina",
+    afternoon_tea_lounge: "Afternoon tea",
+    michelin_restaurant: "Michelin dining",
+    fine_dining_terrace: "Fine dining",
+    harbour_restaurant: "Harbour dining",
+    courtyard_cafe: "Courtyard café",
+    courtyard_lounge: "Courtyard lounge",
+    social_lounge: "Social lounge",
+    gaming_lounge: "Gaming lounge",
+    vending_galore: "Vending",
+    on_site_pub: "On-site pub",
+    public_hot_spring_bath: "Hot spring bath",
+    traditional_breakfast: "Breakfast",
+    luggage_storage: "Luggage storage",
+    sky_bar: "Sky bar",
+  };
+  function humanizeAmenity(a) {
+    if (AMENITY_LABEL[a]) return AMENITY_LABEL[a];
+    return a.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+  }
+
+  // ---- Formatting --------------------------------------------------------
+  const usd = (n) => "$" + Math.round(n).toLocaleString("en-US");
+  const compact = (n) => n.toLocaleString("en-US");
+
+  // a11y label for a hotel card
+  function cardAria(h) {
+    return (
+      `${h.name}, ${h.star_rating} star hotel, rated ${h.overall_rating} from ` +
+      `${compact(h.review_count)} reviews, from ${usd(h.min_price)} per night, ` +
+      `${h.city} ${h.state}`
+    );
+  }
+
+  window.SF = {
+    HOTELS,
+    DESTINATIONS: buildDestinations(),
+    PRICE_MIN: Math.min(...HOTELS.map((h) => h.min_price)),
+    PRICE_MAX: Math.max(...HOTELS.map((h) => h.min_price)),
+    PAGE_SIZE: 8,
+    humanizeAmenity,
+    usd,
+    compact,
+    cardAria,
+    slug,
+  };
+})();
+
+</script>
+<script type="text/babel" data-src="components.jsx">
+/* ===================== Stayfinder · UI components ===================== */
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+const SF = window.SF;
+
+/* ---------- Icons (simple line glyphs) ---------- */
+function Icon({ name, size = 20, className = "", stroke = 2 }) {
+  const p = {
+    search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.2-3.2" /></>,
+    pin: <><path d="M12 21s-6.5-5.6-6.5-10.5a6.5 6.5 0 1 1 13 0C18.5 15.4 12 21 12 21Z" /><circle cx="12" cy="10.5" r="2.2" /></>,
+    chevron: <path d="m6 9 6 6 6-6" />,
+    star: <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L12 16.77l-5.2 2.74.99-5.79-4.21-4.1 5.82-.85z" />,
+    x: <><path d="M18 6 6 18" /><path d="m6 6 12 12" /></>,
+    sliders: <><path d="M4 6h10" /><path d="M18 6h2" /><circle cx="16" cy="6" r="2" /><path d="M4 12h2" /><path d="M10 12h10" /><circle cx="8" cy="12" r="2" /><path d="M4 18h12" /><path d="M20 18h0" /><circle cx="18" cy="18" r="2" /></>,
+    arrowLeft: <path d="m14 6-6 6 6 6" />,
+    arrowRight: <path d="m10 6 6 6-6 6" />,
+    building: <><path d="M5 21V5.5A1.5 1.5 0 0 1 6.5 4h7A1.5 1.5 0 0 1 15 5.5V21" /><path d="M15 9h2.5A1.5 1.5 0 0 1 19 10.5V21" /><path d="M3 21h18" /><path d="M8 8h0M11 8h0M8 12h0M11 8h0M11 12h0M8 16h0M11 16h0" /></>,
+    check: <path d="m4 12 5 5L20 6" />,
+    sort: <><path d="M7 4v16" /><path d="m3 8 4-4 4 4" /><path d="M17 20V4" /><path d="m13 16 4 4 4-4" /></>,
+  }[name];
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" strokeWidth={stroke}
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {p}
+    </svg>
+  );
+}
+
+/* ---------- Rating stars (amber, fractional fill) ---------- */
+function RatingStars({ value, size = 15 }) {
+  const pct = Math.max(0, Math.min(100, (value / 5) * 100));
+  const row = (cls) => (
+    <div className={"rs-row " + cls} aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24">
+          <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L12 16.77l-5.2 2.74.99-5.79-4.21-4.1 5.82-.85z" />
+        </svg>
+      ))}
+    </div>
+  );
+  return (
+    <span className="rating-stars" style={{ "--w": size }}>
+      {row("rs-empty")}
+      <span className="rs-fill" style={{ width: pct + "%" }}>{row("rs-full")}</span>
+    </span>
+  );
+}
+
+/* ---------- Photo placeholder ---------- */
+function PhotoPlaceholder({ name, stars }) {
+  return (
+    <div className="photo">
+      <div className="photo-stripes" aria-hidden="true" />
+      <div className="photo-glyph" aria-hidden="true"><Icon name="building" size={34} stroke={1.6} /></div>
+      <div className="photo-name" aria-hidden="true">{name}</div>
+      <div className="star-badge" aria-hidden="true">
+        <Icon name="star" size={12} stroke={0} className="sb-star" />
+        <span>{stars}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Hotel card ---------- */
+function HotelCard({ h }) {
+  const ams = h.amenities.slice(0, 3);
+  const extra = h.amenities.length - ams.length;
+  return (
+    <a className="card" href={"Hotel Detail.html?id=" + h.id} aria-label={SF.cardAria(h)}>
+      <PhotoPlaceholder name={h.name} stars={h.star_rating} />
+      <div className="card-body">
+        <h3 className="card-title">{h.name}</h3>
+        <p className="card-loc">{h.city}, {h.state} · {h.country === "USA" ? "USA" : h.country}</p>
+        <div className="card-rating">
+          <RatingStars value={h.overall_rating} />
+          <span className="rating-num">{h.overall_rating.toFixed(1)}</span>
+          <span className="rating-count">({SF.compact(h.review_count)})</span>
+        </div>
+        <div className="pills">
+          {ams.map((a) => (
+            <span className="pill" key={a}>{SF.humanizeAmenity(a)}</span>
+          ))}
+          {extra > 0 && <span className="pill pill-more">+{extra}</span>}
+        </div>
+        <div className="card-price">
+          <span className="price-from">from</span>
+          <span className="price-val">{SF.usd(h.min_price)}</span>
+          <span className="price-unit">/ night</span>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+/* ---------- Skeleton card ---------- */
+function SkeletonCard() {
+  return (
+    <div className="card skeleton" aria-hidden="true">
+      <div className="photo sk-block" />
+      <div className="card-body">
+        <div className="sk-line w70" />
+        <div className="sk-line w45" />
+        <div className="sk-line w55" />
+        <div className="sk-pills">
+          <div className="sk-pill" /><div className="sk-pill" /><div className="sk-pill" />
+        </div>
+        <div className="sk-line w35 tall" />
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Empty / status states ---------- */
+function EmptyState({ icon, title, body, action }) {
+  return (
+    <div className="empty" role="status">
+      <div className="empty-icon"><Icon name={icon} size={26} stroke={1.8} /></div>
+      <h2 className="empty-title">{title}</h2>
+      {body && <p className="empty-body">{body}</p>}
+      {action}
+    </div>
+  );
+}
+
+/* ---------- Pagination ---------- */
+function Pagination({ page, pages, onPage }) {
+  if (pages <= 1) return null;
+  const nums = [];
+  for (let i = 1; i <= pages; i++) nums.push(i);
+  return (
+    <nav className="pagination" aria-label="Pagination">
+      <button className="page-btn arrow" onClick={() => onPage(page - 1)}
+        disabled={page === 1} aria-label="Previous page">
+        <Icon name="arrowLeft" size={18} />
+      </button>
+      <ul className="page-list">
+        {nums.map((n) => (
+          <li key={n}>
+            <button
+              className={"page-btn" + (n === page ? " is-active" : "")}
+              aria-current={n === page ? "page" : undefined}
+              aria-label={"Page " + n}
+              onClick={() => onPage(n)}>
+              {n}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <button className="page-btn arrow" onClick={() => onPage(page + 1)}
+        disabled={page === pages} aria-label="Next page">
+        <Icon name="arrowRight" size={18} />
+      </button>
+    </nav>
+  );
+}
+
+Object.assign(window, {
+  Icon, RatingStars, PhotoPlaceholder, HotelCard, SkeletonCard, EmptyState, Pagination,
+});
+
+</script>
+<script type="text/babel" data-src="combobox.jsx">
+/* ===================== Stayfinder · Destination combobox ===================== */
+const { useState: useStateCB, useEffect: useEffectCB, useRef: useRefCB } = React;
+
+function DestinationCombobox({ selected, onSelect, autoFocus }) {
+  const all = window.SF.DESTINATIONS;
+  const [open, setOpen] = useStateCB(false);
+  const [query, setQuery] = useStateCB("");
+  const [active, setActive] = useStateCB(0);
+  const wrapRef = useRefCB(null);
+  const inputRef = useRefCB(null);
+  const listRef = useRefCB(null);
+
+  const q = query.trim().toLowerCase();
+  const results = q ? all.filter((o) => o.search.includes(q)) : all;
+
+  // close on outside click
+  useEffectCB(() => {
+    function onDoc(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  useEffectCB(() => {
+    if (autoFocus && inputRef.current) inputRef.current.focus();
+  }, [autoFocus]);
+
+  // keep active option in view
+  useEffectCB(() => {
+    if (!open || !listRef.current) return;
+    const el = listRef.current.querySelector('[data-idx="' + active + '"]');
+    if (el) {
+      const lr = listRef.current.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      if (er.bottom > lr.bottom) listRef.current.scrollTop += er.bottom - lr.bottom;
+      else if (er.top < lr.top) listRef.current.scrollTop -= lr.top - er.top;
+    }
+  }, [active, open]);
+
+  function choose(opt) {
+    if (!opt) return;
+    onSelect(opt);
+    setQuery("");
+    setOpen(false);
+    inputRef.current && inputRef.current.blur();
+  }
+
+  function onKey(e) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (!open) { setOpen(true); return; }
+      setActive((i) => Math.min(results.length - 1, i + 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((i) => Math.max(0, i - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (open && results[active]) choose(results[active]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  }
+
+  const valueText = selected ? selected.label : "";
+
+  return (
+    <div className="combobox" ref={wrapRef}>
+      <div className="combo-field">
+        <Icon name="search" size={20} className="combo-lead" />
+        <input
+          ref={inputRef}
+          id="destination"
+          className="combo-input"
+          type="text"
+          role="combobox"
+          aria-expanded={open}
+          aria-controls="destination-list"
+          aria-autocomplete="list"
+          autoComplete="off"
+          placeholder={selected ? valueText : "Search a city or country…"}
+          value={open ? query : valueText && !query ? valueText : query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); setActive(0); }}
+          onFocus={() => { setOpen(true); setActive(0); }}
+          onKeyDown={onKey}
+        />
+        {(selected || query) && (
+          <button className="combo-clear" type="button" aria-label="Clear destination"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => { setQuery(""); onSelect(null); setOpen(true); inputRef.current.focus(); }}>
+            <Icon name="x" size={16} />
+          </button>
+        )}
+        <Icon name="chevron" size={20} className={"combo-caret" + (open ? " up" : "")} />
+      </div>
+
+      {open && (
+        <div className="combo-pop" role="listbox" id="destination-list" ref={listRef}>
+          {results.length === 0 && (
+            <div className="combo-empty">No destinations</div>
+          )}
+          {results.map((o, i) => (
+            <div
+              key={o.key}
+              data-idx={i}
+              role="option"
+              aria-selected={selected && selected.key === o.key}
+              className={
+                "combo-opt " + o.kind + (i === active ? " is-active" : "") +
+                (selected && selected.key === o.key ? " is-selected" : "")
+              }
+              onMouseEnter={() => setActive(i)}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => choose(o)}>
+              <span className="opt-icon">
+                <Icon name={o.kind === "country" ? "search" : "pin"} size={16} stroke={1.9} />
+              </span>
+              {o.kind === "country" ? (
+                <span className="opt-main">
+                  <span className="opt-title">{o.label}</span>
+                </span>
+              ) : (
+                <span className="opt-main">
+                  <span className="opt-title">{o.city}<span className="opt-sub">, {o.state}</span></span>
+                  <span className="opt-country">{o.countryLabel}</span>
+                </span>
+              )}
+              <span className="opt-count">{o.count}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+window.DestinationCombobox = DestinationCombobox;
+
+</script>
+<script type="text/babel" data-src="toolbar.jsx">
+/* ===================== Stayfinder · Refine toolbar + mobile sheet ===================== */
+const { useEffect: useEffectTB } = React;
+const STAR_OPTS = [
+  { label: "Any", short: "Any", val: 0 },
+  { label: "3★ & up", short: "3★+", val: 3 },
+  { label: "4★ & up", short: "4★+", val: 4 },
+  { label: "5★", short: "5★", val: 5 },
+];
+const SORT_OPTS = [
+  { val: "recommended", label: "Recommended" },
+  { val: "price_asc", label: "Price: Low to High" },
+  { val: "price_desc", label: "Price: High to Low" },
+  { val: "rating_desc", label: "Rating: Highest" },
+  { val: "stars_desc", label: "Stars: Highest" },
+];
+
+function Segmented({ value, onChange, useShort }) {
+  return (
+    <div className="segmented" role="group" aria-label="Minimum star rating">
+      {STAR_OPTS.map((o) => (
+        <button
+          key={o.val}
+          type="button"
+          className={"seg-btn" + (value === o.val ? " is-on" : "")}
+          aria-pressed={value === o.val}
+          onClick={() => onChange(o.val)}>
+          {useShort ? o.short : o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SortSelect({ value, onChange, id }) {
+  return (
+    <div className="select-wrap">
+      <Icon name="sort" size={16} className="select-lead" />
+      <select id={id} className="select" value={value}
+        aria-label="Sort hotels by"
+        onChange={(e) => onChange(e.target.value)}>
+        {SORT_OPTS.map((o) => (
+          <option key={o.val} value={o.val}>{o.label}</option>
+        ))}
+      </select>
+      <Icon name="chevron" size={16} className="select-caret" />
+    </div>
+  );
+}
+
+function PriceRange({ min, max, onMin, onMax, bounds }) {
+  return (
+    <div className="price-range" role="group" aria-label="Price range in US dollars">
+      <div className="price-input">
+        <span className="price-dollar">$</span>
+        <input type="number" inputMode="numeric" className="num" placeholder={String(bounds[0])}
+          aria-label="Minimum price per night" value={min} min="0"
+          onChange={(e) => onMin(e.target.value)} />
+      </div>
+      <span className="price-dash" aria-hidden="true">–</span>
+      <div className="price-input">
+        <span className="price-dollar">$</span>
+        <input type="number" inputMode="numeric" className="num" placeholder={String(bounds[1])}
+          aria-label="Maximum price per night" value={max} min="0"
+          onChange={(e) => onMax(e.target.value)} />
+      </div>
+    </div>
+  );
+}
+
+/* Desktop inline toolbar */
+function ToolbarInline({ f, set, bounds, count, countLabel }) {
+  return (
+    <div className="toolbar">
+      <div className="tb-group">
+        <span className="tb-label">Stars</span>
+        <Segmented value={f.stars} onChange={(v) => set({ stars: v })} />
+      </div>
+      <div className="tb-group">
+        <span className="tb-label">Price</span>
+        <PriceRange min={f.min} max={f.max} bounds={bounds}
+          onMin={(v) => set({ min: v })} onMax={(v) => set({ max: v })} />
+      </div>
+      <div className="tb-group tb-sort">
+        <span className="tb-label">Sort</span>
+        <SortSelect id="sort-desktop" value={f.sort} onChange={(v) => set({ sort: v })} />
+      </div>
+      <div className="tb-count" aria-live="polite">{countLabel}</div>
+    </div>
+  );
+}
+
+/* Mobile sticky bar */
+function ToolbarMobile({ f, set, activeFilters, onOpenSheet, countLabel }) {
+  return (
+    <div className="toolbar-mobile">
+      <div className="tbm-row">
+        <button className="filters-btn" onClick={onOpenSheet}>
+          <Icon name="sliders" size={18} />
+          <span>Filters</span>
+          {activeFilters > 0 && <span className="filters-badge">{activeFilters}</span>}
+        </button>
+        <SortSelect id="sort-mobile" value={f.sort} onChange={(v) => set({ sort: v })} />
+      </div>
+      <div className="tbm-count" aria-live="polite">{countLabel}</div>
+    </div>
+  );
+}
+
+/* Mobile bottom sheet */
+function FilterSheet({ open, f, set, bounds, onReset, onClose, resultCount }) {
+  useEffectTB(() => {
+    function onKey(e) { if (e.key === "Escape") onClose(); }
+    if (open) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  return (
+    <div className={"sheet-root" + (open ? " open" : "")} aria-hidden={!open}>
+      <div className="sheet-scrim" onClick={onClose} />
+      <div className="sheet" role="dialog" aria-modal="true" aria-label="Filters">
+        <div className="sheet-head">
+          <h2 className="sheet-title">Filters</h2>
+          <button className="sheet-close" aria-label="Close filters" onClick={onClose}>
+            <Icon name="x" size={20} />
+          </button>
+        </div>
+        <div className="sheet-body">
+          <div className="sheet-field">
+            <label className="sheet-label">Star rating</label>
+            <Segmented value={f.stars} onChange={(v) => set({ stars: v })} useShort />
+          </div>
+          <div className="sheet-field">
+            <label className="sheet-label">Price per night (USD)</label>
+            <PriceRange min={f.min} max={f.max} bounds={bounds}
+              onMin={(v) => set({ min: v })} onMax={(v) => set({ max: v })} />
+          </div>
+        </div>
+        <div className="sheet-foot">
+          <button className="btn btn-ghost" onClick={onReset}>Reset</button>
+          <button className="btn btn-primary" onClick={onClose}>
+            {resultCount === 0 ? "No matches" : `Show ${resultCount} ${resultCount === 1 ? "hotel" : "hotels"}`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  STAR_OPTS, SORT_OPTS, Segmented, SortSelect, PriceRange,
+  ToolbarInline, ToolbarMobile, FilterSheet,
+});
+
+</script>
+<script type="text/babel" data-src="app.jsx">
+/* ===================== Stayfinder · App ===================== */
+const { useState, useEffect, useMemo, useRef } = React;
+const SFA = window.SF;
+const track = (event, payload) => { try { console.log("track:", event, payload); } catch (e) {} };
+
+const DEFAULT_FILTERS = { stars: 0, min: "", max: "", sort: "recommended" };
+
+function sortHotels(list, sort) {
+  const by = {
+    recommended: (a, b) => b.overall_rating - a.overall_rating || a.id.localeCompare(b.id),
+    price_asc: (a, b) => a.min_price - b.min_price || a.id.localeCompare(b.id),
+    price_desc: (a, b) => b.min_price - a.min_price || a.id.localeCompare(b.id),
+    rating_desc: (a, b) => b.overall_rating - a.overall_rating || a.id.localeCompare(b.id),
+    stars_desc: (a, b) => b.star_rating - a.star_rating || b.overall_rating - a.overall_rating || a.id.localeCompare(b.id),
+  }[sort] || null;
+  const out = list.slice();
+  if (by) out.sort(by);
+  return out;
+}
+
+function App() {
+  const [dest, setDest] = useState(null);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const loadTimer = useRef(null);
+
+  const bounds = [SFA.PRICE_MIN, SFA.PRICE_MAX];
+
+  // pick destination → simulate fetch
+  function selectDestination(opt) {
+    setDest(opt);
+    setPage(1);
+    if (loadTimer.current) clearTimeout(loadTimer.current);
+    if (opt) {
+      setLoading(true);
+      track("search_performed", { city: opt.city || null, country: opt.country, filters });
+      loadTimer.current = setTimeout(() => setLoading(false), 600);
+    } else {
+      setLoading(false);
+    }
+  }
+
+  function setF(patch) {
+    setFilters((f) => ({ ...f, ...patch }));
+    setPage(1);
+  }
+  function resetFilters() {
+    setFilters((f) => ({ ...DEFAULT_FILTERS, sort: f.sort }));
+    setPage(1);
+  }
+
+  // base subset for the chosen destination
+  const base = useMemo(() => {
+    if (!dest) return [];
+    if (dest.kind === "country") return SFA.HOTELS.filter((h) => h.country === dest.country);
+    return SFA.HOTELS.filter((h) => h.city === dest.city && h.country === dest.country);
+  }, [dest]);
+
+  // apply filters + sort
+  const filtered = useMemo(() => {
+    let lo = filters.min === "" ? null : Math.max(0, parseFloat(filters.min));
+    let hi = filters.max === "" ? null : Math.max(0, parseFloat(filters.max));
+    if (lo != null && hi != null && lo > hi) { const t = lo; lo = hi; hi = t; }
+    const out = base.filter((h) => {
+      if (filters.stars && h.star_rating < filters.stars) return false;
+      if (lo != null && h.min_price < lo) return false;
+      if (hi != null && h.min_price > hi) return false;
+      return true;
+    });
+    return sortHotels(out, filters.sort);
+  }, [base, filters]);
+
+  // analytics: no_results
+  useEffect(() => {
+    if (dest && !loading && base.length > 0 && filtered.length === 0) {
+      track("no_results", { filters });
+    }
+  }, [dest, loading, base.length, filtered.length]);
+
+  const pages = Math.max(1, Math.ceil(filtered.length / SFA.PAGE_SIZE));
+  const safePage = Math.min(page, pages);
+  const pageItems = filtered.slice((safePage - 1) * SFA.PAGE_SIZE, safePage * SFA.PAGE_SIZE);
+
+  const activeFilters =
+    (filters.stars ? 1 : 0) + (filters.min !== "" ? 1 : 0) + (filters.max !== "" ? 1 : 0);
+
+  const countLabel = !dest
+    ? ""
+    : loading
+    ? "Loading hotels…"
+    : filtered.length === 0
+    ? "No hotels"
+    : filtered.length === 1
+    ? "1 hotel"
+    : `${filtered.length} hotels`;
+
+  const destName = dest ? (dest.kind === "country" ? dest.countryLabel : dest.short) : null;
+
+  return (
+    <React.Fragment>
+      <a className="skip-link" href="#results">Skip to results</a>
+
+      <header className="appbar">
+        <div className="container appbar-inner">
+          <a className="brand" href="#" onClick={(e) => e.preventDefault()}>
+            <span className="brand-mark" aria-hidden="true"><Icon name="pin" size={18} stroke={2.2} /></span>
+            <span className="brand-name">Stayfinder</span>
+          </a>
+        </div>
+      </header>
+
+      <main>
+        {/* Hero */}
+        <section className="hero">
+          <div className="container">
+            <h1 className="hero-title">Find your stay</h1>
+            <p className="hero-sub">Browse hotels by destination — pick a city or country to begin.</p>
+            <div className="hero-search">
+              <label className="vh" htmlFor="destination">Destination</label>
+              <DestinationCombobox selected={dest} onSelect={selectDestination} autoFocus={false} />
+            </div>
+          </div>
+        </section>
+
+        {/* Refine toolbar — only once a destination is chosen */}
+        {dest && (
+          <div className="refine">
+            <div className="container">
+              <div className="refine-desktop">
+                <ToolbarInline f={filters} set={setF} bounds={bounds} countLabel={countLabel} />
+              </div>
+              <div className="refine-mobile">
+                <ToolbarMobile f={filters} set={setF} activeFilters={activeFilters}
+                  onOpenSheet={() => setSheetOpen(true)} countLabel={countLabel} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Results */}
+        <section className="results" id="results">
+          <div className="container">
+            {!dest && (
+              <EmptyState icon="pin" title="Start by choosing a destination"
+                body="Pick a city or country above to see available stays." />
+            )}
+
+            {dest && loading && (
+              <div className="grid">
+                {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+              </div>
+            )}
+
+            {dest && !loading && filtered.length > 0 && (
+              <React.Fragment>
+                <div className="results-head">
+                  <h2 className="results-title">
+                    Hotels in <span>{destName}</span>
+                  </h2>
+                </div>
+                <div className="grid">
+                  {pageItems.map((h) => <HotelCard key={h.id} h={h} />)}
+                </div>
+                <Pagination page={safePage} pages={pages} onPage={setPage} />
+              </React.Fragment>
+            )}
+
+            {dest && !loading && filtered.length === 0 && (
+              <EmptyState icon="search" title="No hotels found"
+                body="Try widening your filters to see more stays."
+                action={<button className="btn btn-primary" onClick={resetFilters}>Reset filters</button>} />
+            )}
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <div className="container footer-inner">
+          <span className="brand-name sm">Stayfinder</span>
+          <span className="build">Mock UI · build 2026.06.08 · {SFA.HOTELS.length} hotels indexed</span>
+        </div>
+      </footer>
+
+      <FilterSheet open={sheetOpen} f={filters} set={setF} bounds={bounds}
+        onReset={resetFilters} onClose={() => setSheetOpen(false)} resultCount={filtered.length} />
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+</body>
+</html>

@@ -1,7 +1,8 @@
 # UI/UX Design Spec — Home Page (Search + Hotel Grid)
 
 > Route: `/` · Drives the mock UI for destination search, refine/sort, and the hotel grid.
-> Companion spec: [hotel-detail-page-design.md](hotel-detail-page-design.md).
+> Rendered mockup: [home-page-mockup.html](home-page-mockup.html) (open in a browser).
+> Companion spec: [hotel-detail-page-design-spec.md](hotel-detail-page-design-spec.md).
 > Sourced from `prd.md`, `architecture.md`, `product-roadmap.md`, `user-flows.md`, `services/mock/hotels.json`.
 
 **Visual direction:** Clean & modern — neutral grey scale, one blue accent, photo-forward

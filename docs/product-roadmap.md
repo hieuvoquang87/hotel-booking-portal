@@ -35,6 +35,15 @@ API (BFF — REST contract, under /api):
   GET /api/hotels/[id]/rooms?check_in=&check_out=  Room types + price/night (lazy, slow sim)
 ```
 
+### Design Mockups
+
+UI source of truth for the two pages — replicate when building. See [`docs/designs/`](designs/README.md).
+
+| Page | Route | Mockup (browser) | Spec |
+|------|-------|------------------|------|
+| Search + hotel grid | `/` | [home-page-mockup.html](designs/home-page-mockup.html) | [home-page-design-spec.md](designs/home-page-design-spec.md) |
+| Detail + room availability | `/hotels/[id]` | [hotel-detail-page-mockup.html](designs/hotel-detail-page-mockup.html) | [hotel-detail-page-design-spec.md](designs/hotel-detail-page-design-spec.md) |
+
 ### State Management
 
 ```
