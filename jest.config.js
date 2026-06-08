@@ -22,11 +22,12 @@ const baseConfig = {
   ],
 };
 
-// next/jest forces its own transformIgnorePatterns (ignoring everything in
-// node_modules except next/geist) and *appends* any we pass — which can't widen
-// the set. MSW v2 ships only ESM, so it must be transformed by next/jest's SWC.
-// Post-process the resolved config to REPLACE transformIgnorePatterns so MSW and
-// its ESM-only deps are transformed instead of loaded raw.
+// MSW v2 ships only ESM, so it must be transformed by next/jest's SWC instead of
+// loaded raw. next/jest forces its own transformIgnorePatterns whose negative
+// lookahead already *allows* its runtime + geist through the transform; passing
+// our own pattern only appends (can't widen the ignore set). So inject MSW's deps
+// into next's existing lookahead rather than replacing it — replacing would
+// silently stop transforming next/geist, breaking later component tests (M3–M5).
 const transformEsmDeps = [
   'msw',
   '@mswjs',
@@ -42,9 +43,10 @@ const transformEsmDeps = [
 
 module.exports = async () => {
   const config = await createJestConfig(baseConfig)();
-  config.transformIgnorePatterns = [
-    `/node_modules/(?!(?:.pnpm/)?(?:${transformEsmDeps})/)`,
-    '^.+\\.module\\.(css|sass|scss)$',
-  ];
+  config.transformIgnorePatterns = config.transformIgnorePatterns.map((pattern) =>
+    pattern.includes('(?!(geist|')
+      ? pattern.replace('(?!(geist|', `(?!(${transformEsmDeps}|geist|`)
+      : pattern,
+  );
   return config;
 };
