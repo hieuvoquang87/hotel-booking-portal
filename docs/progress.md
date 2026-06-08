@@ -31,7 +31,7 @@ a11y, acceptance). Home → [spec](designs/home-page-design-spec.md) ·
 | --- | --------------------------------- | ----------------------------------------------------------- | ------ |
 | M0  | Project setup & tooling           | Next.js/TS/Tailwind/RQ + Jest/RTL/MSW/Playwright (CI → M7)  | [x]    |
 | M1  | Data layer & domain               | Domain types, `hotelService`, `availabilityService`, `lib/` | [x]    |
-| M2  | BFF API routes                    | `/api/locations`, `/api/hotels`, `[id]`, `[id]/rooms`       | [ ]    |
+| M2  | BFF API routes                    | `/api/locations`, `/api/hotels`, `[id]`, `[id]/rooms`       | [x]    |
 | M3  | Client state & data hooks         | QueryProvider, AppProvider, the four `use*` hooks           | [ ]    |
 | M4  | Search · filter · sort · paginate | Home page: dropdown, filters, sort, pagination, grid        | [ ]    |
 | M5  | Hotel detail & room availability  | `/hotels/[id]` + lazy availability with all states          | [ ]    |
@@ -100,13 +100,16 @@ available_dates[]`.
 **Outcome:** the client's only data surface. Idempotent cacheable GET reads that
 mirror the REST contract 1:1 (architecture §5).
 
-- [ ] `GET /api/locations` → `getLocations()` (cached once; destination dropdown source).
+- [x] `GET /api/locations` → `getLocations()` (cached once; destination dropdown source).
 - [x] `GET /api/hotels?country=&city=&star_rating=&price_range=` → `getHotelsByLocation` (location-first; server also accepts refine params per contract).
-- [ ] `GET /api/hotels/[id]` → `getHotelById` (static info; fast, renders immediately).
-- [ ] `GET /api/hotels/[id]/rooms?check_in=&check_out=` → `availabilityService` (lazy/slow path; never blocks the page).
-- [ ] **Status codes:** `2xx` success; `4xx` for bad/missing dates, `checkout ≤ check-in`, unknown id.
-- [ ] **Structured API logs** on each route handler (request + outcome).
-- [ ] **Integration tests** for each route (valid + error params).
+- [x] `GET /api/hotels/[id]` → `getHotelById` (static info; fast, renders immediately).
+- [x] `GET /api/hotels/[id]/rooms?check_in=&check_out=` → `availabilityService` (lazy/slow path; never blocks the page).
+- [x] **Status codes:** `2xx` success; `4xx` for bad/missing dates, `checkout ≤ check-in`, unknown id.
+- [x] **Structured API logs** on each route handler (request + outcome).
+- [x] **Integration tests** for each route (valid + error params).
+
+**Resolved decisions:** filtering is **location-only** (star/price ignored at the BFF); paramless `/api/hotels` returns the **top 10 by rating**.
+
 - **Done when:** all four routes return correct shapes/status for happy + error inputs; client never reaches `services/` directly.
 
 ---
