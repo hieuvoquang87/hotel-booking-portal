@@ -81,6 +81,8 @@ hooks/
 services/
 ├── hotelService.ts            getLocations / getHotelsByLocation / getHotelById
 ├── availabilityService.ts     Simulate slow third-party (latency + price)
+├── mappers.ts                 Raw seed → domain types (boundary)
+├── seed.ts                    Isolates the raw JSON import (Phase-2 swap seam)
 └── mock/hotels.json           40 hotels × 10 cities
 
 stores/
@@ -124,9 +126,9 @@ stores/
 **Extends Phase 1** — assumes routes, components, and data layer exist.
 
 > **Framing:** Phase 1 ships the 3 core discovery features. Phase 2 makes them
-> production-grade — adding booking, crawlable SEO, a real-API seam, observability,
-> and the operability/resilience hardening in §6 below. Nothing in Phase 2 is
-> implemented yet; the items here are **designed plans**.
+> production-grade — adding booking (§1), crawlable SEO (§2), a real-API seam (§3),
+> observability (§4), error boundaries (§5), and operability/resilience hardening
+> (§6). Nothing in Phase 2 is implemented yet; the items here are **designed plans**.
 
 ### 1. Booking (New Feature)
 
@@ -209,6 +211,9 @@ type Event =
   | { name: 'no_rooms'; hotelId: string };
 ```
 
+The resilience slice (§6) emits its operational metrics — call latency, cache
+hit/miss, circuit-breaker state — through this same `track()` facade.
+
 ### 5. Error Handling
 
 | Failure                | Behavior                                         |
@@ -217,10 +222,14 @@ type Event =
 | Invalid intent slug    | redirect to base city page                       |
 | Empty filter result    | `EmptyState` + reset filters                     |
 | `available_dates: []`  | "No rooms available for these dates"             |
-| Service down / timeout | Backoff retry → last ISR cache, else `error.tsx` |
+| Service down / timeout | Page/ISR fallback for inventory; availability degrades via §6 (stale app cache), never `error.tsx` |
 | Service 5xx            | Typed error → boundary + Sentry alert            |
 
 **Layers:** `error.tsx` · `not-found.tsx` · `loading.tsx` · `global-error.tsx`
+
+The availability boundary's detailed failure path — timeout → bounded retry →
+circuit breaker → stale-cache fallback — is specified in §6, which supersedes the
+generic row above for that dependency.
 
 ### 6. Operability & Resilience
 
@@ -290,15 +299,17 @@ and recovers. Design thinking, not a wishlist. **New seams:** `services/resilien
 
 ## Deliverables
 
-| File                             | Contents                                                             |
-| -------------------------------- | -------------------------------------------------------------------- |
-| **README.md**                    | Install · run locally · test; state management + component breakdown |
-| **ASSUMPTIONS-AND-TRADEOFFS.md** | Architectural rationale (design thinking)                            |
-| **AI-USAGE.md**                  | How AI tools were used during coding/UI                              |
+| File                                  | Contents                                                                                  |
+| ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **README.md**                         | Install · run · test; architecture, state management, quality bar, resilience, security    |
+| **docs/assumptions-and-tradeoffs.md** | Architectural rationale and accepted trade-offs (design thinking)                          |
+| **ai-dev-workflow.md**                | How AI tools were used across the requirements → docs → build workflow                     |
 
 ---
 
-## Non-Functional Targets (Phase 1)
+## Non-Functional Targets
+
+**Phase 1 (client experience):**
 
 | Metric          | Target                   |
 | --------------- | ------------------------ |
@@ -309,6 +320,15 @@ and recovers. Design thinking, not a wishlist. **New seams:** `services/resilien
 | JS (gzip)       | < 150KB                  |
 | Filter response | < 100ms (in-memory)      |
 | Test coverage   | ≥ 85% (unit)             |
+
+**Phase 2 (production / operability — see §6 and [`architecture.md`](architecture.md) §2):**
+
+| Metric        | Target    |
+| ------------- | --------- |
+| Throughput    | 100 TPS   |
+| Availability  | 99.995% SLA |
+| MTTD          | 5m        |
+| MTTR          | 20m       |
 
 ---
 
