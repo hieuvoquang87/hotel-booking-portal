@@ -69,10 +69,20 @@ the detail.
 
 ### Phase B — M4 refactor onto the primitives — in scope
 
-- Migrate M4's merged components (`components/EmptyState.tsx`, `components/home/*` —
-  `HotelCard`, `HotelCardSkeleton`, `HotelGrid`, `Pagination`, `PriceRange`, `ResultCount`,
-  `SegmentedStars`, `SortSelect`, `DestinationCombobox`) to consume the Phase-A primitives, so
-  call sites collapse from long class strings to `<Button>`/`<Badge>`/`<Card>`/`<Input>`.
+- Migrate the M4 components that carry token chrome to consume the Phase-A primitives, so call
+  sites collapse from long class strings to `<Button>`/`<Badge>`/`<Card>`/`<Input>`. The merged
+  M4 surface (verified post-merge) maps as:
+  - `EmptyState` → `Card` + `Button`; `HotelCard` → `Card` + `Badge`; `HotelCardSkeleton` → `Skeleton`.
+  - `Pagination` → `Button`; `PriceRange` → `Input` (+ `Label`); `SegmentedStars` → `Button` (segmented).
+  - `MobileFilterBar` → `Button` + `Badge` (active-count); `FilterSheet` → its 3 actions become
+    `Button` (close = icon/ghost, Reset = outline, "Show N" = default); `DestinationCombobox` →
+    `Input` (field) + `Button` (clear).
+- **Stays custom in Phase B (Radix deferred to P2):** `FilterSheet`'s overlay/dialog
+  (`role="dialog"` hand-rolled), `DestinationCombobox`'s `role="listbox"` popup, and
+  `SortSelect`'s **native `<select>`** — only their button/input/badge chrome adopts primitives;
+  the widget behavior is untouched (the Radix `Dialog`/`Command`/`Select` swap is a separate P2 step).
+- **No chrome change (layout/text only):** `HotelGrid`, `ResultCount`, `RefineToolbar`,
+  `HomeView`, `HomeViewFallback` — these compose other components or hold only layout classes.
 - **Like-for-like, behavior-preserving.** M4's existing unit tests (`tests/unit/components/**`)
   are the safety net and **must stay green**. Swapping a native element for a primitive can
   change the DOM role (an amenity `<li>` → `<Badge>` is a `<span>`; a `Card` wrapper can drop
@@ -195,16 +205,18 @@ components/ui/label.tsx                primitive: form label
 docs/designs/*-design-spec.md          (modify) token tables define the CSS-variable values
 
 PHASE B — M4 refactor (consume the primitives; behavior unchanged)
-components/EmptyState.tsx              (modify) Card/Button chrome
-components/home/HotelCard.tsx          (modify) Card + Badge
+components/EmptyState.tsx              (modify) Card + Button
+components/home/HotelCard.tsx          (modify) Card + Badge (keep <ul>/<li> for pills)
 components/home/HotelCardSkeleton.tsx  (modify) Skeleton
-components/home/HotelGrid.tsx          (modify) grid only — minimal
 components/home/Pagination.tsx         (modify) Button
 components/home/PriceRange.tsx         (modify) Input + Label
-components/home/ResultCount.tsx        (modify) text only — minimal
 components/home/SegmentedStars.tsx     (modify) Button (segmented)
-components/home/SortSelect.tsx         (modify) Input/Button chrome (stays non-Radix in Phase B)
-components/home/DestinationCombobox.tsx(modify) Input chrome (stays non-Radix in Phase B)
+components/home/MobileFilterBar.tsx    (modify) Button + Badge (active-count)
+components/home/FilterSheet.tsx        (modify) 3 actions → Button; overlay/dialog stays custom (P2)
+components/home/DestinationCombobox.tsx(modify) Input + Button (clear); listbox stays custom (P2)
+components/home/SortSelect.tsx         (modify) native <select> token alignment only (Radix Select → P2)
+components/home/{HotelGrid,ResultCount,RefineToolbar,HomeView,HomeViewFallback}.tsx
+                                       (no chrome change) layout/text/composition only
 
 PHASE C — hotel detail & availability
 app/hotels/[id]/page.tsx               server: fetch + metadata + static detail + panel mount

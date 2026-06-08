@@ -9,8 +9,10 @@ branch, after M4 has merged to `main`**:
 - **Phase A (Tasks A1–A3) — Design-system foundation:** `shadcn init`, token reconciliation in
   `app/globals.css`, and the `components/ui/*` primitives (`Button`, `Badge`, `Card`, `Input`,
   `Skeleton`, `Label`).
-- **Phase B (Tasks B1–B2) — M4 refactor:** migrate `components/EmptyState.tsx` + `components/home/*`
-  onto the primitives, M4's existing tests staying green.
+- **Phase B (Tasks B1–B3) — M4 refactor:** migrate the chrome-bearing M4 components
+  (`EmptyState` + the `components/home/*` set) onto the primitives, M4's existing tests staying
+  green; widget behavior (`FilterSheet` dialog, `DestinationCombobox` listbox, `SortSelect`
+  native select) untouched.
 - **Phase C (Tasks 0–12) — Hotel detail & availability:** the original M5, built on the primitives.
 
 **Architecture:** `app/hotels/[id]/page.tsx` is a server component that fetches its own BFF route `/api/hotels/[id]` via M3's `getJson` (BFF-only data access), exposes `generateMetadata` (hotel-name title), and calls `notFound()` on a 404. The only client island is `RoomAvailability`, which seeds demo-default dates, validates, and drives M3's `useAvailability` through the BFF's slow `/rooms` route — never blocking the detail. All M5 components and all refactored M4 components compose `components/ui/*` for chrome (color/border/radius/focus); raw Tailwind on app components is for layout only. TDD throughout; ≥85% coverage on M5 modules, no coverage regression on M4 modules.
@@ -27,7 +29,7 @@ branch, after M4 has merged to `main`**:
 - **M1:** `types/domain.ts` (`Hotel`, `Room`, `AvailableRoom`), `lib/availability.ts` (`nightsInRange`), `services/availabilityService.ts` (room→`AvailableRoom` mapper), `tests/fixtures.ts` (`makeHotel`, `makeRoom`).
 - **M2:** `/api/hotels/[id]` (detail), `/api/hotels/[id]/rooms` (availability).
 - **M3:** `hooks/useAvailability.ts`, `stores/AppProvider.tsx` (`useAppDates`, mounted in root layout), `lib/fetcher.ts` (`getJson`, `ApiError`), `tests/msw/{handlers,server}.ts`, `tests/utils/queryWrapper.tsx`.
-- **M4:** `components/Icon.tsx`, `components/EmptyState.tsx`, `components/home/*` (`HotelCard`, `HotelCardSkeleton`, `HotelGrid`, `Pagination`, `PriceRange`, `ResultCount`, `SegmentedStars`, `SortSelect`, `DestinationCombobox`), `lib/amenities.ts` (`humanizeAmenity`), `utils/analyticUtil.ts` (`track`, `AnalyticsEvent`), the root layout app bar/footer, and M4's `tests/unit/components/**` (the Phase B green-gate).
+- **M4 (merged, verified):** `components/Icon.tsx`, `components/EmptyState.tsx`, `components/home/*` (`HomeView`, `HomeViewFallback`, `HotelCard`, `HotelCardSkeleton`, `HotelGrid`, `Pagination`, `PriceRange`, `ResultCount`, `RefineToolbar`, `SegmentedStars`, `SortSelect`, `DestinationCombobox`, `FilterSheet`, `MobileFilterBar`), `app/page.tsx` (renders `HomeView` under `<Suspense>`), `lib/amenities.ts` (`humanizeAmenity`), `lib/destinations.ts`, `utils/analyticUtil.ts` (`track`, `AnalyticsEvent`), the root layout app bar/footer + `app/icon.svg`, and M4's `tests/unit/components/**` + `tests/integration/components/home/**` (the Phase B green-gate).
 
 If a referenced M1–M4 export is missing at execution time, stop and complete that milestone first — M5 is assembly + refactor on top of them.
 
@@ -52,15 +54,17 @@ If a referenced M1–M4 export is missing at execution time, stop and complete t
 | `components/ui/label.tsx` | Primitive — form label |
 | `docs/designs/*-design-spec.md` | **(modify)** token tables define the CSS-variable values (§12) |
 | **— Phase B (modify M4 to consume primitives) —** | |
-| `components/EmptyState.tsx` | **(modify)** Card/Button chrome |
-| `components/home/HotelCard.tsx` | **(modify)** Card + Badge |
+| `components/EmptyState.tsx` | **(modify)** Card + Button |
+| `components/home/HotelCard.tsx` | **(modify)** Card + Badge (keep `<ul>/<li>`) |
 | `components/home/HotelCardSkeleton.tsx` | **(modify)** Skeleton |
 | `components/home/Pagination.tsx` | **(modify)** Button |
 | `components/home/PriceRange.tsx` | **(modify)** Input + Label |
 | `components/home/SegmentedStars.tsx` | **(modify)** Button (segmented) |
-| `components/home/SortSelect.tsx` | **(modify)** Input/Button chrome (non-Radix in Phase B) |
-| `components/home/DestinationCombobox.tsx` | **(modify)** Input chrome (non-Radix in Phase B) |
-| `components/home/{HotelGrid,ResultCount}.tsx` | **(modify, minimal)** layout/text only |
+| `components/home/MobileFilterBar.tsx` | **(modify)** Button + Badge (active-count) |
+| `components/home/FilterSheet.tsx` | **(modify)** 3 actions → Button; overlay/dialog stays custom (P2) |
+| `components/home/DestinationCombobox.tsx` | **(modify)** Input + Button (clear); listbox stays custom (P2) |
+| `components/home/SortSelect.tsx` | **(modify)** native `<select>` token alignment only (Radix Select → P2) |
+| `components/home/{HotelGrid,ResultCount,RefineToolbar,HomeView,HomeViewFallback}.tsx` | **(no chrome change)** layout/text/composition only |
 | **— Phase C —** | |
 | `.env.local` | **(create)** `API_BASE_URL=http://localhost:3000` for SSR fetch |
 | `types/domain.ts` | **(modify)** widen `AvailableRoom` with `bedCount`, `squareFootage`, `amenities` |
@@ -238,28 +242,45 @@ it('renders a surface with content', () => {
 > too, not only literal class-string assertions — verify the M4 test (don't assume it's
 > class-free) and re-assert the same user-facing role/text after the swap.
 
-## Task B1: refactor `EmptyState` + `HotelCard` + `HotelCardSkeleton`
+> **Scope note (verified against merged M4).** `RefineToolbar`, `HomeView`, `HomeViewFallback`,
+> `HotelGrid`, `ResultCount` hold only layout/composition classes — **no refactor** (leave them).
+> `FilterSheet`'s overlay/dialog, `DestinationCombobox`'s `role="listbox"` popup, and
+> `SortSelect`'s native `<select>` **stay as-is behaviorally** — only their button/input/badge
+> chrome adopts primitives (the Radix `Dialog`/`Command`/`Select` swap is a separate **P2** step).
+
+## Task B1: card/grid surfaces — `EmptyState` + `HotelCard` + `HotelCardSkeleton`
 
 **Files:**
 - Modify: `components/EmptyState.tsx`, `components/home/HotelCard.tsx`, `components/home/HotelCardSkeleton.tsx`
-- Touch (only if a class-string assertion breaks): the matching `tests/unit/components/**` files
+- Touch (only if an assertion breaks): matching `tests/unit/components/**`
 
 - [ ] **Step 1: Green baseline** — `npx jest tests/unit/components/EmptyState.test.tsx tests/unit/components/home/HotelCard.test.tsx tests/unit/components/home/HotelCardSkeleton.test.tsx` → PASS.
-- [ ] **Step 2: Refactor** — `HotelCard` surface → `Card`; amenity pills + `+N` + star badge → `Badge`; CTA/links keep semantics. `HotelCardSkeleton` → `Skeleton`. `EmptyState` → `Card` shell + `Button` action. Layout/grid classes stay raw.
-- [ ] **Step 3: Re-run the same tests** → still PASS (update only class-string assertions to role/text).
-- [ ] **Step 4: Commit** — `git commit -m "refactor(M5/B): EmptyState + HotelCard onto ui primitives"`
+- [ ] **Step 2: Refactor** — `HotelCard` surface → `Card`; amenity pills + `+N` + star badge → `Badge` **kept inside the existing `<ul>/<li>`** (preserve list roles); the card stays a `<Link>`. `HotelCardSkeleton` → `Skeleton`. `EmptyState` → `Card` shell + `Button` action. Layout/grid classes stay raw.
+- [ ] **Step 3: Re-run** → still PASS (re-assert role/text where a swap moved a role; not just class strings).
+- [ ] **Step 4: Commit** — `git commit -m "refactor(M5/B): card surfaces onto ui primitives"`
 
-## Task B2: refactor the home controls
+## Task B2: desktop refine controls — `Pagination` + `PriceRange` + `SegmentedStars` + `SortSelect`
 
 **Files:**
-- Modify: `components/home/{Pagination,PriceRange,SegmentedStars,SortSelect,DestinationCombobox,ResultCount,HotelGrid}.tsx`
-- Touch (only if a class-string assertion breaks): matching `tests/unit/components/home/**`
+- Modify: `components/home/{Pagination,PriceRange,SegmentedStars,SortSelect}.tsx`
+- Touch (only if an assertion breaks): matching `tests/unit/components/home/**`
 
-- [ ] **Step 1: Green baseline** — `npx jest tests/unit/components/home` → PASS.
-- [ ] **Step 2: Refactor** — `Pagination`/`SegmentedStars` buttons → `Button` (`variant`/segmented); `PriceRange` fields → `Input` + `Label`; `SortSelect` + `DestinationCombobox` trigger/field chrome → `Input`/`Button` (**stay non-Radix** — only chrome changes); `ResultCount`/`HotelGrid` minimal (text/grid).
-- [ ] **Step 3: Re-run** `npx jest tests/unit/components/home` → still PASS.
+- [ ] **Step 1: Green baseline** — `npx jest tests/unit/components/home/Pagination.test.tsx tests/unit/components/home/PriceRange.test.tsx tests/unit/components/home/SegmentedStars.test.tsx tests/unit/components/home/SortSelect.test.tsx` → PASS.
+- [ ] **Step 2: Refactor** — `Pagination` prev/next/page buttons → `Button` (`variant`/`size`); `SegmentedStars` segment buttons → `Button` (segmented, `aria-pressed` preserved); `PriceRange` min/max `<input>` → `Input` + `Label`; `SortSelect` keeps its **native `<select>`** — only align its border/focus tokens (no Radix).
+- [ ] **Step 3: Re-run** → still PASS.
+- [ ] **Step 4: Commit** — `git commit -m "refactor(M5/B): desktop refine controls onto ui primitives"`
+
+## Task B3: mobile + combobox — `MobileFilterBar` + `FilterSheet` + `DestinationCombobox`
+
+**Files:**
+- Modify: `components/home/{MobileFilterBar,FilterSheet,DestinationCombobox}.tsx`
+- Touch (only if an assertion breaks): matching `tests/unit/components/home/**`
+
+- [ ] **Step 1: Green baseline** — `npx jest tests/unit/components/home/MobileFilterBar.test.tsx tests/unit/components/home/FilterSheet.test.tsx tests/unit/components/home/DestinationCombobox.test.tsx` → PASS.
+- [ ] **Step 2: Refactor** — `MobileFilterBar` trigger → `Button` (outline), the active-count chip → `Badge`. `FilterSheet`: close (icon) / Reset (outline) / "Show N" (default) → `Button`; **keep** `role="dialog"`/`aria-modal`/overlay/Esc-close behavior exactly. `DestinationCombobox`: field → `Input`, clear → `Button` (icon); **keep** `role="combobox"`/`role="listbox"`/`role="option"` wiring and keyboard nav untouched.
+- [ ] **Step 3: Re-run** → still PASS (the dialog/combobox role + keyboard tests must remain green — that's the guard the widget behavior survived).
 - [ ] **Step 4: Full suite + typecheck** — `npx jest && npx tsc --noEmit` → green (Phase B introduces no behavior change).
-- [ ] **Step 5: Commit** — `git commit -m "refactor(M5/B): home controls onto ui primitives"`
+- [ ] **Step 5: Commit** — `git commit -m "refactor(M5/B): mobile filter + combobox onto ui primitives"`
 
 ---
 
@@ -1608,7 +1629,7 @@ git commit -m "docs(M5): mark hotel detail & room availability milestone complet
 
 **1. Spec coverage** — every spec section maps to a task:
 
-- §1 Phase A (shadcn init, globals/token reconciliation, primitives) → Tasks A1–A3; §11 primitives → A2–A3; §12 token map → A1. §1 Phase B (M4 refactor, green-gate) → Tasks B1–B2; §9 Phase-B green-gate → B1/B2 baseline+re-run. §1 Phase C scope → Tasks 0–12. §2 rendering (server detail via BFF, getJson, generateMetadata, notFound, API_BASE_URL prereq, fetch dedupe) → Task 10 + Task 0 Step 10. §3 module structure → one task per file. §4 data flow (detail-first, lazy availability, latest-wins, dates client-only) → Tasks 9, 10. §5 RoomAvailability (seed, validate, states, analytics) → Task 9. §6.1 RoomCard widened → Tasks 0 + 7. §6.2 DateField → Task 8. §6.3 RatingStars → Task 1. §6.4 InlineError → Task 2. §6.5 BackToResults history-based → Task 3. §7 states (detail loaded, unknown hotel, idle, loading, success, empty, error, blocked, stale) → Tasks 9 (states) + 10 (notFound) + 11 (integration) + M3 (structural latest-wins). §8 a11y/mobile → baked into each component (labels, aria-live, 44px, aspect-video) + smoke Task 12. §9 testing → every task test-first; integration Task 11; analytics Task 0; notFound Task 10. §10 decisions → Task 12 progress note.
+- §1 Phase A (shadcn init, globals/token reconciliation, primitives) → Tasks A1–A3; §11 primitives → A2–A3; §12 token map → A1. §1 Phase B (M4 refactor, green-gate) → Tasks B1–B3 (B1 card surfaces · B2 desktop refine · B3 mobile+combobox); §9 Phase-B green-gate → each task's baseline+re-run. §1 Phase C scope → Tasks 0–12. §2 rendering (server detail via BFF, getJson, generateMetadata, notFound, API_BASE_URL prereq, fetch dedupe) → Task 10 + Task 0 Step 10. §3 module structure → one task per file. §4 data flow (detail-first, lazy availability, latest-wins, dates client-only) → Tasks 9, 10. §5 RoomAvailability (seed, validate, states, analytics) → Task 9. §6.1 RoomCard widened → Tasks 0 + 7. §6.2 DateField → Task 8. §6.3 RatingStars → Task 1. §6.4 InlineError → Task 2. §6.5 BackToResults history-based → Task 3. §7 states (detail loaded, unknown hotel, idle, loading, success, empty, error, blocked, stale) → Tasks 9 (states) + 10 (notFound) + 11 (integration) + M3 (structural latest-wins). §8 a11y/mobile → baked into each component (labels, aria-live, 44px, aspect-video) + smoke Task 12. §9 testing → every task test-first; integration Task 11; analytics Task 0; notFound Task 10. §10 decisions → Task 12 progress note.
 
 **2. Placeholder scan** — no TBD/TODO; every code step shows complete code; every test step shows full assertions. The two notes (Task 8 jsdom date-typing fallback, Task 11 timeout) give concrete alternatives, not vague hand-waving.
 
