@@ -57,7 +57,7 @@ Precision here is part of the design's honesty. Only **M0 + M1** are built today
 | Surface | State | Role in this slice |
 | --- | --- | --- |
 | `services/availabilityService.ts` | **Exists (M1)** — `checkAvailability` with configurable simulated latency | The keystone. Gains fault injection; its dependency call is wrapped by the resilience policy and fronted by the cache. This is why the slice is buildable now. |
-| `/api/locations`, `/api/hotels`, `/api/hotels/[id]/rooms` | **Assumed (M2, docs-only)** | Edge cache headers are spec'd for when these land; this slice does not build the routes. |
+| `/api/locations`, `/api/hotels`, `/api/hotels/[id]/rooms` | **Exists (M2)** | This slice adds edge cache headers to the cheap reads; it does not change route behavior. |
 | `http.ts` (real-API fetch wrapper) | **Assumed (Phase 2 service swap)** | Slots *inside* `withResilience` unchanged when real endpoints replace the mock. |
 | `track()` observability facade | **Assumed (M6, docs-only)** | Metric events target this facade. If M6 hasn't landed, the plan stubs a minimal facade. |
 
@@ -163,11 +163,10 @@ Phase 1's decoupled, lazy availability boundary. This slice only adds the boundi
 serverless invocations (cost) and improves LCP (performance); directly observable in
 response headers.
 
-**Caveat (honesty).** These routes are M2 and **not built yet**. This is a spec'd
-header policy for when they land, not a change to existing code. The availability
-route is deliberately **not** edge-cached at the HTTP layer — its freshness/fallback
-logic lives in the application cache (§4), which the breaker and stale-read policy
-depend on.
+**Scope note.** These routes exist (M2); this slice adds a header policy to them, it
+does not change their behavior. The availability route is deliberately **not**
+edge-cached at the HTTP layer — its freshness/fallback logic lives in the application
+cache (§4), which the breaker and stale-read policy depend on.
 
 ---
 
