@@ -33,7 +33,7 @@ a11y, acceptance). Home → [spec](designs/home-page-design-spec.md) ·
 | M1  | Data layer & domain               | Domain types, `hotelService`, `availabilityService`, `lib/` | [x]    |
 | M2  | BFF API routes                    | `/api/locations`, `/api/hotels`, `[id]`, `[id]/rooms`       | [x]    |
 | M3  | Client state & data hooks         | QueryProvider, AppProvider, the four `use*` hooks           | [x]    |
-| M4  | Search · filter · sort · paginate | Home page: dropdown, filters, sort, pagination, grid        | [ ]    |
+| M4  | Search · filter · sort · paginate | Home page: dropdown, filters, sort, pagination, grid        | [x]    |
 | M5  | Hotel detail & room availability  | `/hotels/[id]` + lazy availability with all states          | [ ]    |
 | M6  | Cross-cutting (a11y/obs/errors)   | Boundaries, `track()` facade, a11y AA, perf budget          | [ ]    |
 | M7  | Testing & coverage gate           | Unit ≥85%, MSW integration, Playwright E2E green in CI      | [ ]    |
@@ -150,41 +150,50 @@ spec [home-page-design-spec.md](designs/home-page-design-spec.md) — match layo
 
 ### Destination picker (F1)
 
-- [ ] `components/DestinationDropdown.tsx` — filterable city+country dropdown; substring filter in memory (no per-keystroke fetch); city shown with its country.
-- [ ] Selecting country → loads all its hotels; selecting city → that city only; writes slugified `?country=&city=`.
-- [ ] Empty input → show all options.
+- [x] `components/home/DestinationCombobox.tsx` — filterable city+country combobox (renamed from `DestinationDropdown`); substring + diacritic filter in memory (no per-keystroke fetch); city shown as "City, State — Country"; options built by pure `lib/destinations.ts`.
+- [x] Selecting country → loads all its hotels (`?country=`); selecting city → that city only (`?country=&city=`); writes slugified params.
+- [x] Empty input → show all options.
 
 ### Filter (F2)
 
-- [ ] `components/FilterPanel.tsx` — star rating + price min–max; updates list in memory (**<100ms**), no reload.
-- [ ] Filter state reflected in URL (`?stars=&min=&max=`); shareable + back-button correct.
+- [x] Star + price refine via `components/home/RefineToolbar.tsx` (desktop) + `MobileFilterBar.tsx`/`FilterSheet.tsx` (mobile, replaces the single `FilterPanel`); composed in memory by M3's `useFilteredHotels` (**<100ms**), no reload.
+- [x] Filter state reflected in URL (`?stars=&min=&max=`); shareable + back-button correct.
 
 ### Sort & paginate (F3) — _explicit, not implied by filter_
 
-- [ ] Sort control — price asc/desc, `overall_rating`, `star_rating`; reflected in `?sort=`.
-- [ ] Pagination control — fixed page size; reflected in `?page=`.
-- [ ] Changing filters **or** sort **resets to page 1**.
+- [x] `SortSelect` — price asc/desc, `overallRating`, `starRating`; reflected in `?sort=` (default `rating` omitted). "Recommended" dropped (no seed field).
+- [x] `Pagination` — fixed page size **8**; reflected in `?page=`.
+- [x] Changing filters **or** sort **resets to page 1** (M3 `nextState` rule).
 
 ### Grid & states
 
-- [ ] `components/HotelCard.tsx` — name, address, rating, placeholder photo, price-from. `⚠︎ decision`: show `star_rating` + `overall_rating`, or one.
-- [ ] `components/HotelGrid.tsx` — mobile-first responsive grid; sized lazy images (no CLS).
-- [ ] `components/EmptyState.tsx` — reusable.
-- [ ] `aria-live` **result count** announced on filter change.
-- [ ] Home `app/page.tsx` wiring (dropdown + filters + sort + pagination + grid).
-- [ ] **Basic SEO / metadata** — from the design: set the page `<title>` **"Stayfinder — Find your stay"** + a short meta description via the route's `metadata` export; add the **favicon** from the mockup's brand mark (the **map-pin** glyph, `Icon name="pin"`) as `app/icon.svg`. Favicon + title template are app-level (root layout). _Full SEO — canonical / OG / JSON-LD / sitemap — stays Phase 2._
+- [x] `components/home/HotelCard.tsx` — name, address, **both** ratings (`starRating` badge + `overallRating` + review count), placeholder photo (16:9, no CLS), price-from. `⚠︎ decision` resolved: show both ratings.
+- [x] `components/home/HotelGrid.tsx` — mobile-first responsive grid (1/2/3/4 cols); aspect-ratio photo blocks (no CLS); renders 8 skeletons while loading.
+- [x] `components/EmptyState.tsx` — reusable.
+- [x] `aria-live` **result count** announced on filter change (`ResultCount`).
+- [x] Home `app/page.tsx` wiring — static shell + `<Suspense>`-wrapped `components/home/HomeView.tsx` orchestrator.
+- [x] **Basic SEO / metadata** — page `<title>` **"Stayfinder — Find your stay"** + meta description via `metadata` export; title template + map-pin favicon `app/icon.svg` at the root layout. _Full SEO — canonical / OG / JSON-LD / sitemap — stays Phase 2._
 
 ### Edge/empty states (from user-flows.md — acceptance criteria)
 
-- [ ] No destination match → **"No destinations."**
-- [ ] No location selected yet → prompt to pick a destination.
-- [ ] Filters exclude all → **"No hotels found"** + reset action (resets filters).
-- [ ] Price `min > max` → swap or block (no crash).
-- [ ] Bad param (`page=99`, `sort=x`) → clamp / default, never error.
-- [ ] Single page of results → hide pagination controls.
-- [ ] `/api/locations` slow/fails → disabled/empty dropdown + retry.
-- [ ] Back/forward → restores filters/sort/page (dates excluded — they're not in URL).
-- **Done when:** F1–F3 acceptance criteria pass; all listed edge states render correctly; integration test covers destination → filter → sort → paginate.
+- [x] No destination match → **"No destinations."**
+- [x] No location selected yet → prompt to pick a destination.
+- [x] Filters exclude all → **"No hotels found"** + reset action (resets filters).
+- [x] Price `min > max` → swap (no crash).
+- [x] Bad param (`page=99`, `sort=x`) → clamp / default, never error.
+- [x] Single page of results → hide pagination controls.
+- [x] `/api/locations` slow/fails → disabled/empty combobox + retry.
+- [x] Back/forward → restores filters/sort/page (dates excluded — they're not in URL).
+- **Done when:** F1–F3 acceptance criteria pass; all listed edge states render correctly; integration test covers destination → filter → sort → paginate. ✅ **Met** — 182 tests pass (47 suites), clean lint/typecheck, `/` builds as a static shell, M4 modules ≥85% coverage.
+
+**M4 decisions (from design spec):** `/` = static shell + `<Suspense>`-wrapped client
+`HomeView`; combobox offers country-group + city rows (`lib/destinations.ts`);
+"Recommended" sort dropped (no seed field) → default sort `rating` (M3 `DEFAULT_SORT`
+changed `price-asc` → `rating`); page size 8 (`lib/paginate.ts`); analytics via
+`utils/analyticUtil.ts` (DEV console; M6 wires adapters); no new dependencies
+(combobox + bottom sheet hand-rolled). `track()` _adapters_, route
+error/loading/not-found boundaries, and the formal a11y + perf audit remain **M6**;
+Playwright E2E remains **M7**.
 
 ---
 

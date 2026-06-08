@@ -9,7 +9,7 @@ import type { SortKey } from '@/lib/sort';
 export type { SortKey };
 
 const SORT_KEYS: SortKey[] = ['price-asc', 'price-desc', 'rating', 'stars'];
-const DEFAULT_SORT: SortKey = 'price-asc';
+const DEFAULT_SORT: SortKey = 'rating'; // was 'price-asc' — quality-first default (M4)
 const FILTER_KEYS = ['country', 'city', 'stars', 'min', 'max', 'sort'] as const;
 
 export type RefineState = {

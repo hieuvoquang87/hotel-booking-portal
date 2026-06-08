@@ -1,4 +1,4 @@
-export const PAGE_SIZE = 12;
+export const PAGE_SIZE = 8; // home grid page size (design contract); was 12
 
 export interface Page<T> {
   items: T[];
