@@ -14,6 +14,13 @@ hotel → check room availability for dates. Location-first loading, a server-on
 data gateway behind a BFF, pricing/availability decoupled as a slow third-party,
 and mobile-first design for assumed 80% mobile traffic.
 
+**Design mockups:** the UI built in **M4** and **M5** should replicate the mockups in
+[`docs/designs/`](designs/README.md) — open the `*-mockup.html` files in a browser for the
+rendered reference; the `*-design-spec.md` files are the written contract (tokens, states,
+a11y, acceptance). Home → [spec](designs/home-page-design-spec.md) ·
+[mockup](designs/home-page-mockup.html). Detail →
+[spec](designs/hotel-detail-page-design-spec.md) · [mockup](designs/hotel-detail-page-mockup.html).
+
 **Status legend:** `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` deferred to P2
 
 ---
@@ -125,6 +132,9 @@ between URL (`searchParams`) and `AppProvider` (dates).
 
 **Outcome:** the discovery dashboard. Covers PRD **F1, F2, F3**.
 
+**Build to mockup:** [home-page-mockup.html](designs/home-page-mockup.html) (open in browser) ·
+spec [home-page-design-spec.md](designs/home-page-design-spec.md) — match layout, tokens, and all empty/loading states.
+
 ### Destination picker (F1)
 
 - [ ] `components/DestinationDropdown.tsx` — filterable city+country dropdown; substring filter in memory (no per-keystroke fetch); city shown with its country.
@@ -149,6 +159,7 @@ between URL (`searchParams`) and `AppProvider` (dates).
 - [ ] `components/EmptyState.tsx` — reusable.
 - [ ] `aria-live` **result count** announced on filter change.
 - [ ] Home `app/page.tsx` wiring (dropdown + filters + sort + pagination + grid).
+- [ ] **Basic SEO / metadata** — from the design: set the page `<title>` **"Stayfinder — Find your stay"** + a short meta description via the route's `metadata` export; add the **favicon** from the mockup's brand mark (the **map-pin** glyph, `Icon name="pin"`) as `app/icon.svg`. Favicon + title template are app-level (root layout). _Full SEO — canonical / OG / JSON-LD / sitemap — stays Phase 2._
 
 ### Edge/empty states (from user-flows.md — acceptance criteria)
 
@@ -169,10 +180,14 @@ between URL (`searchParams`) and `AppProvider` (dates).
 **Outcome:** detail renders instantly; availability streams in lazily. Covers
 PRD **F4, F5**.
 
+**Build to mockup:** [hotel-detail-page-mockup.html](designs/hotel-detail-page-mockup.html) (open in browser) ·
+spec [hotel-detail-page-design-spec.md](designs/hotel-detail-page-design-spec.md) — match layout, tokens, and all availability states (incl. the `2026-07-10 → 2026-07-12` demo-date default).
+
 ### Detail (F4)
 
 - [ ] `app/hotels/[id]/page.tsx` — renders name, address, description, amenities, policies, `star_rating`, `overall_rating`, review count.
 - [ ] Detail renders immediately **without** waiting on availability.
+- [ ] **Basic SEO / metadata** — from the design: set the page `<title>` per the mockup (**"Stayfinder — Hotel detail"**, ideally the hotel name) + a short meta description via `metadata`; reuse the app **favicon** (the map-pin brand mark) from the root layout. _Full per-hotel SEO (canonical, OG, JSON-LD) stays Phase 2._
 - [ ] `app/hotels/[id]/not-found.tsx` (or `notFound()`) for invalid id.
 
 ### Room availability (F5)

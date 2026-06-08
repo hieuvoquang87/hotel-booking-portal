@@ -67,6 +67,12 @@ data gateway behind a BFF, and pricing/availability decoupled as a slow third-pa
 
 ## 5. Design
 
+> **UI mockups & specs:** the visual source of truth for the two pages lives in
+> [`docs/designs/`](designs/README.md). Home (`/`) →
+> [mockup](designs/home-page-mockup.html) · [spec](designs/home-page-design-spec.md);
+> Hotel detail (`/hotels/[id]`) → [mockup](designs/hotel-detail-page-mockup.html) ·
+> [spec](designs/hotel-detail-page-design-spec.md). Build the components to replicate them.
+
 ### Layering
 
 ```
