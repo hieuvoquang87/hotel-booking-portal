@@ -101,7 +101,7 @@ available_dates[]`.
 mirror the REST contract 1:1 (architecture §5).
 
 - [ ] `GET /api/locations` → `getLocations()` (cached once; destination dropdown source).
-- [ ] `GET /api/hotels?country=&city=&star_rating=&price_range=` → `getHotelsByLocation` (location-first; server also accepts refine params per contract).
+- [x] `GET /api/hotels?country=&city=&star_rating=&price_range=` → `getHotelsByLocation` (location-first; server also accepts refine params per contract).
 - [ ] `GET /api/hotels/[id]` → `getHotelById` (static info; fast, renders immediately).
 - [ ] `GET /api/hotels/[id]/rooms?check_in=&check_out=` → `availabilityService` (lazy/slow path; never blocks the page).
 - [ ] **Status codes:** `2xx` success; `4xx` for bad/missing dates, `checkout ≤ check-in`, unknown id.
