@@ -26,6 +26,9 @@ export function filterSortPaginate(hotels: Hotel[], params: RefineParams): Page<
     result = filterByPrice(result, min, max);
   }
 
+  // Intentional asymmetry: filterByPrice keeps a hotel if ANY room falls in range,
+  // while sortHotels orders by priceFrom (the hotel's cheapest room). So a hotel can
+  // match on a pricier room yet still sort by its lowest advertised price.
   result = sortHotels(result, params.sort);
   return paginate(result, params.page);
 }

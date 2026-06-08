@@ -48,4 +48,23 @@ describe('filterSortPaginate', () => {
     filterSortPaginate(input, { stars: null, min: null, max: null, sort: 'price-asc', page: 1 });
     expect(input.map((h) => h.id)).toEqual(['a', 'b', 'c']);
   });
+
+  it('sorts multi-room hotels by priceFrom even when matched via a higher-priced room', () => {
+    // Pins the intentional filter(any-room) vs sort(priceFrom) asymmetry.
+    const cheap = makeHotel({
+      id: 'cheap',
+      rooms: [makeRoom({ pricePerNight: 100 }), makeRoom({ pricePerNight: 900 })],
+    });
+    const mid = makeHotel({ id: 'mid', rooms: [makeRoom({ pricePerNight: 500 })] });
+    // min=400 keeps both (cheap via its $900 room, mid via its $500 room);
+    // price-asc then orders by priceFrom: cheap(100) before mid(500).
+    const result = filterSortPaginate([mid, cheap], {
+      stars: null,
+      min: 400,
+      max: null,
+      sort: 'price-asc',
+      page: 1,
+    });
+    expect(result.items.map((h) => h.id)).toEqual(['cheap', 'mid']);
+  });
 });
