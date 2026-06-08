@@ -1998,7 +1998,7 @@ export function HomeViewFallback() {
 // components/home/HomeView.tsx
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFilteredHotels } from '../../hooks/useFilteredHotels';
 import { useHotels } from '../../hooks/useHotels';
 import { useLocations } from '../../hooks/useLocations';
@@ -2013,7 +2013,6 @@ import { MobileFilterBar } from './MobileFilterBar';
 import { Pagination } from './Pagination';
 import { RefineToolbar } from './RefineToolbar';
 import { ResultCount } from './ResultCount';
-import { useState } from 'react';
 
 export function HomeView() {
   const { state, setParams } = useSearchParamsState();
@@ -2333,25 +2332,44 @@ function renderHome() {
   );
 }
 
+// NOTE: this `next/navigation` mock is intentionally NON-reactive — mutating
+// `mockSearch` does not trigger a React re-render, so a `replace()` write does not
+// round-trip back into `useSearchParamsState` within one render. We therefore assert
+// the URL *write* and the loaded-state *read* separately (each on its own render,
+// seeding `mockSearch` up front for the read), instead of expecting one navigation to
+// propagate reactively. This matches how the no-hotels/error tests below work, and
+// keeps full F1–F3 flow coverage. (A stateful mock that re-renders on write is the
+// alternative; the split is simpler and mirrors the passing tests.)
+
 describe('Home flow: destination → filter → sort → paginate', () => {
-  it('selects a destination, loads hotels, then filters and paginates via the URL', async () => {
+  it('writes slugified country params when a destination is selected (F1)', async () => {
     renderHome();
 
     // No destination yet.
     expect(screen.getByText(/choosing a destination/i)).toBeTruthy();
 
-    // Pick the USA country row.
+    // Pick the USA country row → writes ?country=usa.
     await userEvent.click(screen.getByRole('combobox'));
     await userEvent.click(await screen.findByRole('option', { name: /All hotels in USA/ }));
     expect(replace).toHaveBeenCalledWith('/?country=usa');
+  });
+
+  it('loads the location subset, then filters and paginates via the URL (F2/F3)', async () => {
+    // Seed the URL as if a destination is already chosen (the read half).
+    mockSearch = 'country=usa';
+    renderHome();
 
     // Hotels load (10 → page size 8 → 2 pages).
     await waitFor(() => expect(screen.getAllByRole('link').length).toBe(8));
     expect(screen.getByText('10 hotels')).toBeTruthy();
 
-    // Apply a 5★ filter — resets to page 1 and narrows the set.
+    // Apply a 5★ filter — page resets to 1 (M3 rule) and the URL gains stars=5.
     await userEvent.click(screen.getAllByRole('button', { name: '5★' })[0]);
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/?country=usa&stars=5'));
+    expect(replace).toHaveBeenCalledWith('/?country=usa&stars=5');
+
+    // Change sort — writes ?sort=… (page-asc here) without a refetch.
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: /sort/i }), 'price-asc');
+    expect(replace).toHaveBeenCalledWith('/?country=usa&sort=price-asc');
   });
 
   it('shows "No hotels found" + Reset when filters exclude everything', async () => {
@@ -2375,7 +2393,7 @@ describe('Home flow: destination → filter → sort → paginate', () => {
 - [ ] **Step 3: Run to verify it passes**
 
 Run: `npx jest components/home/HomeView.integration.test.tsx`
-Expected: PASS (3 tests). If the URL-mock and the hook's serialization disagree on key order, align the expected query strings with M3's `toSearchParams` (sorted keys) — e.g. `country=usa&stars=5`.
+Expected: PASS (4 tests). The expected query strings assume M3's `toSearchParams` emits **sorted keys** (e.g. `country=usa&stars=5`, `country=usa&sort=price-asc`) — if M3's ordering differs, align these assertions to it. The mock is non-reactive by design (see the note atop the test): assert writes and seeded reads separately, never a write that must round-trip.
 
 - [ ] **Step 4: Commit**
 
