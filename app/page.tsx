@@ -4,7 +4,9 @@ import { HomeView } from '@/components/home/HomeView';
 import { HomeViewFallback } from '@/components/home/HomeViewFallback';
 
 export const metadata: Metadata = {
-  title: 'Find your stay',
+  // absolute → home tab reads exactly the spec's title, bypassing the layout's
+  // "%s · Stayfinder" template (which still applies to other routes, e.g. M5 detail).
+  title: { absolute: 'Stayfinder — Find your stay' },
   description:
     'Browse and compare hotels by destination — filter by rating and price, then check room availability.',
 };
