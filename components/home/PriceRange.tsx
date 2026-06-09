@@ -40,8 +40,8 @@ export function PriceRange({
 
   return (
     <div role="group" aria-label="Price range in US dollars" className="flex items-center gap-2">
-      <div className="flex items-center rounded-lg border border-slate-200 bg-white px-2">
-        <span className="text-sm text-slate-400">$</span>
+      <div className="flex items-center rounded-lg border bg-background px-2">
+        <span className="text-sm text-muted-foreground">$</span>
         <Input
           aria-label="Minimum price"
           inputMode="numeric"
@@ -53,9 +53,9 @@ export function PriceRange({
           className="w-16 border-0 bg-transparent px-0 py-0 shadow-none tabular-nums focus-visible:border-transparent focus-visible:ring-0"
         />
       </div>
-      <span className="text-slate-400">–</span>
-      <div className="flex items-center rounded-lg border border-slate-200 bg-white px-2">
-        <span className="text-sm text-slate-400">$</span>
+      <span className="text-muted-foreground">–</span>
+      <div className="flex items-center rounded-lg border bg-background px-2">
+        <span className="text-sm text-muted-foreground">$</span>
         <Input
           aria-label="Maximum price"
           inputMode="numeric"

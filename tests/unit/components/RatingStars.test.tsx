@@ -11,14 +11,14 @@ describe('RatingStars', () => {
     expect(container.querySelectorAll('svg[aria-hidden="true"]').length).toBeGreaterThan(0);
   });
 
-  it('applies muted class to unfilled stars when rating is below 5', () => {
-    // value=3 rounds to 3 → icons 0,1,2 get text-star; icons 3,4 get text-muted
+  it('applies light-gray class to unfilled stars when rating is below 5', () => {
+    // value=3 rounds to 3 → icons 0,1,2 get text-star; icons 3,4 get text-slate-300
     const { container } = render(<RatingStars value={3} />);
     const icons = container.querySelectorAll('svg');
-    const mutedIcons = Array.from(icons).filter((el) =>
-      el.classList.value.includes('text-muted'),
+    const emptyIcons = Array.from(icons).filter((el) =>
+      el.classList.value.includes('text-slate-300'),
     );
-    expect(mutedIcons.length).toBeGreaterThan(0);
+    expect(emptyIcons.length).toBeGreaterThan(0);
   });
 
   it('accepts a custom size prop', () => {

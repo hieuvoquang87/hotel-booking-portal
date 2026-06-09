@@ -17,7 +17,7 @@ export function SortSelect({
   onChange: (value: SortKey) => void;
 }) {
   return (
-    <label className="inline-flex items-center gap-2 text-sm text-slate-600">
+    <label className="inline-flex items-center gap-2 text-sm text-muted-foreground">
       <span>Sort</span>
       <select
         id={id}

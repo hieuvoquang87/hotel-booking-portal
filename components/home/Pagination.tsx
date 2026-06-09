@@ -24,7 +24,7 @@ export function Pagination({
       >
         <Icon name="chevron" size={18} className="rotate-90" />
       </Button>
-      <span className="text-sm tabular-nums text-slate-600">
+      <span className="text-sm tabular-nums text-muted-foreground">
         Page {page} of {totalPages}
       </span>
       <Button

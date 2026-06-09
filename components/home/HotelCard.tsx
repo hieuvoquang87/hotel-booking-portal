@@ -21,30 +21,30 @@ export function HotelCard({ hotel }: { hotel: Hotel }) {
     <Link
       href={`/hotels/${hotel.id}`}
       aria-label={cardAria(hotel)}
-      className="group block transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+      className="group block transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <Card className="overflow-hidden">
-        <div className="relative aspect-video bg-slate-100">
+        <div className="relative aspect-video bg-muted">
           <span className="absolute inset-0 flex items-center justify-center text-slate-300">
             <Icon name="building" size={34} aria-hidden />
           </span>
           <Badge
             variant="default"
-            className="absolute right-2 top-2 bg-white/90 text-slate-900 hover:bg-white/90"
+            className="absolute right-2 top-2 bg-card/90 text-foreground hover:bg-card/90"
             aria-hidden
           >
             {hotel.starRating}★
           </Badge>
         </div>
         <div className="space-y-1.5 p-4">
-          <h3 className="text-base font-semibold text-slate-900">{hotel.name}</h3>
-          <p className="text-sm text-slate-600">
+          <h3 className="text-base font-semibold text-foreground">{hotel.name}</h3>
+          <p className="text-sm text-muted-foreground">
             {hotel.address.city}, {hotel.address.state} · {hotel.address.country}
           </p>
-          <p className="flex items-center gap-1 text-sm text-slate-900" aria-hidden>
-            <Icon name="star" size={14} className="text-amber-500" />
+          <p className="flex items-center gap-1 text-sm text-foreground" aria-hidden>
+            <Icon name="star" size={14} className="text-star" />
             <span className="font-medium tabular-nums">{hotel.overallRating}</span>
-            <span className="text-slate-500">({fmtCount(hotel.reviewCount)})</span>
+            <span className="text-muted-foreground">({fmtCount(hotel.reviewCount)})</span>
           </p>
           <ul className="flex flex-wrap gap-1.5 pt-1" aria-hidden>
             {shown.map((a) => (
@@ -58,9 +58,9 @@ export function HotelCard({ hotel }: { hotel: Hotel }) {
               </li>
             ) : null}
           </ul>
-          <p className="pt-1 text-sm font-semibold tabular-nums text-slate-900">
+          <p className="pt-1 text-sm font-semibold tabular-nums text-foreground">
             from {fmtPrice(hotel.priceFrom)}
-            <span className="font-normal text-slate-500"> / night</span>
+            <span className="font-normal text-muted-foreground"> / night</span>
           </p>
         </div>
       </Card>

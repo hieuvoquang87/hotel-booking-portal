@@ -85,8 +85,8 @@ export function DestinationCombobox({
 
   return (
     <div ref={wrapRef} className="relative w-full max-w-[560px]">
-      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3">
-        <Icon name="search" size={20} className="text-slate-400" />
+      <div className="flex items-center gap-2 rounded-lg border bg-background px-3">
+        <Icon name="search" size={20} className="text-muted-foreground" />
         <Input
           role="combobox"
           aria-expanded={open}
@@ -106,17 +106,17 @@ export function DestinationCombobox({
           onKeyDown={onKey}
           className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-0"
         />
-        <Icon name="chevron" size={20} className={`text-slate-400 ${open ? 'rotate-180' : ''}`} />
+        <Icon name="chevron" size={20} className={`text-muted-foreground ${open ? 'rotate-180' : ''}`} />
       </div>
 
       {error ? (
-        <div className="mt-1 flex items-center gap-2 text-sm text-red-600">
+        <div className="mt-1 flex items-center gap-2 text-sm text-destructive">
           <span>Couldn’t load destinations.</span>
           <Button
             type="button"
             variant="link"
             onClick={onRetry}
-            className="h-auto p-0 font-medium text-red-600 underline"
+            className="h-auto p-0 font-medium text-destructive underline"
           >
             Retry
           </Button>
@@ -127,10 +127,10 @@ export function DestinationCombobox({
         <div
           id={listId}
           role="listbox"
-          className="absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg"
+          className="absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded-lg border bg-card shadow-lg"
         >
           {results.length === 0 ? (
-            <div className="px-3 py-3 text-sm text-slate-400">No destinations</div>
+            <div className="px-3 py-3 text-sm text-muted-foreground">No destinations</div>
           ) : (
             results.map((o, i) => (
               <div
@@ -142,13 +142,13 @@ export function DestinationCombobox({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => choose(o)}
                 className={`flex min-h-11 cursor-pointer items-center gap-2 px-3 text-sm ${
-                  i === active ? 'bg-blue-50 text-slate-900' : 'text-slate-700'
+                  i === active ? 'bg-primary/10 text-foreground' : 'text-muted-foreground'
                 } ${o.kind === 'country' ? 'font-medium' : ''}`}
               >
                 <Icon
                   name={o.kind === 'country' ? 'search' : 'pin'}
                   size={16}
-                  className="text-slate-400"
+                  className="text-muted-foreground"
                 />
                 <span>{o.label}</span>
               </div>

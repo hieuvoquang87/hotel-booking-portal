@@ -18,7 +18,7 @@ export function MobileFilterBar({
   onSort: (sort: SortKey) => void;
 }) {
   return (
-    <div className="sticky top-14 z-20 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/95 py-2 backdrop-blur sm:hidden">
+    <div className="sticky top-14 z-20 flex items-center justify-between gap-3 border-b bg-background/95 py-2 backdrop-blur sm:hidden">
       <Button variant="outline" type="button" onClick={onOpen} className="gap-2 px-3">
         <Icon name="sliders" size={18} />
         Filters

@@ -16,7 +16,7 @@ export function RatingStars({ value, size = 16 }: RatingStarsProps) {
             key={i}
             name="star"
             size={size}
-            className={i < rounded ? 'text-star' : 'text-muted'}
+            className={i < rounded ? 'text-star' : 'text-slate-300'}
           />
         ))}
       </span>

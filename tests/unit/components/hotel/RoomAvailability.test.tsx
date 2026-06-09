@@ -149,7 +149,10 @@ describe('RoomAvailability', () => {
       data: [],
     };
     render(<RoomAvailability hotelId={HOTEL_ID} />);
-    expect(screen.getByText('No rooms available for these dates')).toBeTruthy();
+    // The text appears in both the sr-only live region and the visible EmptyState,
+    // so use getAllByText to avoid "multiple elements" error.
+    const noRoomsNodes = screen.getAllByText('No rooms available for these dates');
+    expect(noRoomsNodes.length).toBeGreaterThanOrEqual(1);
     const noRoomsCalls = track.mock.calls.filter(
       ([e]: [{ name: string }]) => e.name === 'no_rooms',
     );

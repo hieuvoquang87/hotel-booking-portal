@@ -54,9 +54,11 @@ export function RoomAvailability({ hotelId }: { hotelId: string }) {
 
   const status = query.isLoading
     ? 'Checking availability…'
-    : query.data
-      ? `${query.data.length} ${(query.data as unknown[]).length === 1 ? 'room' : 'rooms'} available`
-      : '';
+    : query.data && query.data.length > 0
+      ? `${query.data.length} ${query.data.length === 1 ? 'room' : 'rooms'} available`
+      : query.data
+        ? 'No rooms available for these dates'
+        : '';
 
   return (
     <section className="space-y-4">
@@ -88,9 +90,9 @@ export function RoomAvailability({ hotelId }: { hotelId: string }) {
         </div>
       ) : query.isError ? (
         <InlineError message="Couldn't load availability" onRetry={() => query.refetch()} />
-      ) : query.data && (query.data as unknown[]).length > 0 ? (
+      ) : query.data && query.data.length > 0 ? (
         <div className="space-y-3">
-          {(query.data as import('@/types/domain').AvailableRoom[]).map((room) => (
+          {query.data.map((room) => (
             <RoomCard key={room.roomId} room={room} />
           ))}
         </div>

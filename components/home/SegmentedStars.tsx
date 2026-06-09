@@ -20,7 +20,7 @@ export function SegmentedStars({
     <div
       role="group"
       aria-label="Minimum star rating"
-      className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5"
+      className="inline-flex rounded-lg border bg-card p-0.5"
     >
       {OPTIONS.map((opt) => {
         const active = opt.value === value;
@@ -32,7 +32,7 @@ export function SegmentedStars({
             aria-pressed={active}
             onClick={() => onChange(opt.value)}
             className={`rounded-md px-3 ${
-              active ? 'bg-blue-600 text-white hover:bg-blue-600' : 'text-slate-600'
+              active ? 'bg-primary text-primary-foreground hover:bg-primary' : 'text-muted-foreground'
             }`}
           >
             {opt.label}

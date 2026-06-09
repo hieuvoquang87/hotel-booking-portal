@@ -74,11 +74,11 @@ describe('RoomAvailability integration', () => {
 
     renderPanel(HOTEL_ID);
 
-    await waitFor(() =>
-      expect(
-        screen.getByText(/No rooms available for these dates/i),
-      ).toBeTruthy(),
-    );
+    await waitFor(() => {
+      // The text appears in both the sr-only live region and the visible EmptyState.
+      const nodes = screen.getAllByText(/No rooms available for these dates/i);
+      expect(nodes.length).toBeGreaterThanOrEqual(1);
+    });
   });
 
   it('error: 500 response → InlineError alert + Retry button', async () => {
