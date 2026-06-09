@@ -1,12 +1,17 @@
 import Link from 'next/link';
-import { humanizeAmenity } from '@/lib/amenities';
-import type { Hotel } from '@/types/domain';
+import { RatingStars } from '@/components/RatingStars';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { humanizeAmenity } from '@/lib/amenities';
+import type { Hotel } from '@/types/domain';
 import { Icon } from '../Icon';
 
 const fmtPrice = (n: number) => `$${n.toLocaleString('en-US')}`;
 const fmtCount = (n: number) => n.toLocaleString('en-US');
+
+// Diagonal hairline texture so the photo placeholder reads as a surface, not a blank box.
+const STRIPES =
+  'repeating-linear-gradient(135deg, rgba(148,163,184,0.10) 0 2px, transparent 2px 11px)';
 
 function cardAria(h: Hotel): string {
   const where = [h.address.city, h.address.state].filter(Boolean).join(' ');
@@ -21,32 +26,34 @@ export function HotelCard({ hotel }: { hotel: Hotel }) {
     <Link
       href={`/hotels/${hotel.id}`}
       aria-label={cardAria(hotel)}
-      className="group block transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      className="group focus-visible:outline-ring flex h-full flex-col transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
     >
-      <Card className="overflow-hidden">
-        <div className="relative aspect-video bg-muted">
-          <span className="absolute inset-0 flex items-center justify-center text-slate-300">
-            <Icon name="building" size={34} aria-hidden />
+      <Card className="flex flex-1 flex-col overflow-hidden">
+        <div className="relative aspect-video overflow-hidden bg-slate-100" aria-hidden>
+          <span className="absolute inset-0" style={{ backgroundImage: STRIPES }} />
+          <span className="absolute inset-0 grid place-items-center text-slate-300">
+            <Icon name="building" size={34} />
           </span>
-          <Badge
-            variant="default"
-            className="absolute right-2 top-2 bg-card/90 text-foreground hover:bg-card/90"
-            aria-hidden
-          >
-            {hotel.starRating}★
-          </Badge>
+          <span className="absolute inset-x-3 bottom-2.5 truncate text-xs font-semibold tracking-wide text-slate-500/85 uppercase">
+            {hotel.name}
+          </span>
+          <span className="text-foreground absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold tabular-nums shadow-sm">
+            <Icon name="star" size={13} className="text-star" />
+            {hotel.starRating}
+          </span>
         </div>
-        <div className="space-y-1.5 p-4">
-          <h3 className="text-base font-semibold text-foreground">{hotel.name}</h3>
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-1 flex-col gap-2 p-4">
+          <h3 className="text-foreground text-base font-semibold">{hotel.name}</h3>
+          <p className="text-muted-foreground text-sm">
             {hotel.address.city}, {hotel.address.state} · {hotel.address.country}
           </p>
-          <p className="flex items-center gap-1 text-sm text-foreground" aria-hidden>
-            <Icon name="star" size={14} className="text-star" />
-            <span className="font-medium tabular-nums">{hotel.overallRating}</span>
-            <span className="text-muted-foreground">({fmtCount(hotel.reviewCount)})</span>
-          </p>
-          <ul className="flex flex-wrap gap-1.5 pt-1" aria-hidden>
+          <div className="flex items-center gap-1.5" aria-hidden>
+            <RatingStars value={hotel.overallRating} size={14} />
+            <span className="text-muted-foreground text-sm tabular-nums">
+              ({fmtCount(hotel.reviewCount)})
+            </span>
+          </div>
+          <ul className="flex flex-wrap gap-1.5 pt-0.5" aria-hidden>
             {shown.map((a) => (
               <li key={a}>
                 <Badge variant="muted">{humanizeAmenity(a)}</Badge>
@@ -58,9 +65,12 @@ export function HotelCard({ hotel }: { hotel: Hotel }) {
               </li>
             ) : null}
           </ul>
-          <p className="pt-1 text-sm font-semibold tabular-nums text-foreground">
-            from {fmtPrice(hotel.priceFrom)}
-            <span className="font-normal text-muted-foreground"> / night</span>
+          <p className="mt-auto flex items-baseline gap-1.5 border-t border-slate-200 pt-2.5">
+            <span className="text-muted-foreground text-xs">from</span>
+            <span className="text-foreground text-lg font-bold tabular-nums">
+              {fmtPrice(hotel.priceFrom)}
+            </span>
+            <span className="text-muted-foreground text-xs">/ night</span>
           </p>
         </div>
       </Card>

@@ -15,8 +15,8 @@ describe('AmenitiesGrid', () => {
     expect(screen.getByText('Wi-Fi')).toBeTruthy();
     // pool → 'Pool'
     expect(screen.getByText('Pool')).toBeTruthy();
-    // free_parking → 'Parking' (strips free_ prefix, capitalizes)
-    expect(screen.getByText('Parking')).toBeTruthy();
+    // free_parking → 'Free parking' (curated label, matches the design mockup)
+    expect(screen.getByText('Free parking')).toBeTruthy();
   });
 
   it('renders exactly one listitem per amenity', () => {

@@ -101,5 +101,7 @@
   }
   html {
     @apply font-sans;
+    /* Reserve scrollbar gutter so pagination never shifts the layout horizontally. */
+    scrollbar-gutter: stable;
   }
 }

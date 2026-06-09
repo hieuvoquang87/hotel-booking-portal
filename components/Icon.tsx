@@ -1,6 +1,14 @@
 import type { ReactElement, SVGProps } from 'react';
 
-export type IconName = 'pin' | 'building' | 'search' | 'chevron' | 'x' | 'star' | 'sliders';
+export type IconName =
+  | 'pin'
+  | 'building'
+  | 'search'
+  | 'chevron'
+  | 'x'
+  | 'star'
+  | 'sliders'
+  | 'sort';
 
 const PATHS: Record<IconName, ReactElement> = {
   pin: (
@@ -17,8 +25,11 @@ const PATHS: Record<IconName, ReactElement> = {
   ),
   chevron: <path d="m6 9 6 6 6-6" />,
   x: <path d="M6 6l12 12 M18 6 6 18" />,
-  star: <path d="m12 3 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18.8 6.2 21l1.1-6.5L2.6 9.8l6.5-.9L12 3Z" />,
+  star: (
+    <path d="m12 3 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18.8 6.2 21l1.1-6.5L2.6 9.8l6.5-.9L12 3Z" />
+  ),
   sliders: <path d="M4 8h10 M18 8h2 M4 16h2 M10 16h10 M14 6v4 M6 14v4" />,
+  sort: <path d="m3 7 4-4 4 4 M7 3v18 M21 17l-4 4-4-4 M17 21V3" />,
 };
 
 type IconProps = SVGProps<SVGSVGElement> & { name: IconName; size?: number; title?: string };

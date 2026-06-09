@@ -35,6 +35,18 @@ export function HomeView() {
 
   const activeFilterCount = [state.stars, state.min, state.max].filter((v) => v !== null).length;
 
+  // Derived from the already-loaded location set (never global inventory).
+  const loaded = hotels.data ?? [];
+  const prices = loaded.map((h) => h.priceFrom);
+  const priceBounds: [number, number] | undefined = prices.length
+    ? [Math.min(...prices), Math.max(...prices)]
+    : undefined;
+  const destinationLabel = loaded[0]
+    ? state.city
+      ? [loaded[0].address.city, loaded[0].address.state].filter(Boolean).join(', ')
+      : loaded[0].address.country
+    : null;
+
   // Analytics: announce a search whenever the committed location/refine state changes.
   const prevKey = useRef('');
   useEffect(() => {
@@ -60,7 +72,10 @@ export function HomeView() {
   // Analytics: inventory-gap signal when a loaded location yields zero after filters.
   useEffect(() => {
     if (hasDestination && hotels.isSuccess && view.total === 0) {
-      track({ name: 'no_results', filters: { stars: state.stars, min: state.min, max: state.max } });
+      track({
+        name: 'no_results',
+        filters: { stars: state.stars, min: state.min, max: state.max },
+      });
     }
   }, [hasDestination, hotels.isSuccess, view.total, state.stars, state.min, state.max]);
 
@@ -70,24 +85,28 @@ export function HomeView() {
 
   return (
     <div className="space-y-6">
-      <section className="space-y-3">
+      <section className="space-y-3 text-center">
         <h1 className="text-3xl font-bold text-slate-900 md:text-4xl">Find your stay</h1>
-        <p className="text-slate-600">Browse hotels by destination.</p>
-        <DestinationCombobox
-          options={options}
-          value={{ country: state.country, city: state.city }}
-          onSelect={onSelect}
-          loading={locations.isLoading}
-          error={locations.isError}
-          onRetry={() => locations.refetch()}
-        />
+        <p className="text-slate-600">
+          Browse hotels by destination — pick a city or country to begin.
+        </p>
+        <div className="flex justify-center">
+          <DestinationCombobox
+            options={options}
+            value={{ country: state.country, city: state.city }}
+            onSelect={onSelect}
+            loading={locations.isLoading}
+            error={locations.isError}
+            onRetry={() => locations.refetch()}
+          />
+        </div>
       </section>
 
       {!hasDestination ? (
         <EmptyState
           icon="pin"
           title="Start by choosing a destination"
-          subtext="Pick a city or country to see hotels."
+          subtext="Pick a city or country above to see available stays."
         />
       ) : (
         <>
@@ -98,6 +117,7 @@ export function HomeView() {
             sort={state.sort}
             loading={hotels.isLoading}
             total={view.total}
+            priceBounds={priceBounds}
             onStars={(stars) => setParams({ stars })}
             onPrice={(min, max) => setParams({ min, max })}
             onSort={(sort) => setParams({ sort })}
@@ -118,12 +138,17 @@ export function HomeView() {
             <EmptyState
               icon="pin"
               title="No hotels found"
-              subtext="Try widening your filters."
+              subtext="Try widening your filters to see more stays."
               actionLabel="Reset filters"
               onAction={onReset}
             />
           ) : (
             <>
+              {destinationLabel ? (
+                <h2 className="text-xl font-bold text-slate-900">
+                  Hotels in <span className="text-blue-600">{destinationLabel}</span>
+                </h2>
+              ) : null}
               <HotelGrid hotels={view.items} loading={false} />
               <Pagination
                 page={view.page}
@@ -139,6 +164,7 @@ export function HomeView() {
             min={state.min}
             max={state.max}
             resultCount={view.total}
+            priceBounds={priceBounds}
             onStars={(stars) => setParams({ stars })}
             onPrice={(min, max) => setParams({ min, max })}
             onReset={onReset}

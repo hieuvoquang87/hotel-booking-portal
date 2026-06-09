@@ -23,7 +23,9 @@ Select a hotel                                   → /hotels/[id]
   │  detail renders immediately (placeholder photo)
   ▼
 Hotel detail
-  │  pick check-in / check-out dates (manual; not stored in URL)
+  │  dates auto-seeded with demo defaults (2026-07-10 → 2026-07-12)
+  │  so the success state shows immediately; user can change them.
+  │  (manual entry; not stored in URL)
   ▼
 Availability (lazy, third-party sim)
   │  "Checking availability…" → available rooms + price/night (USD)
@@ -74,11 +76,12 @@ Results list (loaded location set)
 
 ```
 Select hotel ─→ /hotels/[id]
-   │  GET /api/hotels/[id]  → hotel + static room info (fast)
+   │  GET /api/hotels/[id]  → hotel + static room info (server-rendered, no client-side loading)
    ▼
 Detail renders (name, address, description, amenities, policies, ratings)
    │
-   pick check-in / check-out
+   dates auto-seeded to demo range (2026-07-10 → 2026-07-12) on first visit
+   │  so the availability success state shows without manual entry.
    │  validate: checkout > check-in
    ▼
 GET /api/hotels/[id]/rooms?check_in=&check_out=   (lazy, simulated latency)
@@ -105,11 +108,12 @@ loading        success          empty           error
 | Filter       | price `min > max`                         | swap or block (no crash)                      |
 | Sort/page    | bad param (`page=99`, `sort=x`)           | clamp / default, never error                  |
 | Pagination   | single page                               | hide controls                                 |
-| Detail       | invalid `/hotels/[id]`                    | not-found page                                |
+| Detail       | invalid `/hotels/[id]` (404)               | not-found page                                |
+| Detail       | `/hotels/[id]` server error (5xx)          | error boundary: "Couldn't load this hotel" + retry + browse link |
 | Detail dates | checkout ≤ check-in                       | blocked / invalid                             |
 | Detail dates | partial (only check-in)                   | no fetch until both set                       |
 | Availability | loading                                   | "Checking availability…" skeleton             |
-| Availability | `available_dates: []` (15% of stock)      | "No rooms available for these dates"          |
+| Availability | `available_dates: []` (some rooms in seed) | "No rooms available for these dates"          |
 | Availability | dates outside July 2026 window            | "No rooms available" (dataset accepted as-is) |
 | Availability | stale response (dates changed mid-flight) | latest-wins; older response ignored           |
 | Availability | timeout / offline                         | inline error + retry; page not blocked        |
@@ -125,7 +129,8 @@ Client state (URL + AppProvider)        Server state (React Query)
 country, city (slugified, URL)          /api/locations   (once)
 stars, min, max, sort, page (URL)       /api/hotels      [country, city]
 check-in, check-out (AppProvider only,  /api/hotels/[id]
-  manual entry, NOT in URL)             /api/hotels/[id]/rooms [id,check_in,check_out]
+  auto-seeded with demo defaults,        /api/hotels/[id]/rooms [id,check_in,check_out]
+  NOT in URL)
 ```
 
 All data flows client → `/api/*` → server-only services → mock seed.

@@ -32,14 +32,17 @@ export default function RootLayout({
           <AppProvider>
             <a
               href="#main"
-              className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:shadow"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:shadow"
             >
               Skip to content
             </a>
             <header className="sticky top-0 z-40 h-14 border-b border-slate-200 bg-white/95 backdrop-blur md:h-16">
               <div className="mx-auto flex h-full max-w-7xl items-center px-4 md:px-6 lg:px-8">
                 <span className="flex items-center gap-2 text-lg font-bold text-slate-900">
-                  <Icon name="pin" size={22} className="text-blue-600" /> Stayfinder
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                    <Icon name="pin" size={18} />
+                  </span>
+                  Stayfinder
                 </span>
               </div>
             </header>
