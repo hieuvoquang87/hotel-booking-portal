@@ -116,6 +116,6 @@ describe('useSearchParamsState', () => {
   it('setParams resets page on a filter change and calls router.replace', () => {
     const { result } = renderHook(() => useSearchParamsState());
     act(() => result.current.setParams({ stars: 4 }));
-    expect(replace).toHaveBeenCalledWith('/?country=usa&stars=4');
+    expect(replace).toHaveBeenCalledWith('/?country=usa&stars=4', { scroll: false });
   });
 });

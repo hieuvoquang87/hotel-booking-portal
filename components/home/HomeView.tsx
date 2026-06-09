@@ -15,6 +15,7 @@ import { MobileFilterBar } from './MobileFilterBar';
 import { Pagination } from './Pagination';
 import { RefineToolbar } from './RefineToolbar';
 import { ResultCount } from './ResultCount';
+import { TrustStrip } from './TrustStrip';
 
 export function HomeView() {
   const { state, setParams } = useSearchParamsState();
@@ -34,6 +35,11 @@ export function HomeView() {
   });
 
   const activeFilterCount = [state.stars, state.min, state.max].filter((v) => v !== null).length;
+
+  // Dynamic hero counts from the locations list (invariant-safe — no global inventory).
+  const locList = locations.data ?? [];
+  const cityCount = locList.length;
+  const countryCount = new Set(locList.map((l) => l.country)).size;
 
   // Derived from the already-loaded location set (never global inventory).
   const loaded = hotels.data ?? [];
@@ -81,26 +87,32 @@ export function HomeView() {
 
   const onSelect = (opt: DestinationOption) =>
     setParams({ country: opt.params.country, city: 'city' in opt.params ? opt.params.city : null });
+  const onClearDestination = () => setParams({ country: null, city: null });
   const onReset = () => setParams({ stars: null, min: null, max: null });
 
   return (
     <div className="space-y-6">
-      <section className="space-y-3 text-center">
-        <h1 className="text-3xl font-bold text-slate-900 md:text-4xl">Find your stay</h1>
-        <p className="text-slate-600">
-          Browse hotels by destination — pick a city or country to begin.
+      <section className="relative -mt-6 mb-2 w-screen ml-[calc(-50vw+50%)] space-y-5 bg-blue-800 px-4 pb-8 pt-8 text-center md:px-6 md:pb-10 md:pt-10 lg:px-8">
+        <h1 className="text-3xl font-bold text-white md:text-4xl">Find your perfect stay</h1>
+        <p className="text-blue-100">
+          {cityCount > 0 && countryCount > 0
+            ? `Compare 40+ stays across ${cityCount} cities in ${countryCount} countries — by rating and price, in seconds`
+            : 'Browse hotels by destination — pick a city or country to begin.'}
         </p>
         <div className="flex justify-center">
           <DestinationCombobox
             options={options}
             value={{ country: state.country, city: state.city }}
             onSelect={onSelect}
+            onClear={onClearDestination}
             loading={locations.isLoading}
             error={locations.isError}
             onRetry={() => locations.refetch()}
           />
         </div>
       </section>
+
+      <TrustStrip />
 
       {!hasDestination ? (
         <EmptyState

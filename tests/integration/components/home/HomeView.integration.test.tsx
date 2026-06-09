@@ -62,7 +62,7 @@ describe('Home flow: destination → filter → sort → paginate', () => {
     await waitFor(() => expect(combo).toBeEnabled());
     await userEvent.click(combo);
     await userEvent.click(await screen.findByRole('option', { name: /All hotels in USA/ }));
-    expect(replace).toHaveBeenCalledWith('/?country=usa');
+    expect(replace).toHaveBeenCalledWith('/?country=usa', { scroll: false });
   });
 
   it('loads the location subset, then filters and sorts via the URL (F2/F3)', async () => {
@@ -76,14 +76,14 @@ describe('Home flow: destination → filter → sort → paginate', () => {
 
     // Apply a 5★ filter — page resets to 1 (M3 rule) and the URL gains stars=5.
     await userEvent.click(screen.getAllByRole('button', { name: '5★' })[0]);
-    expect(replace).toHaveBeenCalledWith('/?country=usa&stars=5');
+    expect(replace).toHaveBeenCalledWith('/?country=usa&stars=5', { scroll: false });
 
     // Change sort — writes ?sort=price-asc without a refetch.
     await userEvent.selectOptions(
       screen.getAllByRole('combobox', { name: /sort/i })[0],
       'price-asc',
     );
-    expect(replace).toHaveBeenCalledWith('/?country=usa&sort=price-asc');
+    expect(replace).toHaveBeenCalledWith('/?country=usa&sort=price-asc', { scroll: false });
   });
 
   it('shows "No hotels found" + Reset when filters exclude everything', async () => {
@@ -91,7 +91,7 @@ describe('Home flow: destination → filter → sort → paginate', () => {
     renderHome();
     await waitFor(() => expect(screen.getByText('No hotels found')).toBeTruthy());
     await userEvent.click(screen.getByRole('button', { name: /reset filters/i }));
-    expect(replace).toHaveBeenCalledWith('/?country=usa'); // filters cleared
+    expect(replace).toHaveBeenCalledWith('/?country=usa', { scroll: false }); // filters cleared
   });
 
   it('offers Retry when locations fail to load', async () => {

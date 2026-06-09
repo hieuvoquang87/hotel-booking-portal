@@ -35,7 +35,7 @@ export function RefineToolbar({
     <div className="hidden border-b border-slate-200 pb-4 sm:block">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <span className="inline-flex items-center gap-2">
-          <span className={labelClass}>Stars</span>
+          <span className={labelClass}>Star Rating</span>
           <SegmentedStars value={stars} onChange={onStars} />
         </span>
         <span className="inline-flex items-center gap-2">

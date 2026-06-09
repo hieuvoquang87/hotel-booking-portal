@@ -44,6 +44,7 @@ describe('DestinationCombobox', () => {
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     await open();
@@ -59,6 +60,7 @@ describe('DestinationCombobox', () => {
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     await open();
@@ -76,6 +78,7 @@ describe('DestinationCombobox', () => {
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     await open();
@@ -94,6 +97,7 @@ describe('DestinationCombobox', () => {
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     await open();
@@ -111,6 +115,7 @@ describe('DestinationCombobox', () => {
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     const input = screen.getByRole('combobox');
@@ -128,6 +133,7 @@ describe('DestinationCombobox', () => {
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('Chicago, IL — USA');
@@ -140,6 +146,7 @@ describe('DestinationCombobox', () => {
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('All hotels in USA');
@@ -155,6 +162,7 @@ describe('DestinationCombobox', () => {
         loading={false}
         error
         onRetry={onRetry}
+        onClear={() => {}}
       />,
     );
     await userEvent.click(screen.getByRole('button', { name: /retry/i }));

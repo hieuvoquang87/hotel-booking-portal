@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/Icon';
 import { RatingStars } from '@/components/RatingStars';
+import { hotelPlaceholderGradient } from '@/lib/colors';
 import type { Hotel } from '@/types/domain';
 
 type HotelHeroProps = {
@@ -14,8 +15,11 @@ export function HotelHero({ hotel }: HotelHeroProps) {
   return (
     <div>
       {/* 16:9 placeholder image — reserves space to prevent CLS */}
-      <div className="aspect-video bg-muted flex items-center justify-center rounded-lg mb-4">
-        <Icon name="building" size={48} className="text-muted-foreground" />
+      <div
+        className="aspect-video flex items-center justify-center rounded-lg mb-4"
+        style={{ background: hotelPlaceholderGradient(hotel.id) }}
+      >
+        <Icon name="building" size={48} className="text-white/35" />
       </div>
 
       <h1 className="text-2xl font-bold mb-1">{name}</h1>
