@@ -81,6 +81,8 @@ hooks/
 services/
 ├── hotelService.ts            getLocations / getHotelsByLocation / getHotelById
 ├── availabilityService.ts     Simulate slow third-party (latency + price)
+├── mappers.ts                 Raw seed → domain types (boundary)
+├── seed.ts                    Isolates the raw JSON import (Phase-2 swap seam)
 └── mock/hotels.json           40 hotels × 10 cities
 
 stores/
@@ -119,9 +121,15 @@ stores/
 
 ---
 
-## Phase 2: Scale, SEO & Booking
+## Phase 2: Scale, SEO, Booking & Resilience
 
 **Extends Phase 1** — assumes routes, components, and data layer exist.
+
+> **Framing:** Phase 1 ships the 3 core discovery features. Phase 2 makes them
+> production-grade — adding booking (§1), crawlable SEO (§2), a real-API seam (§3),
+> observability (§4), error boundaries (§5), operability/resilience hardening (§6),
+> and internationalization (§7). Nothing in Phase 2 is implemented yet; the items
+> here are **designed plans**.
 
 ### 1. Booking (New Feature)
 
@@ -204,6 +212,9 @@ type Event =
   | { name: 'no_rooms'; hotelId: string };
 ```
 
+The resilience slice (§6) emits its operational metrics — call latency, cache
+hit/miss, circuit-breaker state — through this same `track()` facade.
+
 ### 5. Error Handling
 
 | Failure                | Behavior                                         |
@@ -212,10 +223,76 @@ type Event =
 | Invalid intent slug    | redirect to base city page                       |
 | Empty filter result    | `EmptyState` + reset filters                     |
 | `available_dates: []`  | "No rooms available for these dates"             |
-| Service down / timeout | Backoff retry → last ISR cache, else `error.tsx` |
+| Service down / timeout | Page/ISR fallback for inventory; availability degrades via §6 (stale app cache), never `error.tsx` |
 | Service 5xx            | Typed error → boundary + Sentry alert            |
 
 **Layers:** `error.tsx` · `not-found.tsx` · `loading.tsx` · `global-error.tsx`
+
+The availability boundary's detailed failure path — timeout → bounded retry →
+circuit breaker → stale-cache fallback — is specified in §6, which supersedes the
+generic row above for that dependency.
+
+### 6. Operability & Resilience
+
+> **Designed, not implemented.** Full spec:
+> [`superpowers/specs/2026-06-08-operability-resilience-design.md`](superpowers/specs/2026-06-08-operability-resilience-design.md).
+
+Hardens the one expensive/slow/unreliable boundary (availability) and makes it
+operable. Rests on the **M1 `availabilityService` (already built)**, so it is
+buildable independently of the rest of Phase 2. Covers 4 of the 6 AWS
+Well-Architected pillars — **Security is deliberately excluded** (the 6th, out of
+scope for this slice).
+
+**One control-flow path** around availability (not a feature checklist):
+
+```
+breaker OPEN? ───────────────► fallback ladder
+cache fresh (within TTL)? ───► return cached                    [cost]
+else call upstream (timeout-bounded, ≤2 retries + jitter)
+   success   → write cache, return                              [reliability]
+   exhausted → trip breaker → fallback ladder
+fallback ladder: stale cache (last-known) → "pricing unavailable"
+                 (hotel browsing never blocks)
+```
+
+| Pillar | Delivers |
+| --- | --- |
+| Reliability / Resiliency | timeout, bounded retry + jitter, circuit breaker, tiered fallback, stale-cache last-known |
+| Performance | availability cache, edge cache headers on cheap reads, web-vitals CI budget, load-test thresholds |
+| Cost Optimization | cache the expensive upstream, edge caching to cut invocations, deferred sampling noted |
+| Operational Excellence | feature flags, `track()` metric events, SLOs + alerts (designed), load tests, incident playbooks, CI perf/bundle gates |
+
+**Keystone:** a **fault-injection mode** in the mock service makes every resilience
+claim triggerable and testable on mock — the breaker actually trips, serves stale,
+and recovers. Design thinking, not a wishlist. **New seams:** `services/resilience.ts`,
+`services/cache.ts`, `services/config.ts`, `load/` (k6/autocannon), `docs/runbooks/`
+(incident playbooks: detection → diagnosis → mitigation → recovery).
+
+### 7. Internationalization (i18n)
+
+> **Designed, not implemented.** Target locales: **English + Spanish / French /
+> German** — all Latin-script, left-to-right, so no RTL, transliteration, or font
+> work. Scoped deliberately to keep the first pass cheap.
+
+Two independent axes: **UI chrome + formatting** (owned in code, built first) and
+**content localization** (owned by the data source, deferred until localized data exists).
+
+**Layered — cheapest seams first:**
+
+| Layer | What | Cost |
+| --- | --- | --- |
+| Formatting seams | `formatCurrency / formatDate / formatNumber` via `Intl.*`, locale-aware — route every price/date/number through them | low — bake in early; expensive to retrofit |
+| Message catalog | `messages/{en,es,fr,de}.json` + a catalog library (e.g. `next-intl`, routing verified against Next 16 i18n docs); no hardcoded strings | medium |
+| Locale routing | `app/[locale]/…` segment + `middleware.ts` Accept-Language negotiation; `LocaleSwitcher` | medium |
+| SEO (with §2) | `hreflang` alternates, per-locale `generateMetadata`, per-locale sitemap | medium |
+| Content | localized hotel fields selected at the `mappers.ts` boundary by locale | deferred — needs real localized data |
+
+**Locale lives in the URL path** (`/fr/hotel/…`), not a cookie — shareable, crawlable,
+consistent with URL-as-source-of-truth. `lib/slug.ts` is unaffected (es/fr/de
+diacritics are already stripped). Display currency goes through `formatCurrency`;
+display-vs-settlement currency is a booking (§1) concern. The native date picker
+(P1 default) is already locale-aware. **New seams:** `lib/format.ts`, `messages/`,
+`middleware.ts`, `app/[locale]/`, `components/LocaleSwitcher.tsx`.
 
 ---
 
@@ -240,20 +317,30 @@ type Event =
 | Country segment in URL (Phase 2)    | International = more data, not a route rewrite                       |
 | SSG + ISR (Phase 2)                 | Small inventory → pre-render all; ISR handles price drift            |
 | Intent slugs allow-listed (Phase 2) | Controlled crawl surface; no infinite filter URLs                    |
+| Resilience policy transport-agnostic (P2) | Wraps mock today + real `http.ts` later; lets the breaker trip in a test on mock |
+| One availability cache, two read policies (P2) | Fresh-within-TTL = cost; stale-past-TTL = resilience fallback; never hard-evict last-known |
+| Breaker + cache state per-instance (P2)        | Fine for demo; Redis/edge-KV is the documented swap seam            |
+| Fault injection ships disabled (P2)            | A test affordance to exercise resilience paths, not prod behavior   |
+| Locale in URL path, not cookie (P2)            | Shareable + crawlable + SEO `hreflang`; consistent with URL-as-source-of-truth |
+| i18n scoped to es/fr/de (P2)                   | Latin-script LTR — no RTL, transliteration, or font work in the first pass |
+| `Intl` format helpers seamed early (P2)        | Route prices/dates/numbers through helpers now; i18n stays additive, not a refactor |
+| UI localized, content English until real data (P2) | Mock seed is English-only; `mappers.ts` is the seam for localized content later |
 
 ---
 
 ## Deliverables
 
-| File                             | Contents                                                             |
-| -------------------------------- | -------------------------------------------------------------------- |
-| **README.md**                    | Install · run locally · test; state management + component breakdown |
-| **ASSUMPTIONS-AND-TRADEOFFS.md** | Architectural rationale (design thinking)                            |
-| **AI-USAGE.md**                  | How AI tools were used during coding/UI                              |
+| File                                  | Contents                                                                                  |
+| ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **README.md**                         | Install · run · test; architecture, state management, quality bar, resilience, security    |
+| **docs/assumptions-and-tradeoffs.md** | Architectural rationale and accepted trade-offs (design thinking)                          |
+| **ai-dev-workflow.md**                | How AI tools were used across the requirements → docs → build workflow                     |
 
 ---
 
-## Non-Functional Targets (Phase 1)
+## Non-Functional Targets
+
+**Phase 1 (client experience):**
 
 | Metric          | Target                   |
 | --------------- | ------------------------ |
@@ -265,6 +352,15 @@ type Event =
 | Filter response | < 100ms (in-memory)      |
 | Test coverage   | ≥ 85% (unit)             |
 
+**Phase 2 (production / operability — see §6 and [`architecture.md`](architecture.md) §2):**
+
+| Metric        | Target    |
+| ------------- | --------- |
+| Throughput    | 100 TPS   |
+| Availability  | 99.995% SLA |
+| MTTD          | 5m        |
+| MTTR          | 20m       |
+
 ---
 
 ## Open Questions (Phase 2)
@@ -272,3 +368,7 @@ type Event =
 1. City landing content — all hotels or sorted by rating/price?
 2. ISR revalidate window — how fresh must prices/availability be (1h vs 5m)?
 3. State slug for intl — scheme for non-US (e.g., `idf` for Île-de-France)?
+4. Circuit-breaker thresholds — failure count to open, cooldown before half-open? (§6)
+5. Availability cache TTL — and how stale is acceptable as a last-known fallback? (§6)
+6. SLO targets — availability p95 latency and acceptable user-visible error rate? (§6)
+7. i18n launch — which locales ship first, and what's the translation source (static catalogs vs CMS)? (§7)
