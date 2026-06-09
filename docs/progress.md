@@ -34,7 +34,7 @@ a11y, acceptance). Home → [spec](designs/home-page-design-spec.md) ·
 | M2  | BFF API routes                    | `/api/locations`, `/api/hotels`, `[id]`, `[id]/rooms`       | [x]    |
 | M3  | Client state & data hooks         | QueryProvider, AppProvider, the four `use*` hooks           | [x]    |
 | M4  | Search · filter · sort · paginate | Home page: dropdown, filters, sort, pagination, grid        | [x]    |
-| M5  | Hotel detail & room availability  | `/hotels/[id]` + lazy availability with all states          | [ ]    |
+| M5  | Hotel detail & room availability  | shadcn/ui primitive layer + M4 refactor + `/hotels/[id]` detail/availability | [x]    |
 | M6  | Cross-cutting (a11y/obs/errors)   | Boundaries, `track()` facade, a11y AA, perf budget          | [ ]    |
 | M7  | Testing & coverage gate           | Unit ≥85%, MSW integration, Playwright E2E green in CI      | [ ]    |
 | M8  | Docs & deliverables               | README, AI-USAGE; finalize ASSUMPTIONS-AND-TRADEOFFS        | [ ]    |
@@ -205,28 +205,69 @@ PRD **F4, F5**.
 **Build to mockup:** [hotel-detail-page-mockup.html](designs/hotel-detail-page-mockup.html) (open in browser) ·
 spec [hotel-detail-page-design-spec.md](designs/hotel-detail-page-design-spec.md) — match layout, tokens, and all availability states (incl. the `2026-07-10 → 2026-07-12` demo-date default).
 
-### Detail (F4)
+### Phase A — shadcn/ui primitive layer
 
-- [x] `app/hotels/[id]/page.tsx` — renders name, address, description, amenities, policies, `star_rating`, `overall_rating`, review count.
+- [x] **shadcn/ui init** — installed `class-variance-authority`, `radix-ui`, `tailwind-merge`, `clsx`; added `lib/utils.ts` (`cn`).
+- [x] **Token reconciliation** — `globals.css` re-skinned to the slate/blue spec from the design; custom tokens `--success`, `--star`, `--warning` added; light-only (dark theme deferred to P2).
+- [x] `components/ui/badge.tsx` — `default` | `muted` | `success` variants.
+- [x] `components/ui/button.tsx` — all variants + sizes; `asChild` via `Slot.Root`; 44px touch target (`min-h-11`).
+- [x] `components/ui/card.tsx` — `Card`, `CardHeader`, `CardContent`, `CardFooter`.
+- [x] `components/ui/input.tsx` — base text input with `aria-invalid` ring.
+- [x] `components/ui/label.tsx` — `<label>` wrapper.
+- [x] `components/ui/skeleton.tsx` — shimmer block.
+- [x] **Unit tests** for all `components/ui/` primitives ≥85% coverage.
+
+### Phase B — M4 components refactored onto primitives
+
+- [x] `components/home/HotelCard.tsx` refactored: star badge → `Badge variant="default"`, overall rating pill → `Badge variant="muted"`, "From $..." → `Badge variant="success"`.
+- [x] `components/home/DestinationCombobox.tsx` refactored: trigger → `Button variant="outline"`.
+- [x] `components/home/SortSelect.tsx` refactored: trigger → `Button variant="outline"`.
+- [x] `components/home/FilterSheet.tsx` / `MobileFilterBar.tsx` refactored: open trigger → `Button variant="outline"`, reset → `Button variant="ghost"`.
+- [x] `components/home/Pagination.tsx` refactored: prev/next → `Button variant="outline"`, current page → `Button` (active state).
+- [x] `components/RatingStars.tsx` — shared star-rating display (shared across home card + detail hero).
+- [x] `components/InlineError.tsx` — shared inline error + retry button.
+- [x] All M4 component unit tests remain green after refactor.
+
+### Phase C — Detail (F4)
+
+- [x] `app/hotels/[id]/page.tsx` — server component; fetches via `getJson`/`API_BASE_URL`; renders name, address, description, amenities, policies, `star_rating`, `overall_rating`, review count; calls `notFound()` on 404; re-throws other errors.
 - [x] Detail renders immediately **without** waiting on availability.
-- [x] **Basic SEO / metadata** — from the design: set the page `<title>` per the mockup (**"Stayfinder — Hotel detail"**, ideally the hotel name) + a short meta description via `metadata`; reuse the app **favicon** (the map-pin brand mark) from the root layout. _Full per-hotel SEO (canonical, OG, JSON-LD) stays Phase 2._
-- [x] `app/hotels/[id]/not-found.tsx` (or `notFound()`) for invalid id.
+- [x] **Basic SEO / metadata** — `generateMetadata` returns hotel name as `<title>` + short description; falls back to `{ title: 'Hotel' }` on fetch error.
+- [x] `app/hotels/[id]/not-found.tsx` — renders empty-state + "Browse hotels" link.
+- [x] `components/hotel/HotelHero.tsx` — name, address, star badges, overall rating, review count, placeholder photo.
+- [x] `components/hotel/AmenitiesGrid.tsx` — amenity pills grid.
+- [x] `components/hotel/PoliciesList.tsx` — check-in/out times + cancellation policy.
+- [x] `components/hotel/BackToResults.tsx` — history-based back link.
 
-### Room availability (F5)
+### Phase C — Room availability (F5)
 
-- [ ] `components/RoomAvailability.tsx` — check-in / check-out date inputs (manual, not URL).
-- [ ] **Validation:** checkout ≤ check-in → blocked/invalid; partial dates (only check-in) → **no fetch** until both set.
-- [ ] On valid dates → lazy `useAvailability` fetch; show available room types + `price_per_night` (USD).
-- [ ] A room shows available only if every night in `[check-in → check-out)` ∈ `available_dates`.
+- [x] `components/hotel/RoomAvailability.tsx` — client island; check-in / check-out date fields (manual, not URL); lazy `useAvailability` fetch.
+- [x] `components/hotel/DateField.tsx` — native `<input type="date">` with label + `aria-invalid`.
+- [x] `components/hotel/RoomCard.tsx` — room type, specs (bed type · count · occupancy · sq ft), amenity pills, price/night, "Available" badge.
+- [x] `components/hotel/RoomSkeleton.tsx` — shimmer placeholder during fetch.
+- [x] **Validation:** checkout ≤ check-in → inputs marked invalid, no fetch until both dates are set and valid.
+- [x] On valid dates → lazy `useAvailability` fetch; shows available room types + `price_per_night` (USD).
+- [x] A room shows available only if every night in `[check-in → check-out)` ∈ `available_dates`.
 
 ### Availability states (from user-flows.md)
 
-- [ ] **Loading** → "Checking availability…" skeleton.
-- [ ] **Success** → rooms + price/night.
-- [ ] **Empty** (`available_dates: []`, ~15% of stock; or dates outside the July-2026 window) → **"No rooms available for these dates."**
-- [ ] **Error** (timeout/offline) → inline error + retry; **page never blocked.**
-- [ ] **Stale response** (dates changed mid-flight) → latest-wins; older response ignored.
-- **Done when:** F4 renders without availability dependency; F5 acceptance criteria + all four states pass; integration test covers detail → dates → availability (incl. a no-availability hotel).
+- [x] **Loading** → `RoomSkeleton` shimmer ("Checking availability…").
+- [x] **Success** → list of `RoomCard` components with price/night.
+- [x] **Empty** (`available_dates: []`, ~15% of stock; or dates outside the July-2026 window) → **"No rooms available for these dates."**
+- [x] **Error** (timeout/offline) → `InlineError` inline error + retry; **page never blocked.**
+- [x] **Stale response** (dates changed mid-flight) → latest-wins via React Query keying.
+- **Done when:** F4 renders without availability dependency; F5 acceptance criteria + all four states pass; integration test covers detail → dates → availability (incl. a no-availability hotel). ✅ **Met** — 272 tests pass (66 suites), clean lint/typecheck/build, `/hotels/[id]` dynamic + `/` static, all M5 modules ≥85% coverage (most at 100%).
+
+**M5 decisions (from spec/plan):** Three-phase implementation — Phase A: shadcn semantic tokens
+re-skinned to the slate/blue design spec; custom `--success`/`--star`/`--warning` tokens; light-only
+(Radix widgets + dark theme deferred to P2); custom `Icon` retained (no lucide dependency).
+Phase B: M4 home components refactored onto shadcn primitives, tests remain green.
+Phase C: detail = async server component via `getJson`/`notFound`/`generateMetadata`; availability =
+lazy client island (`RoomAvailability` with `'use client'`); `AvailableRoom` type widened to include
+all room display fields; demo dates default `2026-07-10 → 2026-07-12`; history-based `BackToResults`
+(no URL state needed); `API_BASE_URL` env var used for SSR absolute URL; no booking CTA in Phase 1.
+Remaining cross-cutting work: `track()` vendor adapters + route error/loading boundaries + formal
+a11y/perf audit → M6; Playwright E2E → M7; Radix primitives + dark theme → P2.
 
 ---
 
