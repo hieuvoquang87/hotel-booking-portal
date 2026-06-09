@@ -21,7 +21,11 @@ const baseConfig = {
     'stores/**/*.{ts,tsx}',
     'components/**/*.{ts,tsx}',
     'app/**/*.{ts,tsx}',
+    'utils/**/*.{ts,tsx}',
   ],
+  coverageThreshold: {
+    global: { statements: 85, branches: 85, functions: 85, lines: 85 },
+  },
 };
 
 // MSW v2 ships only ESM, so it must be transformed by next/jest's SWC instead of
