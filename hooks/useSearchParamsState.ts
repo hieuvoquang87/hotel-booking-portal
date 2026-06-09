@@ -86,7 +86,7 @@ export function useSearchParamsState(): {
   const setParams = useCallback(
     (patch: Partial<RefineState>) => {
       const qs = toSearchParams(nextState(state, patch)).toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname);
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
     [state, router, pathname],
   );

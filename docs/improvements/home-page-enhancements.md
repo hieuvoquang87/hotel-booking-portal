@@ -1,7 +1,8 @@
 # Home Page Enhancements — Making Discovery More Engaging
 
 **Date:** 2026-06-08
-**Status:** Ideas / proposal — nothing implemented.
+**Status:** In progress — implementing visual-first slice (#2 Hero glow-up, #6a Gradient placeholders, #7 Trust strip). New features (Popular Destinations, Quick Chips, Curated Collections) deferred.
+**Branch:** `feat/home-page-enhancements`
 **Inspiration:** Booking.com home page (search-first hero + offers + "browse by property type" +
 destination discovery), filtered through *this* product's Phase-1 scope.
 

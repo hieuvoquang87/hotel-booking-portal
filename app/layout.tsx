@@ -36,10 +36,10 @@ export default function RootLayout({
             >
               Skip to content
             </a>
-            <header className="sticky top-0 z-40 h-14 border-b border-slate-200 bg-white/95 backdrop-blur md:h-16">
+            <header className="sticky top-0 z-40 h-14 border-b border-blue-900/30 bg-blue-800 md:h-16">
               <div className="mx-auto flex h-full max-w-7xl items-center px-4 md:px-6 lg:px-8">
-                <span className="flex items-center gap-2 text-lg font-bold text-slate-900">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                <span className="flex items-center gap-2 text-lg font-bold text-white">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-800">
                     <Icon name="pin" size={18} />
                   </span>
                   Stayfinder

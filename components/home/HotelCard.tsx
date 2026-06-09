@@ -3,15 +3,12 @@ import { RatingStars } from '@/components/RatingStars';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { humanizeAmenity } from '@/lib/amenities';
+import { hotelPlaceholderGradient } from '@/lib/colors';
 import type { Hotel } from '@/types/domain';
 import { Icon } from '../Icon';
 
 const fmtPrice = (n: number) => `$${n.toLocaleString('en-US')}`;
 const fmtCount = (n: number) => n.toLocaleString('en-US');
-
-// Diagonal hairline texture so the photo placeholder reads as a surface, not a blank box.
-const STRIPES =
-  'repeating-linear-gradient(135deg, rgba(148,163,184,0.10) 0 2px, transparent 2px 11px)';
 
 function cardAria(h: Hotel): string {
   const where = [h.address.city, h.address.state].filter(Boolean).join(' ');
@@ -29,12 +26,15 @@ export function HotelCard({ hotel }: { hotel: Hotel }) {
       className="group focus-visible:outline-ring flex h-full flex-col transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
     >
       <Card className="flex flex-1 flex-col overflow-hidden">
-        <div className="relative aspect-video overflow-hidden bg-slate-100" aria-hidden>
-          <span className="absolute inset-0" style={{ backgroundImage: STRIPES }} />
-          <span className="absolute inset-0 grid place-items-center text-slate-300">
+        <div
+          className="relative aspect-video overflow-hidden"
+          style={{ background: hotelPlaceholderGradient(hotel.id) }}
+          aria-hidden
+        >
+          <span className="absolute inset-0 grid place-items-center text-white/35">
             <Icon name="building" size={34} />
           </span>
-          <span className="absolute inset-x-3 bottom-2.5 truncate text-xs font-semibold tracking-wide text-slate-500/85 uppercase">
+          <span className="absolute inset-x-3 bottom-2.5 truncate text-xs font-semibold tracking-wide text-white/60 uppercase">
             {hotel.name}
           </span>
           <span className="text-foreground absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold tabular-nums shadow-sm">
