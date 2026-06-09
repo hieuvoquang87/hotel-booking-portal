@@ -41,10 +41,11 @@ export function HomeView() {
   const priceBounds: [number, number] | undefined = prices.length
     ? [Math.min(...prices), Math.max(...prices)]
     : undefined;
-  const destinationLabel =
-    state.city && loaded[0]
-      ? `${loaded[0].address.city}, ${loaded[0].address.state}`
-      : (loaded[0]?.address.country ?? null);
+  const destinationLabel = loaded[0]
+    ? state.city
+      ? [loaded[0].address.city, loaded[0].address.state].filter(Boolean).join(', ')
+      : loaded[0].address.country
+    : null;
 
   // Analytics: announce a search whenever the committed location/refine state changes.
   const prevKey = useRef('');
