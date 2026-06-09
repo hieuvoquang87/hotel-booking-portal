@@ -1,55 +1,71 @@
-import { track } from '@/utils/analyticUtil';
+import {
+  track,
+  registerAnalyticsAdapter,
+  __resetAnalyticsAdapters,
+  type AnalyticsEvent,
+} from '../../../utils/analyticUtil';
 
-describe('track', () => {
-  const original = process.env.NODE_ENV;
-  afterEach(() => {
-    (process.env as { NODE_ENV?: string }).NODE_ENV = original;
-    jest.restoreAllMocks();
-  });
+// Reset BEFORE each test so the load-time default DEV adapter never leaks into a test's
+// fan-out count (afterEach would leave it registered for the first test).
+beforeEach(() => __resetAnalyticsAdapters());
 
-  it('logs the event to console.debug in development', () => {
-    (process.env as { NODE_ENV?: string }).NODE_ENV = 'development';
-    const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
-    track({ name: 'no_results', filters: { stars: 4, min: null, max: null } });
-    expect(spy).toHaveBeenCalledWith('[track]', expect.objectContaining({ name: 'no_results' }));
-  });
+const sample: AnalyticsEvent = { name: 'hotel_viewed', hotelId: 'h1' };
 
-  it('is a no-op in production (does not throw, does not log)', () => {
-    (process.env as { NODE_ENV?: string }).NODE_ENV = 'production';
-    const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
-    expect(() =>
-      track({
-        name: 'search_performed',
-        city: 'chicago',
-        country: 'usa',
-        filters: { stars: null, min: null, max: null, sort: 'rating' },
-      }),
-    ).not.toThrow();
-    expect(spy).not.toHaveBeenCalled();
-  });
+test('track fans out to every registered adapter', () => {
+  const a = jest.fn();
+  const b = jest.fn();
+  registerAnalyticsAdapter(a);
+  registerAnalyticsAdapter(b);
+  track(sample);
+  expect(a).toHaveBeenCalledWith(sample);
+  expect(b).toHaveBeenCalledWith(sample);
+});
 
-  // M5 analytics events
-  it('logs hotel_viewed event in development', () => {
-    (process.env as { NODE_ENV?: string }).NODE_ENV = 'development';
-    const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
-    track({ name: 'hotel_viewed', hotelId: 'hotel-01' });
-    expect(spy).toHaveBeenCalledWith('[track]', expect.objectContaining({ name: 'hotel_viewed' }));
+test('a throwing adapter does not break the others or track()', () => {
+  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  const bad = jest.fn(() => {
+    throw new Error('boom');
   });
+  const good = jest.fn();
+  registerAnalyticsAdapter(bad);
+  registerAnalyticsAdapter(good);
+  expect(() => track(sample)).not.toThrow();
+  expect(good).toHaveBeenCalledWith(sample);
+  expect(consoleSpy).toHaveBeenCalledWith('[analytics] adapter threw:', expect.any(Error));
+  consoleSpy.mockRestore();
+});
 
-  it('logs availability_checked event in development', () => {
-    (process.env as { NODE_ENV?: string }).NODE_ENV = 'development';
-    const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
-    track({ name: 'availability_checked', hotelId: 'hotel-01', nights: 3 });
-    expect(spy).toHaveBeenCalledWith(
-      '[track]',
-      expect.objectContaining({ name: 'availability_checked' }),
-    );
-  });
+test('registerAnalyticsAdapter returns a working unsubscribe', () => {
+  const a = jest.fn();
+  const off = registerAnalyticsAdapter(a);
+  off();
+  track(sample);
+  expect(a).not.toHaveBeenCalled();
+});
 
-  it('logs no_rooms event in development', () => {
-    (process.env as { NODE_ENV?: string }).NODE_ENV = 'development';
-    const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
-    track({ name: 'no_rooms', hotelId: 'hotel-01' });
-    expect(spy).toHaveBeenCalledWith('[track]', expect.objectContaining({ name: 'no_rooms' }));
-  });
+test('accepts every event in the consolidated union', () => {
+  const seen: AnalyticsEvent[] = [];
+  registerAnalyticsAdapter((e) => seen.push(e));
+  const events: AnalyticsEvent[] = [
+    { name: 'search_performed', city: 'Paris', country: 'France',
+      filters: { stars: 4, min: null, max: null, sort: 'price-asc' } },
+    { name: 'no_results', filters: { stars: 5, min: 0, max: 100 } },
+    { name: 'hotel_viewed', hotelId: 'h1' },
+    { name: 'availability_checked', hotelId: 'h1', nights: 2 },
+    { name: 'no_rooms', hotelId: 'h1' },
+  ];
+  events.forEach(track);
+  expect(seen).toHaveLength(5);
+});
+
+test('a default DEV console adapter is registered at load', () => {
+  const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
+  jest.resetModules();
+  // Re-import a fresh module instance so the load-time default adapter registers.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const fresh = require('../../../utils/analyticUtil') as typeof import('../../../utils/analyticUtil');
+  fresh.track({ name: 'hotel_viewed', hotelId: 'h1' });
+  expect(spy).toHaveBeenCalledWith('[track]', { name: 'hotel_viewed', hotelId: 'h1' });
+  spy.mockRestore();
+  jest.resetModules(); // restore registry for subsequent tests
 });
