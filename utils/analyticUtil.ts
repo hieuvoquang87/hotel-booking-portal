@@ -32,8 +32,11 @@ export function track(event: AnalyticsEvent): void {
   for (const adapter of adapters) {
     try {
       adapter(event);
-    } catch {
-      // An adapter failure must never break tracking or the UI.
+    } catch (err) {
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.error('[analytics] adapter threw:', err);
+      }
     }
   }
 }

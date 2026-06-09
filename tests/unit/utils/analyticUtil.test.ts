@@ -22,6 +22,7 @@ test('track fans out to every registered adapter', () => {
 });
 
 test('a throwing adapter does not break the others or track()', () => {
+  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   const bad = jest.fn(() => {
     throw new Error('boom');
   });
@@ -30,6 +31,8 @@ test('a throwing adapter does not break the others or track()', () => {
   registerAnalyticsAdapter(good);
   expect(() => track(sample)).not.toThrow();
   expect(good).toHaveBeenCalledWith(sample);
+  expect(consoleSpy).toHaveBeenCalledWith('[analytics] adapter threw:', expect.any(Error));
+  consoleSpy.mockRestore();
 });
 
 test('registerAnalyticsAdapter returns a working unsubscribe', () => {
@@ -63,4 +66,5 @@ test('a default DEV console adapter is registered at load', () => {
   fresh.track({ name: 'hotel_viewed', hotelId: 'h1' });
   expect(spy).toHaveBeenCalledWith('[track]', { name: 'hotel_viewed', hotelId: 'h1' });
   spy.mockRestore();
+  jest.resetModules(); // restore registry for subsequent tests
 });
