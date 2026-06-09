@@ -14,22 +14,22 @@ rounded cards, generous whitespace. **Mobile-first**, WCAG 2.1 AA.
 
 ### Color tokens (Tailwind slate + blue)
 
-| Token            | Hex       | Tailwind  | Use                                                    |
-| ---------------- | --------- | --------- | ------------------------------------------------------ |
-| `bg/page`        | `#F8FAFC` | slate-50  | Page background                                        |
-| `bg/surface`     | `#FFFFFF` | white     | Cards, bars, sheets                                    |
-| `border`         | `#E2E8F0` | slate-200 | Dividers, card outline, inputs                         |
-| `text/primary`   | `#0F172A` | slate-900 | Headings, key values                                   |
-| `text/secondary` | `#475569` | slate-600 | Body, meta                                             |
-| `text/muted`     | `#94A3B8` | slate-400 | Placeholders, hints                                    |
-| `accent`         | `#2563EB` | blue-600  | Primary buttons, active fill (≥3:1 UI; 5.1:1 on white) |
-| `accent/text`    | `#1D4ED8` | blue-700  | Inline text links / small text on white (extra margin) |
-| `accent/hover`   | `#1D4ED8` | blue-700  | Hover for primary                                      |
-| `focus/ring`     | `#3B82F6` | blue-500  | 2px ring + 2px offset on focus-visible                 |
-| `success`        | `#16A34A` | green-600 | "Available" status                                     |
-| `warning`        | `#D97706` | amber-600 | Soft warnings                                          |
-| `error`          | `#DC2626` | red-600   | Validation + inline errors                             |
-| `star`           | `#F59E0B` | amber-500 | Filled rating stars                                    |
+| Token            | Hex       | Tailwind  | CSS variable                        | Use                                                    |
+| ---------------- | --------- | --------- | ----------------------------------- | ------------------------------------------------------ |
+| `bg/page`        | `#F8FAFC` | slate-50  | `--background`                      | Page background                                        |
+| `bg/surface`     | `#FFFFFF` | white     | `--card`, `--popover`               | Cards, bars, sheets                                    |
+| `border`         | `#E2E8F0` | slate-200 | `--border`, `--input`               | Dividers, card outline, inputs                         |
+| `text/primary`   | `#0F172A` | slate-900 | `--foreground`, `--card-foreground` | Headings, key values                                   |
+| `text/secondary` | `#475569` | slate-600 | `--muted-foreground`                | Body, meta                                             |
+| `text/muted`     | `#94A3B8` | slate-400 | `--muted-foreground` (placeholder)  | Placeholders, hints                                    |
+| `accent`         | `#2563EB` | blue-600  | `--primary`                         | Primary buttons, active fill (≥3:1 UI; 5.1:1 on white) |
+| `accent/text`    | `#1D4ED8` | blue-700  | (hover step of `--primary`)         | Inline text links / small text on white (extra margin) |
+| `accent/hover`   | `#1D4ED8` | blue-700  | (hover step of `--primary`)         | Hover for primary                                      |
+| `focus/ring`     | `#3B82F6` | blue-500  | `--ring`                            | 2px ring + 2px offset on focus-visible                 |
+| `success`        | `#16A34A` | green-600 | `--success` (custom)                | "Available" status                                     |
+| `warning`        | `#D97706` | amber-600 | `--warning` (custom)                | Soft warnings                                          |
+| `error`          | `#DC2626` | red-600   | `--destructive`                     | Validation + inline errors                             |
+| `star`           | `#F59E0B` | amber-500 | `--star` (custom)                   | Filled rating stars                                    |
 
 Color is never the sole signal — pair with icon + text (e.g. ✓ "Available", not green alone).
 

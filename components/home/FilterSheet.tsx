@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Icon } from '../Icon';
 import { PriceRange } from './PriceRange';
 import { SegmentedStars } from './SegmentedStars';
@@ -44,44 +45,38 @@ export function FilterSheet({
         role="dialog"
         aria-modal="true"
         aria-label="Filters"
-        className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-white p-4 shadow-lg motion-safe:animate-[slideUp_200ms_ease-out]"
+        className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-card p-4 shadow-lg motion-safe:animate-[slideUp_200ms_ease-out]"
       >
         <div className="flex items-center justify-between pb-3">
-          <h2 className="text-lg font-semibold text-slate-900">Filters</h2>
-          <button
+          <h2 className="text-lg font-semibold text-foreground">Filters</h2>
+          <Button
+            variant="ghost"
+            size="icon"
             type="button"
             aria-label="Close filters"
             onClick={onClose}
-            className="flex min-h-11 min-w-11 items-center justify-center text-slate-500"
+            className="text-muted-foreground"
           >
             <Icon name="x" size={20} />
-          </button>
+          </Button>
         </div>
         <div className="space-y-5">
           <div>
-            <p className="pb-2 text-sm font-medium text-slate-900">Star rating</p>
+            <p className="pb-2 text-sm font-medium text-foreground">Star rating</p>
             <SegmentedStars value={stars} onChange={onStars} />
           </div>
           <div>
-            <p className="pb-2 text-sm font-medium text-slate-900">Price (USD)</p>
+            <p className="pb-2 text-sm font-medium text-foreground">Price (USD)</p>
             <PriceRange min={min} max={max} onCommit={onPrice} />
           </div>
         </div>
         <div className="mt-6 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onReset}
-            className="min-h-11 rounded-lg border border-slate-200 px-4 text-sm font-medium text-slate-700"
-          >
+          <Button variant="outline" type="button" onClick={onReset} className="px-4">
             Reset
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-11 flex-1 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
-          >
+          </Button>
+          <Button type="button" onClick={onClose} className="flex-1 px-4">
             Show {resultCount}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

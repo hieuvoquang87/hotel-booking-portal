@@ -51,4 +51,17 @@ describe('checkAvailability', () => {
       checkAvailability('hotel-999', '2026-07-10', '2026-07-11', { delayMs: 0 }),
     ).rejects.toBeInstanceOf(HotelNotFoundError);
   });
+
+  // M5: AvailableRoom must carry bedCount, squareFootage, amenities
+  // Seed values for room-01a: bedCount=1, squareFootage=450, amenities=['city_view','mini_bar']
+  it('returned rooms include bedCount, squareFootage, and amenities from the seed', async () => {
+    // checkIn=2026-07-10, checkOut=2026-07-13 → only room-01a qualifies
+    const result = await checkAvailability('hotel-01', '2026-07-10', '2026-07-13', { delayMs: 0 });
+    expect(result).toHaveLength(1);
+    const room = result[0];
+    expect(room.roomId).toBe('room-01a');
+    expect(room.bedCount).toBe(1);
+    expect(room.squareFootage).toBe(450);
+    expect(room.amenities).toEqual(['city_view', 'mini_bar']);
+  });
 });
