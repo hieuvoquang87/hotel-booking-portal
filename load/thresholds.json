@@ -1,0 +1,7 @@
+{
+  "availabilityP95Ms": 2000,
+  "filterSortP95Ms": 100,
+  "resiliencePathP95Ms": 500,
+  "errorRatePercent": 1,
+  "description": "NFR thresholds for the hotel-booking-portal load tests. availabilityP95Ms: maximum acceptable p95 latency for the rooms/availability endpoint under normal load (5 VUs, 30s). filterSortP95Ms: maximum acceptable p95 latency for the in-memory hotel filter/sort endpoint — this should be very fast since no I/O is involved. resiliencePathP95Ms: maximum acceptable p95 latency when the circuit breaker is open under 100% fault injection (10 VUs, 30s); a LOW value proves the breaker is fast-failing rather than hanging on the upstream timeout. errorRatePercent: maximum acceptable HTTP error rate (non-2xx responses) during the happy-path scenario."
+}

@@ -17,6 +17,8 @@ const eslintConfig = defineConfig([
     'coverage/**',
     'playwright-report/**',
     'test-results/**',
+    // k6 load-test scripts use k6-specific globals, not Node/browser.
+    'load/**',
   ]),
   // CommonJS tooling config (jest.config.js uses next/jest, which requires CJS).
   {

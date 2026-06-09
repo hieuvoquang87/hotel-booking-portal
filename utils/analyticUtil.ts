@@ -1,3 +1,5 @@
+import type { BreakerState } from '@/services/resilience';
+
 export type AnalyticsEvent =
   | {
       name: 'search_performed';
@@ -8,7 +10,10 @@ export type AnalyticsEvent =
   | { name: 'no_results'; filters: { stars: number | null; min: number | null; max: number | null } }
   | { name: 'hotel_viewed'; hotelId: string }
   | { name: 'availability_checked'; hotelId: string; nights: number }
-  | { name: 'no_rooms'; hotelId: string };
+  | { name: 'no_rooms'; hotelId: string }
+  | { name: 'availability_latency'; hotelId: string; durationMs: number; cacheHit: boolean }
+  | { name: 'availability_cache_miss'; hotelId: string }
+  | { name: 'availability_breaker_transition'; hotelId: string; state: BreakerState };
 
 export type AnalyticsAdapter = (event: AnalyticsEvent) => void;
 

@@ -53,9 +53,36 @@ test('accepts every event in the consolidated union', () => {
     { name: 'hotel_viewed', hotelId: 'h1' },
     { name: 'availability_checked', hotelId: 'h1', nights: 2 },
     { name: 'no_rooms', hotelId: 'h1' },
+    { name: 'availability_latency', hotelId: 'h1', durationMs: 120, cacheHit: false },
+    { name: 'availability_cache_miss', hotelId: 'h1' },
+    { name: 'availability_breaker_transition', hotelId: 'h1', state: 'OPEN' },
   ];
   events.forEach(track);
-  expect(seen).toHaveLength(5);
+  expect(seen).toHaveLength(8);
+});
+
+test('tracks availability_latency event with adapter', () => {
+  const adapter = jest.fn();
+  registerAnalyticsAdapter(adapter);
+  const event: AnalyticsEvent = { name: 'availability_latency', hotelId: 'h2', durationMs: 250, cacheHit: true };
+  track(event);
+  expect(adapter).toHaveBeenCalledWith(event);
+});
+
+test('tracks availability_cache_miss event with adapter', () => {
+  const adapter = jest.fn();
+  registerAnalyticsAdapter(adapter);
+  const event: AnalyticsEvent = { name: 'availability_cache_miss', hotelId: 'h2' };
+  track(event);
+  expect(adapter).toHaveBeenCalledWith(event);
+});
+
+test('tracks availability_breaker_transition event with adapter', () => {
+  const adapter = jest.fn();
+  registerAnalyticsAdapter(adapter);
+  const event: AnalyticsEvent = { name: 'availability_breaker_transition', hotelId: 'h2', state: 'HALF_OPEN' };
+  track(event);
+  expect(adapter).toHaveBeenCalledWith(event);
 });
 
 test('a default DEV console adapter is registered at load', () => {
