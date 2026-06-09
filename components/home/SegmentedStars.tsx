@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+
 type Option = { label: string; value: number | null };
 
 const OPTIONS: Option[] = [
@@ -23,17 +25,18 @@ export function SegmentedStars({
       {OPTIONS.map((opt) => {
         const active = opt.value === value;
         return (
-          <button
+          <Button
             key={opt.label}
-            type="button"
+            variant="ghost"
+            size="default"
             aria-pressed={active}
             onClick={() => onChange(opt.value)}
-            className={`min-h-11 rounded-md px-3 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${
-              active ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+            className={`rounded-md px-3 ${
+              active ? 'bg-blue-600 text-white hover:bg-blue-600' : 'text-slate-600'
             }`}
           >
             {opt.label}
-          </button>
+          </Button>
         );
       })}
     </div>

@@ -24,7 +24,7 @@ export function SortSelect({
         aria-label="Sort hotels"
         value={value}
         onChange={(e) => onChange(e.target.value as SortKey)}
-        className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+        className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
       >
         {OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>

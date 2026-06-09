@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 const toNum = (s: string): number | null => {
   const t = s.trim();
@@ -41,7 +42,7 @@ export function PriceRange({
     <div role="group" aria-label="Price range in US dollars" className="flex items-center gap-2">
       <div className="flex items-center rounded-lg border border-slate-200 bg-white px-2">
         <span className="text-sm text-slate-400">$</span>
-        <input
+        <Input
           aria-label="Minimum price"
           inputMode="numeric"
           value={minStr}
@@ -49,13 +50,13 @@ export function PriceRange({
           onChange={(e) => setMinStr(e.target.value)}
           onBlur={commit}
           onKeyDown={(e) => e.key === 'Enter' && commit()}
-          className="min-h-11 w-16 bg-transparent text-sm tabular-nums focus:outline-none"
+          className="w-16 border-0 bg-transparent px-0 py-0 shadow-none tabular-nums focus-visible:border-transparent focus-visible:ring-0"
         />
       </div>
       <span className="text-slate-400">–</span>
       <div className="flex items-center rounded-lg border border-slate-200 bg-white px-2">
         <span className="text-sm text-slate-400">$</span>
-        <input
+        <Input
           aria-label="Maximum price"
           inputMode="numeric"
           value={maxStr}
@@ -63,7 +64,7 @@ export function PriceRange({
           onChange={(e) => setMaxStr(e.target.value)}
           onBlur={commit}
           onKeyDown={(e) => e.key === 'Enter' && commit()}
-          className="min-h-11 w-16 bg-transparent text-sm tabular-nums focus:outline-none"
+          className="w-16 border-0 bg-transparent px-0 py-0 shadow-none tabular-nums focus-visible:border-transparent focus-visible:ring-0"
         />
       </div>
     </div>
