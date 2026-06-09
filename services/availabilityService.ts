@@ -33,6 +33,9 @@ export async function checkAvailability(
       type: room.type,
       pricePerNight: room.pricePerNight,
       bedType: room.bedType,
+      bedCount: room.bedCount,
       maxOccupancy: room.maxOccupancy,
+      squareFootage: room.squareFootage,
+      amenities: room.amenities,
     }));
 }

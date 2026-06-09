@@ -23,7 +23,16 @@ export const hotelsHandler = http.get(`${ORIGIN}/api/hotels`, ({ request }) => {
 
 export const roomsHandler = http.get(`${ORIGIN}/api/hotels/:id/rooms`, () =>
   HttpResponse.json([
-    { roomId: 'room-01a', type: 'Deluxe King', pricePerNight: 299, bedType: 'King', maxOccupancy: 2 },
+    {
+      roomId: 'room-01a',
+      type: 'Deluxe King',
+      pricePerNight: 299,
+      bedType: 'King',
+      bedCount: 1,
+      maxOccupancy: 2,
+      squareFootage: 450,
+      amenities: ['city_view', 'mini_bar'],
+    },
   ]),
 );
 

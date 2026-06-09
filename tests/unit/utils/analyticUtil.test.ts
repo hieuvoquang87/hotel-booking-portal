@@ -27,4 +27,29 @@ describe('track', () => {
     ).not.toThrow();
     expect(spy).not.toHaveBeenCalled();
   });
+
+  // M5 analytics events
+  it('logs hotel_viewed event in development', () => {
+    (process.env as { NODE_ENV?: string }).NODE_ENV = 'development';
+    const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
+    track({ name: 'hotel_viewed', hotelId: 'hotel-01' });
+    expect(spy).toHaveBeenCalledWith('[track]', expect.objectContaining({ name: 'hotel_viewed' }));
+  });
+
+  it('logs availability_checked event in development', () => {
+    (process.env as { NODE_ENV?: string }).NODE_ENV = 'development';
+    const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
+    track({ name: 'availability_checked', hotelId: 'hotel-01', nights: 3 });
+    expect(spy).toHaveBeenCalledWith(
+      '[track]',
+      expect.objectContaining({ name: 'availability_checked' }),
+    );
+  });
+
+  it('logs no_rooms event in development', () => {
+    (process.env as { NODE_ENV?: string }).NODE_ENV = 'development';
+    const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
+    track({ name: 'no_rooms', hotelId: 'hotel-01' });
+    expect(spy).toHaveBeenCalledWith('[track]', expect.objectContaining({ name: 'no_rooms' }));
+  });
 });
