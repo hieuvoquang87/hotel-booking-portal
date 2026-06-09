@@ -6,8 +6,9 @@ for dates, with booking and production hardening planned next.
 
 > Spec-driven. Full architecture in [`docs/architecture.md`](docs/architecture.md);
 > roadmap in [`docs/product-roadmap.md`](docs/product-roadmap.md); design rationale in
-> [`docs/assumptions-and-tradeoffs.md`](docs/assumptions-and-tradeoffs.md); milestone
-> status in [`docs/progress.md`](docs/progress.md). Architecture, state management,
+> [`docs/assumptions-and-tradeoffs.md`](docs/assumptions-and-tradeoffs.md); user
+> journeys in [`docs/user-flows.md`](docs/user-flows.md); milestone status in
+> [`docs/progress.md`](docs/progress.md). Architecture, state management,
 > and the quality bar are summarized below.
 
 ## Project phases
@@ -147,7 +148,7 @@ types/          domain types (Hotel, Room, Location, Availability)
 mocks/          MSW request handlers (tests)
 tests/          Jest unit + integration (RTL + MSW)
 e2e/            Playwright end-to-end specs
-docs/           architecture, roadmap, progress, specs, plans, designs, test-results
+docs/           architecture, roadmap, progress, user-flows, specs, plans, designs, runbooks, test-results
 ```
 
 ## Quality bar & non-functional budgets
@@ -165,7 +166,9 @@ Pricing/availability is the one slow, unreliable dependency, so it gets timeout 
 bounded retry, a circuit breaker, and a stale-cache fallback — browsing never blocks
 (design: [resilience spec](docs/superpowers/specs/2026-06-08-operability-resilience-design.md)).
 Releases are immutable Vercel builds with preview → staging → production and instant
-rollback ([`docs/deployment.md`](docs/deployment.md)).
+rollback ([`docs/deployment.md`](docs/deployment.md)). On-call SLOs, alert config, and
+incident runbooks for the availability dependency — slow, down, stale prices after
+recovery, bad deploy — live in [`docs/runbooks/`](docs/runbooks/README.md).
 
 ## Security
 

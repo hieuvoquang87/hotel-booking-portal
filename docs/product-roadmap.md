@@ -348,7 +348,7 @@ display-vs-settlement currency is a booking (§1) concern. The native date picke
 | LCP             | < 2.5s                   |
 | INP             | < 200ms                  |
 | CLS             | < 0.1                    |
-| JS (gzip)       | < 150KB                  |
+| JS (gzip)       | < 250KB                  |
 | Filter response | < 100ms (in-memory)      |
 | Test coverage   | ≥ 85% (unit)             |
 

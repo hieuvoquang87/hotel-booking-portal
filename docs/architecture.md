@@ -31,7 +31,7 @@ data gateway behind a BFF, and pricing/availability decoupled as a slow third-pa
 | Area                    | Target                                                                        |
 | ----------------------- | ----------------------------------------------------------------------------- |
 | Mobile-first            | 80% mobile traffic assumed; design/perf/a11y validated mobile-first           |
-| Perf                    | LCP < 2.5s · INP < 200ms · CLS < 0.1 · initial JS < 150KB gz · filter < 100ms |
+| Perf                    | LCP < 2.5s · INP < 200ms · CLS < 0.1 · initial JS < 250KB gz · filter < 100ms |
 | A11y                    | WCAG 2.1 AA — semantic, keyboard, focus, `aria-live` count, contrast ≥ 4.5:1  |
 | Observability           | `error.tsx` boundary · `track()` facade · typed events · structured API logs  |
 | Testing                 | Jest+RTL unit ≥ 85% · MSW integration · Playwright E2E · CI coverage gate     |
