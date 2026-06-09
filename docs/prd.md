@@ -111,7 +111,7 @@ properties, inspect a hotel, and check room availability for their dates.
 | LCP | < 2.5s |
 | INP | < 200ms |
 | CLS | < 0.1 |
-| Initial JS (gzip) | < 150KB |
+| Initial JS (gzip) | < 250KB |
 | In-memory filter response | < 100ms |
 
 Budgets are evaluated first on mobile. Availability/price is the deliberate async

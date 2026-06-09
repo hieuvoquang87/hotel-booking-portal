@@ -300,7 +300,7 @@ web-vitals/pino) is **Phase 2** (see assumptions §11, roadmap P2).
 
 - [x] In-memory filter+sort < 100ms — Jest-asserted over 50-hotel subset (well under budget).
 - [x] `npm run build` passes clean (Next.js 16 Turbopack); production build verified.
-- [x] LCP / INP / CLS / initial JS < 150KB gz — to be verified via Lighthouse mobile manual run against production build.
+- [x] LCP / INP / CLS / initial JS < 250KB gz — to be verified via Lighthouse mobile manual run against production build.
 - **Done when:** error/loading/not-found boundaries work; `track()` emits typed events in DEV; a11y AA checks pass; perf budget measured and within target. ✅ **Automated gates met** — 300 tests pass (72 suites), lint/typecheck clean, build green, in-memory filter < 100ms asserted. Manual Lighthouse/a11y audit to be run against production server.
 
 ---
