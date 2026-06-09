@@ -108,31 +108,6 @@ server-only). Module map and per-layer build status:
 components → hooks (React Query) → stores → /api (BFF) → services → lib + mock data
 ```
 
-## Test results
-
-### Lighthouse (desktop, no throttling)
-
-Latest run against `/?country=usa&page=1` ([report](docs/test-results/lighthouse-report.html)):
-
-| Category       | Score  |
-| -------------- | ------ |
-| Performance    | 🟢 100 |
-| Accessibility  | 🟢 100 |
-| Best Practices | 🟢 100 |
-| SEO            | 🟢 100 |
-
-Key metrics: **FCP 0.2s** · **LCP 0.7s** · **TBT 0ms** · **CLS 0.011** · **SI 0.3s** · **TTI 0.7s**.
-
-> Re-run with `npx lighthouse http://localhost:3000/?country=usa\&page=1 --preset=desktop --view`.
-> For mobile-emulation (80% traffic target), use `--preset=perf` (4× CPU throttle, slow 4G).
-
-### Jest
-
-```
-Tests:  361 passed, 361 total
-Suites: 77 passed,  77 total
-```
-
 ## Project structure
 
 ```
@@ -180,3 +155,28 @@ recovery, bad deploy — live in [`docs/runbooks/`](docs/runbooks/README.md).
 
 Built with AI assistance; the end-to-end workflow (requirements → docs → architecture
 → implementation) is documented in [`ai-dev-workflow.md`](ai-dev-workflow.md).
+
+## Test results
+
+### Lighthouse (desktop, no throttling)
+
+Latest run against `/?country=usa&page=1` ([report](docs/test-results/lighthouse-report.html)):
+
+| Category       | Score  |
+| -------------- | ------ |
+| Performance    | 🟢 100 |
+| Accessibility  | 🟢 100 |
+| Best Practices | 🟢 100 |
+| SEO            | 🟢 100 |
+
+Key metrics: **FCP 0.2s** · **LCP 0.7s** · **TBT 0ms** · **CLS 0.011** · **SI 0.3s** · **TTI 0.7s**.
+
+> Re-run with `npx lighthouse http://localhost:3000/?country=usa\&page=1 --preset=desktop --view`.
+> For mobile-emulation (80% traffic target), use `--preset=perf` (4× CPU throttle, slow 4G).
+
+### Jest
+
+```
+Tests:  361 passed, 361 total
+Suites: 77 passed,  77 total
+```
