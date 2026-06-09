@@ -62,6 +62,7 @@ test('a default DEV console adapter is registered at load', () => {
   const spy = jest.spyOn(console, 'debug').mockImplementation(() => {});
   jest.resetModules();
   // Re-import a fresh module instance so the load-time default adapter registers.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const fresh = require('../../../utils/analyticUtil') as typeof import('../../../utils/analyticUtil');
   fresh.track({ name: 'hotel_viewed', hotelId: 'h1' });
   expect(spy).toHaveBeenCalledWith('[track]', { name: 'hotel_viewed', hotelId: 'h1' });

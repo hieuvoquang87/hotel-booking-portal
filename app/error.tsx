@@ -12,7 +12,6 @@ export default function Error({
 }) {
   useEffect(() => {
     // P2: report to Sentry via a registered analytics/error adapter.
-    // eslint-disable-next-line no-console
     console.error(error);
   }, [error]);
 

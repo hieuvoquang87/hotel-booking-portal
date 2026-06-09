@@ -34,7 +34,6 @@ export function track(event: AnalyticsEvent): void {
       adapter(event);
     } catch (err) {
       if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
         console.error('[analytics] adapter threw:', err);
       }
     }
@@ -44,7 +43,6 @@ export function track(event: AnalyticsEvent): void {
 // Default adapter: DEV console only; PROD starts with no adapters (no-op), matching M4.
 if (process.env.NODE_ENV !== 'production') {
   registerAnalyticsAdapter((event) => {
-    // eslint-disable-next-line no-console
     console.debug('[track]', event);
   });
 }
