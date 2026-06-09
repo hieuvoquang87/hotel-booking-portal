@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Icon } from '../Icon';
 import { PriceRange } from './PriceRange';
 import { SegmentedStars } from './SegmentedStars';
@@ -48,14 +49,16 @@ export function FilterSheet({
       >
         <div className="flex items-center justify-between pb-3">
           <h2 className="text-lg font-semibold text-slate-900">Filters</h2>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             type="button"
             aria-label="Close filters"
             onClick={onClose}
-            className="flex min-h-11 min-w-11 items-center justify-center text-slate-500"
+            className="text-slate-500"
           >
             <Icon name="x" size={20} />
-          </button>
+          </Button>
         </div>
         <div className="space-y-5">
           <div>
@@ -68,20 +71,12 @@ export function FilterSheet({
           </div>
         </div>
         <div className="mt-6 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onReset}
-            className="min-h-11 rounded-lg border border-slate-200 px-4 text-sm font-medium text-slate-700"
-          >
+          <Button variant="outline" type="button" onClick={onReset} className="px-4">
             Reset
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-11 flex-1 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
-          >
+          </Button>
+          <Button type="button" onClick={onClose} className="flex-1 px-4">
             Show {resultCount}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

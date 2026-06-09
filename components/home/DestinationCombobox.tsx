@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import type { DestinationOption } from '@/lib/destinations';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Icon } from '../Icon';
 
 // Diacritic-insensitive lowercase for substring matching.
@@ -85,7 +87,7 @@ export function DestinationCombobox({
     <div ref={wrapRef} className="relative w-full max-w-[560px]">
       <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3">
         <Icon name="search" size={20} className="text-slate-400" />
-        <input
+        <Input
           role="combobox"
           aria-expanded={open}
           aria-controls={listId}
@@ -102,7 +104,7 @@ export function DestinationCombobox({
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKey}
-          className="min-h-11 w-full bg-transparent text-sm text-slate-900 focus:outline-none disabled:opacity-60"
+          className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-0"
         />
         <Icon name="chevron" size={20} className={`text-slate-400 ${open ? 'rotate-180' : ''}`} />
       </div>
@@ -110,13 +112,14 @@ export function DestinationCombobox({
       {error ? (
         <div className="mt-1 flex items-center gap-2 text-sm text-red-600">
           <span>Couldn’t load destinations.</span>
-          <button
+          <Button
             type="button"
+            variant="link"
             onClick={onRetry}
-            className="font-medium underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            className="h-auto p-0 font-medium text-red-600 underline"
           >
             Retry
-          </button>
+          </Button>
         </div>
       ) : null}
 
