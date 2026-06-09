@@ -44,7 +44,7 @@ export function RefineToolbar({
         </span>
         <div className="ml-auto flex items-center gap-4">
           <ResultCount loading={loading} total={total} />
-          <SortSelect id="sort-desktop" value={sort} onChange={onSort} />
+          <SortSelect id="sort-desktop" value={sort} onChange={onSort} data-testid="sort-select" />
         </div>
       </div>
     </div>

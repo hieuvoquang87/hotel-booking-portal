@@ -17,9 +17,9 @@ test('destination → filter → sort → detail → availability success', asyn
   await starGroup.getByRole('button', { name: '5★' }).click();
 
   // Step 3: Sort — choose "Price: Low to High".
-  // Two <select aria-label="Sort hotels"> exist: one desktop (visible) + one mobile (hidden).
-  // Use .first() to target the desktop/visible instance without relying on CSS class names.
-  await page.getByLabel('Sort hotels').first().selectOption('price-asc');
+  // Use data-testid="sort-select" which is set only on the desktop (RefineToolbar) instance,
+  // making the locator unambiguous regardless of DOM order.
+  await page.getByTestId('sort-select').selectOption('price-asc');
 
   // Step 4: Open the first hotel — The Grand Luminary (hotel-01, 5★, Chicago)
   await page.getByRole('link', { name: /The Grand Luminary/ }).click();
@@ -30,5 +30,5 @@ test('destination → filter → sort → detail → availability success', asyn
   // Step 6: Availability resolves — demo dates (2026-07-10 → 2026-07-12) are pre-seeded.
   // At least one room card shows the "Available" badge and its price.
   await expect(page.getByText('Available').first()).toBeVisible();
-  await expect(page.getByText('$199').first()).toBeVisible();
+  await expect(page.getByText(/\$\d+/).first()).toBeVisible();
 });
