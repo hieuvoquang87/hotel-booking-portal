@@ -49,8 +49,10 @@ export default function RootLayout({
             <main id="main" className="flex-1">
               {children}
             </main>
-            <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-400">
-              Stayfinder · Phase 1
+            <footer className="border-t border-slate-200 bg-white py-6 text-center text-sm text-slate-500">
+              <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
+                <p>&copy; {new Date().getFullYear()} Stayfinder &middot; Find your perfect stay</p>
+              </div>
             </footer>
           </AppProvider>
         </QueryProvider>
