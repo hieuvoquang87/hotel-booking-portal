@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 
 describe('Button', () => {
   it('renders with primary bg and merges custom className', () => {
@@ -42,5 +42,21 @@ describe('Button', () => {
   it('is disabled when the disabled prop is set', () => {
     render(<Button disabled>Disabled</Button>);
     expect(screen.getByRole('button', { name: 'Disabled' })).toBeDisabled();
+  });
+
+  it('renders as a child slot (asChild=true) using the wrapped element', () => {
+    render(
+      <Button asChild>
+        <a href="/home">Home</a>
+      </Button>,
+    );
+    // When asChild is true, Slot.Root renders the child element (<a>) directly
+    const link = screen.getByRole('link', { name: 'Home' });
+    expect(link).toBeTruthy();
+  });
+
+  it('buttonVariants returns class string for secondary variant', () => {
+    const cls = buttonVariants({ variant: 'secondary' });
+    expect(cls).toMatch(/bg-secondary/);
   });
 });

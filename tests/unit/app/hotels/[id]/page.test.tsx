@@ -62,7 +62,7 @@ jest.mock('../../../../../components/EmptyState', () => ({
 
 import { notFound } from 'next/navigation';
 import { getJson, ApiError } from '../../../../../lib/fetcher';
-import HotelDetailPage from '../../../../../app/hotels/[id]/page';
+import HotelDetailPage, { generateMetadata } from '../../../../../app/hotels/[id]/page';
 
 const mockGetJson = getJson as jest.MockedFunction<typeof getJson>;
 
@@ -91,6 +91,25 @@ const hotelFixture = {
   rooms: [],
 };
 
+describe('generateMetadata', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns hotel name and description when getJson resolves', async () => {
+    mockGetJson.mockResolvedValue(hotelFixture);
+    const meta = await generateMetadata({ params: Promise.resolve({ id: 'hotel-01' }) });
+    expect(meta.title).toBe('Grand Plaza Hotel');
+    expect(meta.description).toMatch(/5-star hotel in New York/);
+  });
+
+  it('returns fallback title when getJson rejects', async () => {
+    mockGetJson.mockRejectedValue(new Error('network error'));
+    const meta = await generateMetadata({ params: Promise.resolve({ id: 'bad-id' }) });
+    expect(meta.title).toBe('Hotel');
+  });
+});
+
 describe('HotelDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -116,5 +135,16 @@ describe('HotelDetailPage', () => {
     // The element tree should contain the hotel name somewhere
     const tree = JSON.stringify(element);
     expect(tree).toContain('Grand Plaza Hotel');
+  });
+
+  it('re-throws non-404 errors from fetchHotel', async () => {
+    const networkErr = new Error('network timeout');
+    mockGetJson.mockRejectedValue(networkErr);
+
+    await expect(
+      HotelDetailPage({ params: Promise.resolve({ id: 'hotel-01' }) }),
+    ).rejects.toThrow('network timeout');
+
+    expect(notFound).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Badge } from '@/components/ui/badge';
+import { Badge, badgeVariants } from '@/components/ui/badge';
 
 describe('Badge', () => {
   it('renders children text', () => {
@@ -22,5 +22,10 @@ describe('Badge', () => {
   it('renders the default variant', () => {
     render(<Badge variant="default">Default</Badge>);
     expect(screen.getByText('Default')).toBeTruthy();
+  });
+
+  it('badgeVariants returns a class string that includes the variant class', () => {
+    expect(badgeVariants({ variant: 'muted' })).toMatch(/muted/);
+    expect(badgeVariants({ variant: 'success' })).toMatch(/success/);
   });
 });

@@ -30,4 +30,9 @@ describe('RoomCard', () => {
     render(<RoomCard room={room} />);
     expect(screen.queryByRole('button', { name: /reserve|book/i })).toBeNull();
   });
+
+  it('shows plural bed label when bedCount is greater than 1', () => {
+    render(<RoomCard room={{ ...room, bedCount: 2 }} />);
+    expect(screen.getByText(/2 beds/)).toBeTruthy();
+  });
 });
