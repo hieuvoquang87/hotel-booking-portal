@@ -81,6 +81,7 @@ export function HomeView() {
 
   const onSelect = (opt: DestinationOption) =>
     setParams({ country: opt.params.country, city: 'city' in opt.params ? opt.params.city : null });
+  const onClearDestination = () => setParams({ country: null, city: null });
   const onReset = () => setParams({ stars: null, min: null, max: null });
 
   return (
@@ -95,6 +96,7 @@ export function HomeView() {
             options={options}
             value={{ country: state.country, city: state.city }}
             onSelect={onSelect}
+            onClear={onClearDestination}
             loading={locations.isLoading}
             error={locations.isError}
             onRetry={() => locations.refetch()}

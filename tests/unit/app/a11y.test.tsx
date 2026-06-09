@@ -164,6 +164,7 @@ test('DestinationCombobox has no axe violations', async () => {
       options={destinationOptions}
       value={null}
       onSelect={() => {}}
+      onClear={() => {}}
       loading={false}
       error={false}
       onRetry={() => {}}

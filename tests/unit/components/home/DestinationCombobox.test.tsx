@@ -41,6 +41,7 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={() => {}}
+        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
@@ -56,6 +57,7 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={() => {}}
+        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
@@ -73,6 +75,7 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={() => {}}
+        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
@@ -91,6 +94,7 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={onSelect}
+        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
@@ -108,6 +112,7 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={onSelect}
+        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
@@ -125,6 +130,7 @@ describe('DestinationCombobox', () => {
         options={options}
         value={{ country: 'usa', city: 'chicago' }}
         onSelect={() => {}}
+        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
@@ -137,6 +143,7 @@ describe('DestinationCombobox', () => {
         options={options}
         value={{ country: 'usa', city: null }}
         onSelect={() => {}}
+        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
@@ -152,6 +159,7 @@ describe('DestinationCombobox', () => {
         options={[]}
         value={null}
         onSelect={() => {}}
+        onClear={() => {}}
         loading={false}
         error
         onRetry={onRetry}

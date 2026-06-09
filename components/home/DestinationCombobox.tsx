@@ -13,6 +13,7 @@ type Props = {
   options: DestinationOption[];
   value: { country: string | null; city: string | null } | null;
   onSelect: (option: DestinationOption) => void;
+  onClear: () => void;
   loading: boolean;
   error: boolean;
   onRetry: () => void;
@@ -28,7 +29,7 @@ function selectedLabel(options: DestinationOption[], value: Props['value']): str
   return match?.label ?? '';
 }
 
-export function DestinationCombobox({ options, value, onSelect, loading, error, onRetry }: Props) {
+export function DestinationCombobox({ options, value, onSelect, onClear, loading, error, onRetry }: Props) {
   const listId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -95,11 +96,25 @@ export function DestinationCombobox({ options, value, onSelect, loading, error, 
           onKeyDown={onKey}
           className="border-0 bg-transparent shadow-none focus-visible:border-0 focus-visible:ring-0"
         />
-        <Icon
-          name="chevron"
-          size={20}
-          className={`text-muted-foreground ${open ? 'rotate-180' : ''}`}
-        />
+        {value?.country ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClear();
+            }}
+            aria-label="Clear destination"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <Icon name="x" size={16} />
+          </button>
+        ) : (
+          <Icon
+            name="chevron"
+            size={20}
+            className={`text-muted-foreground shrink-0 ${open ? 'rotate-180' : ''}`}
+          />
+        )}
       </div>
 
       {error ? (
