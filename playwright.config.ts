@@ -26,6 +26,6 @@ export default defineConfig({
     // getJson, which prepends API_BASE_URL. .env.local (M5 Task 0) is gitignored, so CI
     // has no origin and the SSR fetch would throw → the detail page renders error.tsx and
     // primary-flow/no-rooms fail. Provision it here so local AND CI both have an origin.
-    env: { ...process.env, API_BASE_URL: BASE },
+    env: { API_BASE_URL: BASE },
   },
 });
