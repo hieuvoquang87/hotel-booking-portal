@@ -60,7 +60,9 @@ export default async function HotelDetailPage({ params }: Props) {
         </div>
 
         {/* Right column — room availability (sticky on large screens) */}
-        <div className="lg:sticky lg:top-6 lg:self-start">
+        {/* top-20 (80px) clears the sticky 64px header (md:h-16) so the panel
+            parks below it, not underneath it, when scrolling. */}
+        <div className="lg:sticky lg:top-20 lg:self-start">
           <RoomAvailability hotelId={hotel.id} />
         </div>
       </div>
