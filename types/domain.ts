@@ -38,7 +38,10 @@ export type AvailableRoom = {
   type: string;
   pricePerNight: number;
   bedType: string;
+  bedCount: number;
   maxOccupancy: number;
+  squareFootage: number;
+  amenities: string[];
 };
 
 export class InvalidDateRangeError extends Error {

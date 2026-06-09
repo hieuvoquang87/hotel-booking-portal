@@ -11,7 +11,10 @@ export type AnalyticsEvent =
   | {
       name: 'no_results';
       filters: { stars: number | null; min: number | null; max: number | null };
-    };
+    }
+  | { name: 'hotel_viewed'; hotelId: string }
+  | { name: 'availability_checked'; hotelId: string; nights: number }
+  | { name: 'no_rooms'; hotelId: string };
 
 export function track(event: AnalyticsEvent): void {
   if (process.env.NODE_ENV === 'production') return; // M6 wires real adapters here
