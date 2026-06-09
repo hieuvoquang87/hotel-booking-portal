@@ -41,10 +41,10 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={() => {}}
-        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     await open();
@@ -57,10 +57,10 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={() => {}}
-        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     await open();
@@ -75,10 +75,10 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={() => {}}
-        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     await open();
@@ -94,10 +94,10 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={onSelect}
-        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     await open();
@@ -112,10 +112,10 @@ describe('DestinationCombobox', () => {
         options={options}
         value={null}
         onSelect={onSelect}
-        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     const input = screen.getByRole('combobox');
@@ -130,10 +130,10 @@ describe('DestinationCombobox', () => {
         options={options}
         value={{ country: 'usa', city: 'chicago' }}
         onSelect={() => {}}
-        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('Chicago, IL — USA');
@@ -143,10 +143,10 @@ describe('DestinationCombobox', () => {
         options={options}
         value={{ country: 'usa', city: null }}
         onSelect={() => {}}
-        onClear={() => {}}
         loading={false}
         error={false}
         onRetry={() => {}}
+        onClear={() => {}}
       />,
     );
     expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('All hotels in USA');
@@ -159,10 +159,10 @@ describe('DestinationCombobox', () => {
         options={[]}
         value={null}
         onSelect={() => {}}
-        onClear={() => {}}
         loading={false}
         error
         onRetry={onRetry}
+        onClear={() => {}}
       />,
     );
     await userEvent.click(screen.getByRole('button', { name: /retry/i }));
