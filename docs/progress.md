@@ -207,10 +207,10 @@ spec [hotel-detail-page-design-spec.md](designs/hotel-detail-page-design-spec.md
 
 ### Detail (F4)
 
-- [ ] `app/hotels/[id]/page.tsx` — renders name, address, description, amenities, policies, `star_rating`, `overall_rating`, review count.
-- [ ] Detail renders immediately **without** waiting on availability.
-- [ ] **Basic SEO / metadata** — from the design: set the page `<title>` per the mockup (**"Stayfinder — Hotel detail"**, ideally the hotel name) + a short meta description via `metadata`; reuse the app **favicon** (the map-pin brand mark) from the root layout. _Full per-hotel SEO (canonical, OG, JSON-LD) stays Phase 2._
-- [ ] `app/hotels/[id]/not-found.tsx` (or `notFound()`) for invalid id.
+- [x] `app/hotels/[id]/page.tsx` — renders name, address, description, amenities, policies, `star_rating`, `overall_rating`, review count.
+- [x] Detail renders immediately **without** waiting on availability.
+- [x] **Basic SEO / metadata** — from the design: set the page `<title>` per the mockup (**"Stayfinder — Hotel detail"**, ideally the hotel name) + a short meta description via `metadata`; reuse the app **favicon** (the map-pin brand mark) from the root layout. _Full per-hotel SEO (canonical, OG, JSON-LD) stays Phase 2._
+- [x] `app/hotels/[id]/not-found.tsx` (or `notFound()`) for invalid id.
 
 ### Room availability (F5)
 
