@@ -1,0 +1,8 @@
+[
+  {
+    "name": "First-load JS total",
+    "path": ".next/static/chunks/*.js",
+    "limit": "150 kB",
+    "gzip": true
+  }
+]

@@ -14,7 +14,8 @@
     "test:coverage": "jest --coverage --passWithNoTests",
     "test:unit": "jest --testPathPatterns='tests/unit' --passWithNoTests",
     "test:integration": "jest --testPathPatterns='tests/integration' --passWithNoTests",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "size": "size-limit"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.0",
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@playwright/test": "^1.60.0",
+    "@size-limit/file": "^12.1.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -51,6 +53,7 @@
     "msw": "^2.14.6",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "size-limit": "^12.1.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
