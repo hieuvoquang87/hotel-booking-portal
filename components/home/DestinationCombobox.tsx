@@ -1,17 +1,13 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import type { DestinationOption } from '@/lib/destinations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import type { DestinationOption } from '@/lib/destinations';
 import { Icon } from '../Icon';
 
 // Diacritic-insensitive lowercase for substring matching.
-const norm = (s: string) =>
-  s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase();
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 type Props = {
   options: DestinationOption[];
@@ -32,14 +28,7 @@ function selectedLabel(options: DestinationOption[], value: Props['value']): str
   return match?.label ?? '';
 }
 
-export function DestinationCombobox({
-  options,
-  value,
-  onSelect,
-  loading,
-  error,
-  onRetry,
-}: Props) {
+export function DestinationCombobox({ options, value, onSelect, loading, error, onRetry }: Props) {
   const listId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -85,7 +74,7 @@ export function DestinationCombobox({
 
   return (
     <div ref={wrapRef} className="relative w-full max-w-[560px]">
-      <div className="flex items-center gap-2 rounded-lg border bg-background px-3">
+      <div className="bg-background flex items-center gap-2 rounded-lg border px-3">
         <Icon name="search" size={20} className="text-muted-foreground" />
         <Input
           role="combobox"
@@ -104,19 +93,23 @@ export function DestinationCombobox({
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKey}
-          className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-0"
+          className="border-0 bg-transparent shadow-none focus-visible:border-0 focus-visible:ring-0"
         />
-        <Icon name="chevron" size={20} className={`text-muted-foreground ${open ? 'rotate-180' : ''}`} />
+        <Icon
+          name="chevron"
+          size={20}
+          className={`text-muted-foreground ${open ? 'rotate-180' : ''}`}
+        />
       </div>
 
       {error ? (
-        <div className="mt-1 flex items-center gap-2 text-sm text-destructive">
+        <div className="text-destructive mt-1 flex items-center gap-2 text-sm">
           <span>Couldn’t load destinations.</span>
           <Button
             type="button"
             variant="link"
             onClick={onRetry}
-            className="h-auto p-0 font-medium text-destructive underline"
+            className="text-destructive h-auto p-0 font-medium underline"
           >
             Retry
           </Button>
@@ -127,10 +120,10 @@ export function DestinationCombobox({
         <div
           id={listId}
           role="listbox"
-          className="absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded-lg border bg-card shadow-lg"
+          className="bg-card absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded-lg border shadow-lg"
         >
           {results.length === 0 ? (
-            <div className="px-3 py-3 text-sm text-muted-foreground">No destinations</div>
+            <div className="text-muted-foreground px-3 py-3 text-sm">No destinations</div>
           ) : (
             results.map((o, i) => (
               <div
@@ -151,6 +144,9 @@ export function DestinationCombobox({
                   className="text-muted-foreground"
                 />
                 <span>{o.label}</span>
+                <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 tabular-nums">
+                  {o.count}
+                </span>
               </div>
             ))
           )}

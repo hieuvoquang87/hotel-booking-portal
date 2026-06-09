@@ -12,6 +12,7 @@ type Props = {
   min: number | null;
   max: number | null;
   resultCount: number;
+  priceBounds?: [number, number];
   onStars: (v: number | null) => void;
   onPrice: (min: number | null, max: number | null) => void;
   onReset: () => void;
@@ -24,6 +25,7 @@ export function FilterSheet({
   min,
   max,
   resultCount,
+  priceBounds,
   onStars,
   onPrice,
   onReset,
@@ -45,10 +47,10 @@ export function FilterSheet({
         role="dialog"
         aria-modal="true"
         aria-label="Filters"
-        className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-card p-4 shadow-lg motion-safe:animate-[slideUp_200ms_ease-out]"
+        className="bg-card absolute inset-x-0 bottom-0 rounded-t-2xl p-4 shadow-lg motion-safe:animate-[slideUp_200ms_ease-out]"
       >
         <div className="flex items-center justify-between pb-3">
-          <h2 className="text-lg font-semibold text-foreground">Filters</h2>
+          <h2 className="text-foreground text-lg font-semibold">Filters</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -62,12 +64,12 @@ export function FilterSheet({
         </div>
         <div className="space-y-5">
           <div>
-            <p className="pb-2 text-sm font-medium text-foreground">Star rating</p>
+            <p className="text-foreground pb-2 text-sm font-medium">Star rating</p>
             <SegmentedStars value={stars} onChange={onStars} />
           </div>
           <div>
-            <p className="pb-2 text-sm font-medium text-foreground">Price (USD)</p>
-            <PriceRange min={min} max={max} onCommit={onPrice} />
+            <p className="text-foreground pb-2 text-sm font-medium">Price (USD)</p>
+            <PriceRange min={min} max={max} onCommit={onPrice} bounds={priceBounds} />
           </div>
         </div>
         <div className="mt-6 flex items-center justify-between gap-3">

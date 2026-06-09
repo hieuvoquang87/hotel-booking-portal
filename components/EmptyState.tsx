@@ -12,12 +12,15 @@ type EmptyStateProps = {
 
 export function EmptyState({ icon, title, subtext, actionLabel, onAction }: EmptyStateProps) {
   return (
-    <Card role="status" className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+    <Card
+      role="status"
+      className="flex flex-col items-center justify-center gap-3 py-16 text-center"
+    >
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
         <Icon name={icon} size={26} />
       </span>
-      <p className="text-lg font-semibold text-foreground">{title}</p>
-      {subtext ? <p className="text-sm text-muted-foreground">{subtext}</p> : null}
+      <p className="text-foreground text-lg font-semibold">{title}</p>
+      {subtext ? <p className="text-muted-foreground text-sm">{subtext}</p> : null}
       {actionLabel && onAction ? (
         <Button type="button" onClick={onAction} className="mt-2 px-4">
           {actionLabel}

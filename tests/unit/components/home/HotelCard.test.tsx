@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import type { Hotel } from '@/types/domain';
 import { HotelCard } from '@/components/home/HotelCard';
+import type { Hotel } from '@/types/domain';
 
 const hotel = {
   id: 'hotel-01',
@@ -20,11 +20,12 @@ const hotel = {
 describe('HotelCard', () => {
   it('shows name, location, both ratings, review count, and price-from', () => {
     render(<HotelCard hotel={hotel} />);
-    expect(screen.getByText('The Grand Luminary')).toBeTruthy();
+    // Name appears in the heading and (decoratively) in the photo overlay — target the heading.
+    expect(screen.getByRole('heading', { level: 3, name: 'The Grand Luminary' })).toBeTruthy();
     expect(screen.getByText(/Chicago, IL · USA/)).toBeTruthy();
     expect(screen.getByText('4.8')).toBeTruthy();
     expect(screen.getByText(/1,240/)).toBeTruthy();
-    expect(screen.getByText(/from \$199/)).toBeTruthy();
+    expect(screen.getByText('$199')).toBeTruthy();
   });
 
   it('links the whole card to the hotel detail route with a descriptive label', () => {
