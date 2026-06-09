@@ -36,7 +36,7 @@ a11y, acceptance). Home → [spec](designs/home-page-design-spec.md) ·
 | M4  | Search · filter · sort · paginate | Home page: dropdown, filters, sort, pagination, grid        | [x]    |
 | M5  | Hotel detail & room availability  | shadcn/ui primitive layer + M4 refactor + `/hotels/[id]` detail/availability | [x]    |
 | M6  | Cross-cutting (a11y/obs/errors)   | Boundaries, `track()` facade, a11y AA, perf budget          | [x]    |
-| M7  | Testing & coverage gate           | Unit ≥85%, MSW integration, Playwright E2E green in CI      | [ ]    |
+| M7  | Testing & coverage gate           | Unit ≥85%, MSW integration, Playwright E2E green in CI      | [x]    |
 | M8  | Docs & deliverables               | README, AI-USAGE; finalize ASSUMPTIONS-AND-TRADEOFFS        | [ ]    |
 | M9  | Deploy & verify (minimal)         | Vercel deploy, app live, smoke-check                        | [ ]    |
 
@@ -309,11 +309,11 @@ web-vitals/pino) is **Phase 2** (see assumptions §11, roadmap P2).
 
 **Outcome:** the quality bar from PRD §5 enforced in CI.
 
-- [ ] Unit (Jest + RTL) coverage **≥ 85%** — pure logic + components.
-- [ ] Integration (Jest + RTL + **MSW**) — component ↔ API ↔ service for both primary flows.
-- [ ] Playwright **E2E** primary flow: destination → filter → sort → detail → dates → availability.
-- [ ] CI **coverage gate** enforced (PR blocks below 85%); E2E runs on PR preview.
-- **Done when:** all suites green in CI; coverage gate ≥85% enforced and passing.
+- [x] Unit (Jest + RTL) coverage **≥ 85%** — pure logic + components.
+- [x] Integration (Jest + RTL + **MSW**) — component ↔ API ↔ service for both primary flows.
+- [x] Playwright **E2E** primary flow: destination → filter → sort → detail → dates → availability.
+- [x] CI **coverage gate** enforced (PR blocks below 85%); E2E runs on PR preview.
+- **Done when:** all suites green in CI; coverage gate ≥85% enforced and passing. ✅ **Met** — coverage gate enforced at 85% (passing at 93.56% statements / 88.36% branches / 95% functions / 94.83% lines); 3 Playwright E2E specs pass (primary-flow, no-results, no-rooms); GitHub Actions CI pipeline wired (quality + e2e jobs).
 
 ---
 
